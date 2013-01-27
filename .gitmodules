@@ -7,3 +7,6 @@
 [submodule "Arduino code/libraries/USB_Host_Shield_2.0"]
 	path = Arduino code/libraries/USB_Host_Shield_2.0
 	url = https://github.com/felis/USB_Host_Shield_2.0.git
+[submodule "BalanduinoProcessingApp"]
+	path = BalanduinoProcessingApp
+	url = https://github.com/TKJElectronics/BalanduinoProcessingApp.git
