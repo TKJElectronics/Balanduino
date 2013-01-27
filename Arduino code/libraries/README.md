@@ -26,4 +26,4 @@ The final structure including the hardware add-on would look like this:
 			* variants/
 			* boards.txt
 
-For more information send me an email at <a href="mailto:kristianl@tkjelectronics.dk?Subject=Balanduino">kristianl@tkjelectronics.dk</a>.
+For more information send me an email at <kristianl@tkjelectronics.dk>.

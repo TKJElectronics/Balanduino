@@ -1,1 +1,1 @@
-Specific libraries for Sanguino can be put inside this folder
+Specific libraries for Balanduino can be put inside this folder.

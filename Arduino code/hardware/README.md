@@ -22,4 +22,4 @@ Now move the Balanduino directory inside that folder. The final structure includ
 			* boards.txt
 
 For more information see the following site: [http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware](http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware)
-or send me an email at <a href="mailto:kristianl@tkjelectronics.dk?Subject=Balanduino">kristianl@tkjelectronics.dk</a>.
+or send me an email at <kristianl@tkjelectronics.dk>.

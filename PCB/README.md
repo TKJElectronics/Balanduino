@@ -6,4 +6,4 @@ _________
 
 This is the PCB for the Balancing robot.
 
-For more information send me an email at <a href="mailto:kristianl@tkjelectronics.dk?subject=Balanduino">kristianl@tkjelectronics.dk</a>.
+For more information send me an email at <kristianl@tkjelectronics.dk>.

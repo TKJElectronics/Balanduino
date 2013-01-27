@@ -10,4 +10,4 @@ The source code for the robot can be found here: <https://github.com/TKJElectron
 
 Also check out the video: <http://www.youtube.com/watch?v=N28C_JqVhGU>.
 
-For more information see my blog post at <http://blog.tkjelectronics.dk/2012/03/the-balancing-robot/> or send me an email at <a href="mailto:kristianl@tkjelectronics.dk?subject=Balanduino">kristianl@tkjelectronics.dk</a>.
+For more information see my blog post at <http://blog.tkjelectronics.dk/2012/03/the-balancing-robot/> or send me an email at <kristianl@tkjelectronics.dk>.
