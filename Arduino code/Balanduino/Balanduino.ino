@@ -13,12 +13,15 @@
 #include <Kalman.h> // Kalman filter library see: http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/
 Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source code
 
-#include <SPP.h> // SS is rerouted to 8 and INT is rerouted to 7 - see http://www.circuitsathome.com/usb-host-shield-hardware-manual at "5. Interface modifications"
+#include <SPP.h>
 #include <PS3BT.h>
+#include <Wii.h>
 USB Usb;
 BTD Btd(&Usb); // Uncomment DEBUG in "BTD.cpp" to save space
 SPP SerialBT(&Btd,"Balanduino","0000"); // Also uncomment DEBUG in "SPP.cpp"
 PS3BT PS3(&Btd,0x00,0x15,0x83,0x3D,0x0A,0x57); // Also remember to uncomment DEBUG in "PS3BT.cpp" to save space
+//WII Wii(&Btd,PAIR); // You have to pair with your Wiimote first by creating the instance like this - you only have to do this once
+WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 
 void setup() {
   /* Setup encoders */
@@ -64,6 +67,11 @@ void setup() {
 
   /* Calibrate the gyro and accelerometer relative to ground */
   calibrateSensors();
+  
+  /* Beep to indicate that it is now ready */
+  digitalWrite(buzzer,HIGH);
+  delay(100);  
+  digitalWrite(buzzer,LOW);
 
   /* Setup timing */
   loopStartTime = micros();
@@ -300,6 +308,14 @@ void readBTD() {
       steer(update);
     } else 
       steer(stop);  
+  } 
+  else if(Wii.wiimoteConnected) {
+    if(Wii.getButtonPress(B))
+      steer(update);
+    else if(Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117))
+      steer(update);
+    else 
+      steer(stop);      
   } else
     steer(stop);
 }
@@ -374,7 +390,43 @@ void steer(Command command) {
         turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,20); // Scale from 201-255 to 0-20
         steerRight = true;
       }
-    }    
+    }
+    if(Wii.getButtonPress(B)) {
+      if(Wii.getPitch() > 180) {
+        targetOffset = scale(Wii.getPitch(),181,216,0,7);        
+        steerForward = true;
+      }     
+      else if(Wii.getPitch() < 180) {
+        targetOffset = scale(Wii.getPitch(),179,144,0,7);
+        steerBackward = true;
+      }
+      if(Wii.getRoll() > 180) {
+        turningOffset = scale(Wii.getRoll(),181,225,0,20);        
+        steerRight = true;
+      }
+      else if(Wii.getRoll() < 180) {
+        turningOffset = scale(Wii.getRoll(),179,135,0,20);
+        steerLeft = true;     
+      }
+    }
+    else {
+      if(Wii.getAnalogHat(HatY) > 137) {
+        targetOffset = scale(Wii.getAnalogHat(HatY),138,230,0,7);
+        steerForward = true;
+      } 
+      else if(Wii.getAnalogHat(HatY) < 117) {
+        targetOffset = scale(Wii.getAnalogHat(HatY),116,25,0,7);
+        steerBackward = true;
+      }
+      if(Wii.getAnalogHat(HatX) > 137) {
+        turningOffset = scale(Wii.getAnalogHat(HatX),138,230,0,20);
+        steerRight = true;     
+      } 
+      else if(Wii.getAnalogHat(HatX) < 117) {
+        turningOffset = scale(Wii.getAnalogHat(HatX),116,25,0,20);
+        steerLeft = true;
+      }
+    }
   }
   
   else if(command == stop) {
@@ -438,10 +490,6 @@ void calibrateSensors() {
     kalman.setAngle(270);
     gyroAngle = 270;
   }
-
-  digitalWrite(buzzer,HIGH);
-  delay(100);  
-  digitalWrite(buzzer,LOW);
 }
 void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is a value in percentage 0-100%
   if(speedRaw > 100)
