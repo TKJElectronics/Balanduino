@@ -12,7 +12,7 @@ __NB:__ The libaries folders are not allowed to have any special characters, so 
 * USB\_Host\_Shield\_20
 * KalmanFilter
 
-The final structure including the libraies would look like this:
+The final structure including the hardware add-on would look like this:
 
 * Arduino/
 	* libraries/
