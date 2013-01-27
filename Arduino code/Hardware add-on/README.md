@@ -11,7 +11,7 @@ Now move the Balanduino directory inside that folder. The final structure includ
 
 * Arduino/
 	* libraries/
-		* USB_Host_Shield_20/
+		* USB\_Host\_Shield\_20/
 		* KalmanFilter/
 	* hardware/
 		* Balanduino/
