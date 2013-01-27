@@ -8,20 +8,6 @@ This is the Balanduino hardware add-on for the Arduino IDE.
 To use it, simply create a folder named hardware inside your sketchbook directory.
 
 Now move the Balanduino directory inside that folder. The final structure including the libraies would look like this:
-<pre>
-* Arduino/
-	+- libraries/
-		+- USB_Host_Shield_20/
-		+- KalmanFilter/
-	+- hardware/
-		+- Balanduino/
-			+- avr/
-			+- bootloaders/
-			+- cores/
-			+- variants/
-			+- README.md
-			+- boards.txt
-</pre>
 
 * Arduino/
 	* libraries/
