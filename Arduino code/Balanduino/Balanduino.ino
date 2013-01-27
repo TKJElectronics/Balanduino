@@ -9,14 +9,16 @@
  * For details, see http://blog.tkjelectronics.dk/2012/02/the-balancing-robot/
  */
 
-#include "BalancingRobot.h"
+#include "Balanduino.h"
 #include <Kalman.h> // Kalman filter library see: http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/
 Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source code
 
 #include <SPP.h> // SS is rerouted to 8 and INT is rerouted to 7 - see http://www.circuitsathome.com/usb-host-shield-hardware-manual at "5. Interface modifications"
+#include <PS3BT.h>
 USB Usb;
 BTD Btd(&Usb); // Uncomment DEBUG in "BTD.cpp" to save space
-SPP SerialBT(&Btd,"BalancingRobot","0000"); // Also uncomment DEBUG in "SPP.cpp"
+SPP SerialBT(&Btd,"Balanduino","0000"); // Also uncomment DEBUG in "SPP.cpp"
+PS3BT PS3(&Btd,0x00,0x15,0x83,0x3D,0x0A,0x57); // Also remember to uncomment DEBUG in "PS3BT.cpp" to save space
 
 void setup() {
   /* Setup encoders */
@@ -52,9 +54,7 @@ void setup() {
   pinMode(buzzer,OUTPUT);  
 
   /* Setup IMU Inputs */
-  #ifndef PROMINI
   analogReference(EXTERNAL); // Set voltage reference to 3.3V by connecting AREF to 3.3V
-  #endif
   pinMode(gyroY,INPUT);
   pinMode(accY,INPUT);
   pinMode(accZ,INPUT);      
@@ -104,8 +104,8 @@ void loop() {
     }
   }
 
-  /* Read the SPP connection */
-  readSPP();    
+  /* Read the Bluetooth connection */
+  readBTD();    
   
   if(SerialBT.connected) {
     Usb.Task();
@@ -214,7 +214,7 @@ void PID(double restAngle, double offset, double turning) {
   else
     moveMotor(right, backward, PIDRight * -1);
 }
-void readSPP() {
+void readBTD() {
   Usb.Task();
   if(SerialBT.connected) {
     if(SerialBT.available()) {
@@ -243,7 +243,7 @@ void readSPP() {
         Kp = atof(strtok(NULL, ";"));
       } else if(input[0] == 'I') {
         strtok(input, ","); // Ignore 'I'
-        Ki = atof(strtok(NULL, ";"));  
+        Ki = atof(strtok(NULL, ";"));
       } else if(input[0] == 'D') {
         strtok(input, ","); // Ignore 'D'
         Kd = atof(strtok(NULL, ";"));  
@@ -268,7 +268,7 @@ void readSPP() {
         steer(joystick);
       }
       else if(input[0] == 'M') { // IMU
-        strtok(input, ","); // Ignore 'I'
+        strtok(input, ","); // Ignore 'M'
         sppData1 = atof(strtok(NULL, ",")); // Pitch
         sppData2 = atof(strtok(NULL, ";")); // Roll
         steer(imu);
@@ -276,6 +276,30 @@ void readSPP() {
         //SerialBT.printNumberln(sppData2);
       }
     }
+  } else if(PS3.PS3Connected) {
+    if(PS3.getButtonPress(PS)) {
+      steer(stop);
+      PS3.disconnect();
+    } 
+    else if(PS3.getButtonPress(SELECT)) {
+      stopAndReset();
+      while(!PS3.getButtonPress(START))
+        Usb.Task();        
+    }
+    if((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137)) {
+      steer(update);
+    } else 
+      steer(stop);      
+  } 
+  else if(PS3.PS3NavigationConnected) {
+    if(PS3.getButtonPress(PS)) {
+      steer(stop);
+      PS3.disconnect();
+    } 
+    if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117) {
+      steer(update);
+    } else 
+      steer(stop);  
   } else
     steer(stop);
 }
@@ -303,21 +327,54 @@ void steer(Command command) {
     }
   } else if(command == imu) {
       if(sppData2 > 0) {
-        targetOffset = scale(sppData2,1,36,0,7);        
+        targetOffset = scale(sppData2,0,36,0,7);        
         steerForward = true;
       }     
       else if(sppData2 < 0) {
-        targetOffset = scale(sppData2,-1,-36,0,7);
+        targetOffset = scale(sppData2,0,-36,0,7);
         steerBackward = true;
       }
       if(sppData1 > 0) {
-        turningOffset = scale(sppData1,1,45,0,20);        
+        turningOffset = scale(sppData1,0,45,0,20);        
         steerLeft = true;
       }
       else if(sppData1 < 0) {
-        turningOffset = scale(sppData1,-1,-45,0,20);
+        turningOffset = scale(sppData1,0,-45,0,20);
         steerRight = true;     
       }
+  } else if(command == update) {
+    if(PS3.PS3Connected) {
+      if(PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) {
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),232,0,0,7); // Scale from 232-0 to 0-7
+        steerForward = true;
+      } else if(PS3.getAnalogHat(LeftHatY) > 137 && PS3.getAnalogHat(RightHatY) > 137) {
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),276,510,0,7); // Scale from 276-510 to 0-7
+        steerBackward = true;
+      }
+      if(((int)PS3.getAnalogHat(LeftHatY) - (int)PS3.getAnalogHat(RightHatY)) > 15) {
+        turningOffset = scale(abs(PS3.getAnalogHat(LeftHatY) - PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
+        steerLeft = true;      
+      } else if (((int)PS3.getAnalogHat(RightHatY) - (int)PS3.getAnalogHat(LeftHatY)) > 15) {   
+        turningOffset = scale(abs(PS3.getAnalogHat(LeftHatY) - PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20  
+        steerRight = true;  
+      }  
+    }
+    if(PS3.PS3NavigationConnected) {
+      if(PS3.getAnalogHat(LeftHatY) < 117) {
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY),116,0,0,7); // Scale from 116-0 to 0-7
+        steerForward = true;
+      } else if(PS3.getAnalogHat(LeftHatY) > 137) {
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY),138,255,0,7); // Scale from 138-255 to 0-7
+        steerBackward = true;
+      }
+      if(PS3.getAnalogHat(LeftHatX) < 55) {
+        turningOffset = scale(PS3.getAnalogHat(LeftHatX),54,0,0,20); // Scale from 54-0 to 0-20
+        steerLeft = true;     
+      } else if(PS3.getAnalogHat(LeftHatX) > 200) {
+        turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,20); // Scale from 201-255 to 0-20
+        steerRight = true;
+      }
+    }    
   }
   
   else if(command == stop) {
@@ -438,13 +495,13 @@ void setPWM(uint8_t pin, int dutyCycle) { // dutyCycle is a value between 0-ICR
 
 /* Interrupt routine and encoder read functions - I read using the port registers for faster processing */
 void leftEncoder() { 
-  if(PIND & _BV(PIND4)) // read pin 4
+  if(PING & _BV(PING5)) // read pin 4 (PG5)
     leftCounter--;
   else
     leftCounter++;    
 }
 void rightEncoder() {
-  if(PIND & _BV(PIND5)) // read pin 5
+  if(PINE & _BV(PINE3)) // read pin 5 (PE3)
     rightCounter--;
   else
     rightCounter++;  

@@ -3,8 +3,6 @@
 
 #include <stdint.h> // Needed for uint8_t
 
-//#define PROMINI
-
 char stringBuf[30];
 
 bool sendData;
@@ -17,6 +15,7 @@ uint8_t dataCounter;
 /* Used for the PS3 Communication and motor functions */
 int lastCommand; // This is used set a new targetPosition
 enum Command {
+  update,
   stop,
   forward,
   backward,
@@ -32,29 +31,22 @@ enum Command {
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
 /* Left motor */
-#ifdef PROMINI
-#define leftPort PORTC
-#define leftPortDirection DDRC
-#define leftA PINC2 // PC2 - pin A2 (2INA on the Pololu motor driver)
-#define leftB PINC3 // PC3 - pin A3 (2INB on the Pololu motor driver)
-#else
-#define leftPort PORTD
-#define leftPortDirection DDRD
-#define leftA PIND0 // PD0 - pin 0 (2INA on the Pololu motor driver)
-#define leftB PIND1 // PD1 - pin 1 (2INB on the Pololu motor driver)
-#endif
-
+#define leftPort PORTH
+#define leftPortDirection DDRH
 #define leftPwmPortDirection DDRB
-#define leftPWM PINB1 // PB1 - pin 9 (OC1A) - (2PWM on the Pololu motor driver)
+
+#define leftA PINH3 // PH3 - pin 6 (2INA on the Pololu motor driver)
+#define leftB PINH4 // PH4 - pin 7 (2INB on the Pololu motor driver)
+#define leftPWM PINB5 // PB5 - pin 11 (OC1A) - (2PWM on the Pololu motor driver)
 
 /* Right motor */
-#define rightPort PORTC
-#define rightPortDirection DDRC
+#define rightPort PORTH
+#define rightPortDirection DDRH
 #define rightPwmPortDirection DDRB
 
-#define rightA PINC4 // PC4 - pin A4 (1INA on the Pololu motor driver)
-#define rightB PINC5 // PC5 - pin A5 (1INB on the Pololu motor driver)
-#define rightPWM PINB2 // PB2 - pin 10 (OC1B) - (1PWM on the Pololu motor driver)
+#define rightA PINH5 // PH5 - pin 8 (1INA on the Pololu motor driver)
+#define rightB PINH6 // PH6 - pin 9 (1INB on the Pololu motor driver)
+#define rightPWM PINB6 // PB6 - pin 12 (OC1B) - (1PWM on the Pololu motor driver)
 
 /* 
   Note that the right motor is connected as so to the Pololu motor driver:
@@ -76,15 +68,10 @@ volatile long rightCounter = 0;
 
 /* IMU */
 #define gyroY A0
-#ifdef PROMINI
-#define accY A6
-#define accZ A7
-#else
 #define accY A1
 #define accZ A2
-#endif
 
-#define buzzer 6 // Connected to a BC547 transistor - there is a protection diode at the buzzer as well
+#define buzzer 10 // Connected to a BC547 transistor - there is a protection diode at the buzzer as well
 
 // Zero voltage values for the sensors - [0] = gyroY, [1] = accY, [2] = accZ
 double zeroValues[3] = { 0 };
