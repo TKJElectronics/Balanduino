@@ -143,7 +143,7 @@ void loop() {
       strcat(stringBuf,",");
       strcat(stringBuf,SerialBT.doubleToString(targetAngle,2));
       SerialBT.println(stringBuf);
-      dataCounter = 1;
+      dataCounter = 0; // Set the counter to 0, to prevent it from sending data in the next loop
     } else if(sendData) {
       switch(dataCounter) {
         case 0:      
