@@ -1,27 +1,41 @@
 /*
  * The code is released under the GNU General Public License.
  * Developed by Kristian Lauszus
- * This is the algorithm for my balancing robot/segway.
- * It is controlled by either an Android app or a Processing application via bluetooth.
+ * This is the algorithm for the Balanduino balancing robot.
+ * It can be controlled by either an Android app or a Processing application via bluetooth.
  * The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
- * The Processing application can be found here: https://github.com/TKJElectronics/BalancingRobotArduino/tree/master/ProcessingApp
- * The SPP Bluetooth Library can be found at the following link: https://github.com/felis/USB_Host_Shield_2.0
+ * The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
+ * It can also be controlled by a PS3, Wii or a Xbox controller
  * For details, see http://blog.tkjelectronics.dk/2012/02/the-balancing-robot/
  */
 
 #include "Balanduino.h"
-#include <Kalman.h> // Kalman filter library see: http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/
-Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source code
 
+/* 
+ * These are all open source libraries written by Kristian Lauszus, TKJ Electronics
+ * The USB libraries are located at the following link: https://github.com/felis/USB_Host_Shield_2.0
+ */
+#include <Kalman.h> // Kalman filter library see: http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/
+#include <XBOXRECV.h>
 #include <SPP.h>
 #include <PS3BT.h>
 #include <Wii.h>
+
+// Create the Kalman library instance
+Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source code
+
+// This will take care of all USB communication
 USB Usb;
-BTD Btd(&Usb); // Uncomment DEBUG in "BTD.cpp" to save space
+
+// You have to connect a Xbox wireless receiver to the Arduino to control it with a wirelessly Xbox controller
+XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
+BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all the Bluetooth communication - Uncomment DEBUG in "BTD.cpp" to save space
 SPP SerialBT(&Btd,"Balanduino","0000"); // Also uncomment DEBUG in "SPP.cpp"
 PS3BT PS3(&Btd,0x00,0x15,0x83,0x3D,0x0A,0x57); // Also remember to uncomment DEBUG in "PS3BT.cpp" to save space
-//WII Wii(&Btd,PAIR); // You have to pair with your Wiimote first by creating the instance like this - you only have to do this once
 WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
+
+// You have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote - you only have to do this once
+//WII Wii(&Btd,PAIR);
 
 void setup() {
   /* Setup encoders */
@@ -85,7 +99,8 @@ void loop() {
   gyroAngle += gyroYrate*((double)(micros()-timer)/1000000);
   // See my guide for more info about calculation the angles and the Kalman filter: http://arduino.cc/forum/index.php/topic,58048.0.htm
   pitch = kalman.getAngle(accYangle, gyroYrate, (double)(micros() - timer)/1000000); // Calculate the angle using a Kalman filter
-  timer = micros();  
+  timer = micros();
+  //Serial.print(accYangle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
   /* Drive motors */
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
@@ -112,7 +127,7 @@ void loop() {
     }
   }
 
-  /* Read the Bluetooth connection */
+  /* Read the Bluetooth dongle */
   readBTD();    
   
   if(SerialBT.connected) {
@@ -153,6 +168,7 @@ void loop() {
     while((micros() - loopStartTime) < STD_LOOP_TIME)
         Usb.Task();
   }
+  //Serial.print(lastLoopUsefulTime);Serial.print(',');Serial.println(micros() - loopStartTime);
   loopStartTime = micros();    
 }
 void PID(double restAngle, double offset, double turning) {
@@ -285,7 +301,7 @@ void readBTD() {
       }
     }
   } else if(PS3.PS3Connected) {
-    if(PS3.getButtonPress(PS)) {
+    if(PS3.getButtonClick(PS)) {
       steer(stop);
       PS3.disconnect();
     } 
@@ -300,7 +316,7 @@ void readBTD() {
       steer(stop);      
   } 
   else if(PS3.PS3NavigationConnected) {
-    if(PS3.getButtonPress(PS)) {
+    if(PS3.getButtonClick(PS)) {
       steer(stop);
       PS3.disconnect();
     } 
@@ -310,12 +326,26 @@ void readBTD() {
       steer(stop);  
   } 
   else if(Wii.wiimoteConnected) {
-    if(Wii.getButtonPress(B))
+    if(Wii.getButtonClick(HOME)) { // You can use getButtonPress to see if the button is held down
+      steer(stop);
+      Wii.disconnect();
+    } else if(Wii.getButtonPress(B))
       steer(update);
     else if(Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117))
       steer(update);
     else 
       steer(stop);      
+  } 
+  else if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0]) { // We will only read from the first controller
+    if(Xbox.getButtonPress(0,BACK)) {
+      stopAndReset();
+      while(!Xbox.getButtonPress(0,START))
+        Usb.Task();        
+    }
+    if((Xbox.getAnalogHat(0,LeftHatY) < -7500) || (Xbox.getAnalogHat(0,RightHatY) < -7500) || (Xbox.getAnalogHat(0,LeftHatY) > 7500) || (Xbox.getAnalogHat(0,RightHatY) > 7500)) {
+      steer(update);
+    } else 
+      steer(stop);
   } else
     steer(stop);
 }
@@ -375,7 +405,7 @@ void steer(Command command) {
         steerRight = true;  
       }  
     }
-    if(PS3.PS3NavigationConnected) {
+    else if(PS3.PS3NavigationConnected) {
       if(PS3.getAnalogHat(LeftHatY) < 117) {
         targetOffset = scale(PS3.getAnalogHat(LeftHatY),116,0,0,7); // Scale from 116-0 to 0-7
         steerForward = true;
@@ -390,43 +420,62 @@ void steer(Command command) {
         turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,20); // Scale from 201-255 to 0-20
         steerRight = true;
       }
+    } 
+    else if(Wii.wiimoteConnected) {
+      if(Wii.getButtonPress(B)) {
+        if(Wii.getPitch() > 180) {
+          targetOffset = scale(Wii.getPitch(),180,216,0,7);        
+          steerForward = true;
+        }     
+        else if(Wii.getPitch() < 180) {
+          targetOffset = scale(Wii.getPitch(),180,144,0,7);
+          steerBackward = true;
+        }
+        if(Wii.getRoll() > 180) {
+          turningOffset = scale(Wii.getRoll(),180,225,0,20);        
+          steerRight = true;
+        }
+        else if(Wii.getRoll() < 180) {
+          turningOffset = scale(Wii.getRoll(),180,135,0,20);
+          steerLeft = true;     
+        }
+      }
+      else {
+        if(Wii.getAnalogHat(HatY) > 137) {
+          targetOffset = scale(Wii.getAnalogHat(HatY),138,230,0,7);
+          steerForward = true;
+        } 
+        else if(Wii.getAnalogHat(HatY) < 117) {
+          targetOffset = scale(Wii.getAnalogHat(HatY),116,25,0,7);
+          steerBackward = true;
+        }
+        if(Wii.getAnalogHat(HatX) > 137) {
+          turningOffset = scale(Wii.getAnalogHat(HatX),138,230,0,20);
+          steerRight = true;     
+        } 
+        else if(Wii.getAnalogHat(HatX) < 117) {
+          turningOffset = scale(Wii.getAnalogHat(HatX),116,25,0,20);
+          steerLeft = true;
+        }
+      } 
     }
-    if(Wii.getButtonPress(B)) {
-      if(Wii.getPitch() > 180) {
-        targetOffset = scale(Wii.getPitch(),181,216,0,7);        
+    else if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0]) {
+      if(Xbox.getAnalogHat(0,LeftHatY) < -7500 && Xbox.getAnalogHat(0,RightHatY) < -7500) {
+        targetOffset = scale(Xbox.getAnalogHat(0,LeftHatY)+Xbox.getAnalogHat(0,RightHatY),-7500,-32768,0,7); // Scale from -7500 to -32768 to 0-7
         steerForward = true;
-      }     
-      else if(Wii.getPitch() < 180) {
-        targetOffset = scale(Wii.getPitch(),179,144,0,7);
+      } else if(Xbox.getAnalogHat(0,LeftHatY) > 7500 && Xbox.getAnalogHat(0,RightHatY) > 7500) {
+        targetOffset = scale(Xbox.getAnalogHat(0,LeftHatY)+Xbox.getAnalogHat(0,RightHatY),7500,32767,0,7); // Scale from 7500-32767 to 0-7
         steerBackward = true;
       }
-      if(Wii.getRoll() > 180) {
-        turningOffset = scale(Wii.getRoll(),181,225,0,20);        
-        steerRight = true;
-      }
-      else if(Wii.getRoll() < 180) {
-        turningOffset = scale(Wii.getRoll(),179,135,0,20);
-        steerLeft = true;     
-      }
-    }
-    else {
-      if(Wii.getAnalogHat(HatY) > 137) {
-        targetOffset = scale(Wii.getAnalogHat(HatY),138,230,0,7);
-        steerForward = true;
-      } 
-      else if(Wii.getAnalogHat(HatY) < 117) {
-        targetOffset = scale(Wii.getAnalogHat(HatY),116,25,0,7);
-        steerBackward = true;
-      }
-      if(Wii.getAnalogHat(HatX) > 137) {
-        turningOffset = scale(Wii.getAnalogHat(HatX),138,230,0,20);
-        steerRight = true;     
-      } 
-      else if(Wii.getAnalogHat(HatX) < 117) {
-        turningOffset = scale(Wii.getAnalogHat(HatX),116,25,0,20);
-        steerLeft = true;
-      }
-    }
+      /*
+      if(((long)Xbox.getAnalogHat(LeftHatY) - (long)Xbox.getAnalogHat(RightHatY)) > 15) {
+        turningOffset = scale(abs(Xbox.getAnalogHat(LeftHatY) - Xbox.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
+        steerLeft = true;      
+      } else if (((long)Xbox.getAnalogHat(RightHatY) - (long)Xbox.getAnalogHat(LeftHatY)) > 15) {   
+        turningOffset = scale(abs(Xbox.getAnalogHat(LeftHatY) - Xbox.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20  
+        steerRight = true;  
+      }*/
+    }    
   }
   
   else if(command == stop) {
@@ -530,7 +579,6 @@ void stopMotor(Command motor) {
     sbi(rightPort,rightB);
   }
 }
-
 void setPWM(uint8_t pin, int dutyCycle) { // dutyCycle is a value between 0-ICR
   if(pin == leftPWM) {
     OCR1AH = (dutyCycle >> 8); 
@@ -546,13 +594,13 @@ void leftEncoder() {
   if(PING & _BV(PING5)) // read pin 4 (PG5)
     leftCounter--;
   else
-    leftCounter++;    
+    leftCounter++; 
 }
 void rightEncoder() {
   if(PINE & _BV(PINE3)) // read pin 5 (PE3)
     rightCounter--;
   else
-    rightCounter++;  
+    rightCounter++;
 }
 long readLeftEncoder() { // The encoders decrease when motors are traveling forward and increase when traveling backward
   return leftCounter;

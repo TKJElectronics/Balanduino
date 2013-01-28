@@ -1,5 +1,5 @@
-#ifndef _balancingrobot_h_
-#define _balancingrobot_h_
+#ifndef _balanduino_h_
+#define _balanduino_h_
 
 #include <stdint.h> // Needed for uint8_t
 
@@ -12,7 +12,7 @@ uint8_t dataCounter;
 #define PWM_FREQUENCY 20000 // The motor driver can handle a pwm frequency up to 20kHz
 #define PWMVALUE F_CPU/PWM_FREQUENCY/2 // Frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, we use no prescaling so frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
 
-/* Used for the PS3 Communication and motor functions */
+/* Used to make commands more readable */
 int lastCommand; // This is used set a new targetPosition
 enum Command {
   update,
@@ -25,8 +25,10 @@ enum Command {
   joystick,
 };
 
-/* These are used to read and write to the port registers - see http://www.arduino.cc/en/Reference/PortManipulation 
- I do this to save processing power - see this page for more information: http://www.billporter.info/ready-set-oscillate-the-fastest-way-to-change-arduino-pins/ */
+/* 
+ * These are used to read and write to the port registers - see http://www.arduino.cc/en/Reference/PortManipulation 
+ * I do this to save processing power - see this page for more information: http://www.billporter.info/ready-set-oscillate-the-fastest-way-to-change-arduino-pins/ 
+ */
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
