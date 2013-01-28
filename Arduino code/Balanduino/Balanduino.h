@@ -15,7 +15,9 @@ uint8_t dataCounter;
 /* Used to make commands more readable */
 int lastCommand; // This is used set a new targetPosition
 enum Command {
-  update,
+  updatePS3,
+  updateWii,
+  updateXbox,
   stop,
   forward,
   backward,
@@ -115,6 +117,7 @@ double turningOffset = 0; // Offset for turning left and right
 
 double sppData1 = 0;
 double sppData2 = 0;
+bool commandSent = false;
 
 uint8_t loopCounter = 0; // Used to update wheel velocity
 long wheelPosition;

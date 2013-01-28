@@ -240,7 +240,7 @@ void PID(double restAngle, double offset, double turning) {
 }
 void readBTD() {
   Usb.Task();
-  if(SerialBT.connected) {
+  if(SerialBT.connected) { // The SPP connection won't return data as fast as the controller, so we will handle it separately
     if(SerialBT.available()) {
       char input[30];
       uint8_t i = 0;
@@ -284,7 +284,7 @@ void readBTD() {
       }
       /* Remote control */
       else if(input[0] == 'S') // Stop
-        steer(stop);      
+        steer(stop);
       else if(input[0] == 'J') { // Joystick
         strtok(input, ","); // Ignore 'J'
         sppData1 = atof(strtok(NULL, ",")); // x-axis
@@ -300,56 +300,49 @@ void readBTD() {
         //SerialBT.printNumberln(sppData2);
       }
     }
-  } else if(PS3.PS3Connected) {
-    if(PS3.getButtonClick(PS)) {
-      steer(stop);
-      PS3.disconnect();
+  } else {
+    commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
+    if(PS3.PS3Connected) {
+      if(PS3.getButtonClick(PS))
+        PS3.disconnect();
+      else if(PS3.getButtonPress(SELECT)) {
+        stopAndReset();
+        while(!PS3.getButtonPress(START))
+          Usb.Task();        
+      }
+      else if((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137))
+        steer(updatePS3);
     } 
-    else if(PS3.getButtonPress(SELECT)) {
-      stopAndReset();
-      while(!PS3.getButtonPress(START))
-        Usb.Task();        
-    }
-    if((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137)) {
-      steer(update);
-    } else 
-      steer(stop);      
-  } 
-  else if(PS3.PS3NavigationConnected) {
-    if(PS3.getButtonClick(PS)) {
-      steer(stop);
-      PS3.disconnect();
+    else if(PS3.PS3NavigationConnected) {
+      if(PS3.getButtonClick(PS))
+        PS3.disconnect();
+      else if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
+        steer(updatePS3);
     } 
-    if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117) {
-      steer(update);
-    } else 
-      steer(stop);  
-  } 
-  else if(Wii.wiimoteConnected) {
-    if(Wii.getButtonClick(HOME)) { // You can use getButtonPress to see if the button is held down
-      steer(stop);
-      Wii.disconnect();
-    } else if(Wii.getButtonPress(B))
-      steer(update);
-    else if(Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117))
-      steer(update);
-    else 
-      steer(stop);      
-  } 
-  else if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0]) { // We will only read from the first controller
-    if(Xbox.getButtonPress(0,BACK)) {
-      stopAndReset();
-      while(!Xbox.getButtonPress(0,START))
-        Usb.Task();        
+    if(Wii.wiimoteConnected && !commandSent) {
+      if(Wii.getButtonClick(HOME)) // You can use getButtonPress to see if the button is held down
+        Wii.disconnect();
+      else if(Wii.getButtonPress(B))
+        steer(updateWii);
+      else if(Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117))
+        steer(updateWii);
+    } 
+    if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0] && !commandSent) { // We will only read from the first controller
+      if(Xbox.getButtonPress(0,BACK)) {
+        stopAndReset();
+        while(!Xbox.getButtonPress(0,START))
+          Usb.Task();
+      }
+      else if((Xbox.getAnalogHat(0,LeftHatY) < -7500) || (Xbox.getAnalogHat(0,RightHatY) < -7500) || (Xbox.getAnalogHat(0,LeftHatY) > 7500) || (Xbox.getAnalogHat(0,RightHatY) > 7500))
+        steer(updateXbox);
     }
-    if((Xbox.getAnalogHat(0,LeftHatY) < -7500) || (Xbox.getAnalogHat(0,RightHatY) < -7500) || (Xbox.getAnalogHat(0,LeftHatY) > 7500) || (Xbox.getAnalogHat(0,RightHatY) > 7500)) {
-      steer(update);
-    } else 
+    if(!commandSent) // If there hasn't been send a command by now, then send stop
       steer(stop);
-  } else
-    steer(stop);
+  }
 }
 void steer(Command command) {
+  commandSent = true; // Used to see if there has already been send a command or not
+    
   // Set all false
   steerForward = false;
   steerBackward = false;
@@ -388,7 +381,7 @@ void steer(Command command) {
         turningOffset = scale(sppData1,0,-45,0,20);
         steerRight = true;     
       }
-  } else if(command == update) {
+  } else if(command == updatePS3) {
     if(PS3.PS3Connected) {
       if(PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) {
         targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),232,0,0,7); // Scale from 232-0 to 0-7
@@ -404,8 +397,7 @@ void steer(Command command) {
         turningOffset = scale(abs(PS3.getAnalogHat(LeftHatY) - PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20  
         steerRight = true;  
       }  
-    }
-    else if(PS3.PS3NavigationConnected) {
+    } else { // It must be a Navigation controller then
       if(PS3.getAnalogHat(LeftHatY) < 117) {
         targetOffset = scale(PS3.getAnalogHat(LeftHatY),116,0,0,7); // Scale from 116-0 to 0-7
         steerForward = true;
@@ -420,62 +412,59 @@ void steer(Command command) {
         turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,20); // Scale from 201-255 to 0-20
         steerRight = true;
       }
-    } 
-    else if(Wii.wiimoteConnected) {
-      if(Wii.getButtonPress(B)) {
-        if(Wii.getPitch() > 180) {
-          targetOffset = scale(Wii.getPitch(),180,216,0,7);        
-          steerForward = true;
-        }     
-        else if(Wii.getPitch() < 180) {
-          targetOffset = scale(Wii.getPitch(),180,144,0,7);
-          steerBackward = true;
-        }
-        if(Wii.getRoll() > 180) {
-          turningOffset = scale(Wii.getRoll(),180,225,0,20);        
-          steerRight = true;
-        }
-        else if(Wii.getRoll() < 180) {
-          turningOffset = scale(Wii.getRoll(),180,135,0,20);
-          steerLeft = true;     
-        }
-      }
-      else {
-        if(Wii.getAnalogHat(HatY) > 137) {
-          targetOffset = scale(Wii.getAnalogHat(HatY),138,230,0,7);
-          steerForward = true;
-        } 
-        else if(Wii.getAnalogHat(HatY) < 117) {
-          targetOffset = scale(Wii.getAnalogHat(HatY),116,25,0,7);
-          steerBackward = true;
-        }
-        if(Wii.getAnalogHat(HatX) > 137) {
-          turningOffset = scale(Wii.getAnalogHat(HatX),138,230,0,20);
-          steerRight = true;     
-        } 
-        else if(Wii.getAnalogHat(HatX) < 117) {
-          turningOffset = scale(Wii.getAnalogHat(HatX),116,25,0,20);
-          steerLeft = true;
-        }
-      } 
     }
-    else if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0]) {
-      if(Xbox.getAnalogHat(0,LeftHatY) < -7500 && Xbox.getAnalogHat(0,RightHatY) < -7500) {
-        targetOffset = scale(Xbox.getAnalogHat(0,LeftHatY)+Xbox.getAnalogHat(0,RightHatY),-7500,-32768,0,7); // Scale from -7500 to -32768 to 0-7
+  } else if(command == updateWii) {
+    if(Wii.getButtonPress(B)) {
+      if(Wii.getPitch() > 180) {
+        targetOffset = scale(Wii.getPitch(),180,216,0,7);        
         steerForward = true;
-      } else if(Xbox.getAnalogHat(0,LeftHatY) > 7500 && Xbox.getAnalogHat(0,RightHatY) > 7500) {
-        targetOffset = scale(Xbox.getAnalogHat(0,LeftHatY)+Xbox.getAnalogHat(0,RightHatY),7500,32767,0,7); // Scale from 7500-32767 to 0-7
+      }     
+      else if(Wii.getPitch() < 180) {
+        targetOffset = scale(Wii.getPitch(),180,144,0,7);
         steerBackward = true;
       }
-      /*
-      if(((long)Xbox.getAnalogHat(LeftHatY) - (long)Xbox.getAnalogHat(RightHatY)) > 15) {
-        turningOffset = scale(abs(Xbox.getAnalogHat(LeftHatY) - Xbox.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
-        steerLeft = true;      
-      } else if (((long)Xbox.getAnalogHat(RightHatY) - (long)Xbox.getAnalogHat(LeftHatY)) > 15) {   
-        turningOffset = scale(abs(Xbox.getAnalogHat(LeftHatY) - Xbox.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20  
-        steerRight = true;  
-      }*/
-    }    
+      if(Wii.getRoll() > 180) {
+        turningOffset = scale(Wii.getRoll(),180,225,0,20);        
+        steerRight = true;
+      }
+      else if(Wii.getRoll() < 180) {
+        turningOffset = scale(Wii.getRoll(),180,135,0,20);
+        steerLeft = true;     
+      }
+    }
+    else {
+      if(Wii.getAnalogHat(HatY) > 137) {
+        targetOffset = scale(Wii.getAnalogHat(HatY),138,230,0,7);
+        steerForward = true;
+      } 
+      else if(Wii.getAnalogHat(HatY) < 117) {
+        targetOffset = scale(Wii.getAnalogHat(HatY),116,25,0,7);
+        steerBackward = true;
+      }
+      if(Wii.getAnalogHat(HatX) > 137) {
+        turningOffset = scale(Wii.getAnalogHat(HatX),138,230,0,20);
+        steerRight = true;     
+      } 
+      else if(Wii.getAnalogHat(HatX) < 117) {
+        turningOffset = scale(Wii.getAnalogHat(HatX),116,25,0,20);
+        steerLeft = true;
+      }
+    }
+  } else if(command == updateXbox) {
+    if(Xbox.getAnalogHat(0,LeftHatY) < -7500 && Xbox.getAnalogHat(0,RightHatY) < -7500) {
+      targetOffset = scale(Xbox.getAnalogHat(0,LeftHatY)+Xbox.getAnalogHat(0,RightHatY),-7500,-32768,0,7); // Scale from -7500 to -32768 to 0-7
+      steerForward = true;
+    } else if(Xbox.getAnalogHat(0,LeftHatY) > 7500 && Xbox.getAnalogHat(0,RightHatY) > 7500) {
+      targetOffset = scale(Xbox.getAnalogHat(0,LeftHatY)+Xbox.getAnalogHat(0,RightHatY),7500,32767,0,7); // Scale from 7500-32767 to 0-7
+      steerBackward = true;
+    }/*
+    if(((long)Xbox.getAnalogHat(LeftHatY) - (long)Xbox.getAnalogHat(RightHatY)) > 15) {
+      turningOffset = scale(abs(Xbox.getAnalogHat(LeftHatY) - Xbox.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
+       steerLeft = true;      
+    } else if (((long)Xbox.getAnalogHat(RightHatY) - (long)Xbox.getAnalogHat(LeftHatY)) > 15) {   
+      turningOffset = scale(abs(Xbox.getAnalogHat(LeftHatY) - Xbox.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20  
+      steerRight = true;  
+    }*/
   }
   
   else if(command == stop) {
@@ -594,7 +583,7 @@ void leftEncoder() {
   if(PING & _BV(PING5)) // read pin 4 (PG5)
     leftCounter--;
   else
-    leftCounter++; 
+    leftCounter++;
 }
 void rightEncoder() {
   if(PINE & _BV(PINE3)) // read pin 5 (PE3)
