@@ -240,7 +240,7 @@ void PID(double restAngle, double offset, double turning) {
 }
 void readBTD() {
   Usb.Task();
-  if(SerialBT.connected) { // The SPP connection won't return data as fast as the controller, so we will handle it separately
+  if(SerialBT.connected) { // The SPP connection won't return data as fast as the controllers, so we will handle it separately
     if(SerialBT.available()) {
       char input[30];
       uint8_t i = 0;
