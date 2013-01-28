@@ -34,10 +34,9 @@
 #include <avr/pgmspace.h>
 
 const static uint8_t SS   = 6;
-// Husk at ændre
-const static uint8_t MOSI = 0;
-const static uint8_t MISO = 0;
-const static uint8_t SCK  = 0;
+const static uint8_t MOSI = 27;
+const static uint8_t MISO = 28;
+const static uint8_t SCK  = 29;
 
 static const uint8_t SDA = 14;
 static const uint8_t SCL = 13;
@@ -52,37 +51,35 @@ static const uint8_t A5 = 12;
 
 // ATMEL ATMEGA644A / Balanduino
 //
-//                    +---\/---+
-//      M2A () PB0  1|        |40 PA0 (A0 / D7)
-//      M2B () PB1  2|        |39 PA1 (A1 / D8)
+//                   +---\/---+
+//   M2A (D25) PB0  1|        |40 PA0 (A0 / D7)
+//   M2B (D26) PB1  2|        |39 PA1 (A1 / D8)
 //   INT2 (D2) PB2  3|        |38 PA2 (A2 / D9)
 // BUZZER (D5) PB3  4|        |37 PA3 (A3 / D10)
 //    LED (D6) PB4  5|        |36 PA4 (A4 / D11)
-//     MOSI () PB5  6|        |35 PA5 (A5 / D12)
-//     MISO () PB6  7|        |34 PA6 () EN1B
-//      SCK () PB7  8|        |33 PA7 () EN2B
+//  MOSI (D27) PB5  6|        |35 PA5 (A5 / D12)
+//  MISO (D28) PB6  7|        |34 PA6 (D30) EN1B
+//   SCK (D29) PB7  8|        |33 PA7 (D31) EN2B
 //             RST  9|        |32 AREF
 //             VCC 10|        |31 GND 
 //             GND 11|        |30 AVCC
-//           XTAL2 12|        |29 PC7 () M1B
-//           XTAL1 13|        |28 PC6 () M1A
-//     RX (D0) PD0 14|        |27 PC5 () M2EN
-//     TX (D1) PD1 15|        |26 PC4 () M1EN
-//     EN1A () PD2 16|        |25 PC3 () SS
-//     EN2A () PD3 17|        |24 PC2 () INT_MAX
-//    PWM1B () PD4 18|        |23 PC1 (D14) SDA
-//    PWM1A () PD5 19|        |22 PC0 (D13) SCL
+//           XTAL2 12|        |29 PC7 (D24) M1B
+//           XTAL1 13|        |28 PC6 (D23) M1A
+//     RX (D0) PD0 14|        |27 PC5 (D22) M2EN
+//     TX (D1) PD1 15|        |26 PC4 (D21) M1EN
+//  EN1A (D15) PD2 16|        |25 PC3 (D20) SS
+//  EN2A (D16) PD3 17|        |24 PC2 (D19) INT_MAX
+// PWM1B (D17) PD4 18|        |23 PC1 (D14) SDA
+// PWM1A (D18) PD5 19|        |22 PC0 (D13) SCL
 //  PWM2B (D3) PD6 20|        |21 PD7 (D4) PWM2A
 //                   +--------+
 //
 
-// Husk at ændre
-#define NUM_DIGITAL_PINS            7
+#define NUM_DIGITAL_PINS            26
 #define NUM_ANALOG_INPUTS           6
 #define analogInputToDigitalPin(p)  ((p < 6) ? (p) + 7 : -1)
 
-// Husk at ændre - der er seks i alt
-#define digitalPinHasPWM(p)         ((p) == 3 || (p) == 4 || (p) == 5 || (p) == 6)
+#define digitalPinHasPWM(p)         ((p) == 3 || (p) == 4 || (p) == 5 || (p) == 6 || (p) == 17 || (p) == 18)
 
 #ifdef ARDUINO_MAIN
 // these arrays map port names (e.g. port B) to the
@@ -111,6 +108,7 @@ const uint16_t PROGMEM port_to_input_PGM[] = {
         (uint16_t) &PIND
 };
 const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
+        /* User available pins */
         PD, /* 0  - PD0 */
         PD, /* 1  - PD1 */
         PB, /* 2  - PB2 */
@@ -127,26 +125,30 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
         PC, /* 13 - PC0 */
         PC, /* 14 - PC1 */
 
-        // Husk at ændre
-        PB,
-        PC, /* 16 */
-        PC,
-        PC,
-        PC,
-        PC,
-        PC,
-        PC,
-        PC,
-        PA, /* 24 */
-        PA,
-        PA,
-        PA,
-        PA,
-        PA,
-        PA,
-        PA  /* 31 */
+        /* Internal pins */
+        PD, /* 15 - PD2 */
+        PD, /* 16 - PD3 */
+        PD, /* 17 - PD4 */
+        PD, /* 18 - PD5 */
+
+        PC, /* 19 - PC2 */
+        PC, /* 20 - PC3 */
+        PC, /* 21 - PC4 */
+        PC, /* 22 - PC5 */
+        PC, /* 23 - PC6 */
+        PC, /* 24 - PC7 */
+
+        PB, /* 25 - PB0 */
+        PB, /* 26 - PB1 */
+        PB, /* 27 - PB5 */
+        PB, /* 28 - PB6 */
+        PB, /* 29 - PB7 */
+
+        PA, /* 30 - PA6 */
+        PA  /* 31 - PA7 */
 };
 const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
+        /* User available pins */
         _BV(0), /* 0  - PD0 */
         _BV(1), /* 1  - PD1 */
         _BV(2), /* 2  - PB2 */
@@ -163,60 +165,67 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
         _BV(0), /* 13 - PC0 */
         _BV(1), /* 14 - PC1 */
 
-        // Husk at ændre
-        _BV(0),
-        _BV(0), /* 16 */
-        _BV(1),
-        _BV(2),
-        _BV(3),
-        _BV(4),
-        _BV(5),
-        _BV(6),
-        _BV(7),
-        _BV(7), /* 24 */
-        _BV(6),
-        _BV(5),
-        _BV(4),
-        _BV(3),
-        _BV(2),
-        _BV(1),
-        _BV(0)
+        /* Internal pins */
+        _BV(2), /* 15 - PD2 */
+        _BV(3), /* 16 - PD3 */
+        _BV(4), /* 17 - PD4 */
+        _BV(5), /* 18 - PD5 */
+
+        _BV(2), /* 19 - PC2 */
+        _BV(3), /* 20 - PC3 */
+        _BV(4), /* 21 - PC4 */
+        _BV(5), /* 22 - PC5 */
+        _BV(6), /* 23 - PC6 */
+        _BV(7), /* 24 - PC7 */
+
+        _BV(0), /* 25 - PB0 */
+        _BV(1), /* 26 - PB1 */
+        _BV(5), /* 27 - PB5 */
+        _BV(6), /* 28 - PB6 */
+        _BV(7), /* 29 - PB7 */
+
+        _BV(6), /* 30 - PA6 */
+        _BV(7)  /* 31 - PA7 */
 };
 const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
-        NOT_ON_TIMER,   /* 0  - PD0 */
-        NOT_ON_TIMER,   /* 1  - PD1 */
-        NOT_ON_TIMER,   /* 2  - PB2 */
-        TIMER2B,        /* 3  - PD6 */
-        TIMER2A,        /* 4  - PD7 */
-        TIMER0A,        /* 5  - PB3 */
-        TIMER0B,        /* 6  - PB4 */
-        NOT_ON_TIMER,   /* 7  - PA0 */
-        NOT_ON_TIMER,   /* 8  - PA1 */
-        NOT_ON_TIMER,   /* 9  - PA2 */
-        NOT_ON_TIMER,   /* 10 - PA3 */
-        NOT_ON_TIMER,   /* 11 - PA4 */
-        NOT_ON_TIMER,   /* 12 - PA5 */
-        NOT_ON_TIMER,   /* 13 - PC0 */
-        NOT_ON_TIMER,   /* 14 - PC1 */
+        /* User available pins */
+        NOT_ON_TIMER, /* 0  - PD0 */
+        NOT_ON_TIMER, /* 1  - PD1 */
+        NOT_ON_TIMER, /* 2  - PB2 */
+        TIMER2B,      /* 3  - PD6 */
+        TIMER2A,      /* 4  - PD7 */
+        TIMER0A,      /* 5  - PB3 */
+        TIMER0B,      /* 6  - PB4 */
+        NOT_ON_TIMER, /* 7  - PA0 */
+        NOT_ON_TIMER, /* 8  - PA1 */
+        NOT_ON_TIMER, /* 9  - PA2 */
+        NOT_ON_TIMER, /* 10 - PA3 */
+        NOT_ON_TIMER, /* 11 - PA4 */
+        NOT_ON_TIMER, /* 12 - PA5 */
+        NOT_ON_TIMER, /* 13 - PC0 */
+        NOT_ON_TIMER, /* 14 - PC1 */
 
-        // Husk at ændre
-        TIMER2A,        /* 15 - PD7 */
-        NOT_ON_TIMER,   /* 16 - PC0 */
-        NOT_ON_TIMER,   /* 17 - PC1 */
-        NOT_ON_TIMER,   /* 18 - PC2 */
-        NOT_ON_TIMER,   /* 19 - PC3 */
-        NOT_ON_TIMER,   /* 20 - PC4 */
-        NOT_ON_TIMER,   /* 21 - PC5 */
-        NOT_ON_TIMER,   /* 22 - PC6 */
-        NOT_ON_TIMER,   /* 23 - PC7 */
-        NOT_ON_TIMER,   /* 24 - PA0 */
-        NOT_ON_TIMER,   /* 25 - PA1 */
-        NOT_ON_TIMER,   /* 26 - PA2 */
-        NOT_ON_TIMER,   /* 27 - PA3 */
-        NOT_ON_TIMER,   /* 28 - PA4 */
-        NOT_ON_TIMER,   /* 29 - PA5 */
-        NOT_ON_TIMER,   /* 30 - PA6 */
-        NOT_ON_TIMER   /* 31 - PA7 */
+        /* Internal pins */
+        NOT_ON_TIMER, /* 15 - PD2 */
+        NOT_ON_TIMER, /* 16 - PD3 */
+        TIMER1B,      /* 17 - PD4 */
+        TIMER1A,      /* 18 - PD5 */
+
+        NOT_ON_TIMER, /* 19 - PC2 */
+        NOT_ON_TIMER, /* 20 - PC3 */
+        NOT_ON_TIMER, /* 21 - PC4 */
+        NOT_ON_TIMER, /* 22 - PC5 */
+        NOT_ON_TIMER, /* 23 - PC6 */
+        NOT_ON_TIMER, /* 24 - PC7 */
+
+        NOT_ON_TIMER, /* 25 - PB0 */
+        NOT_ON_TIMER, /* 26 - PB1 */
+        NOT_ON_TIMER, /* 27 - PB5 */
+        NOT_ON_TIMER, /* 28 - PB6 */
+        NOT_ON_TIMER, /* 29 - PB7 */
+
+        NOT_ON_TIMER, /* 30 - PA6 */
+        NOT_ON_TIMER  /* 31 - PA7 */
 };
 #endif
 #endif
