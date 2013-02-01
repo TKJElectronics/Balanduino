@@ -10,7 +10,6 @@
  */
 
 #include "Balanduino.h"
-#include <Wire.h>
 
 /* 
  * These are all open source libraries written by Kristian Lauszus, TKJ Electronics
@@ -39,21 +38,13 @@ WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 //WII Wii(&Btd,PAIR);
 
 void setup() {
-  /* Start UART */
-  Serial.begin(115200);
-  
   /* Setup encoders */
   pinMode(leftEncoder1,INPUT);
   pinMode(leftEncoder2,INPUT);
   pinMode(rightEncoder1,INPUT);
   pinMode(rightEncoder2,INPUT); 
-  attachInterrupt(0,leftEncoder,RISING);
-  attachInterrupt(1,rightEncoder,RISING);
-
-  pinMode(leftEnable, OUTPUT);
-  pinMode(rightEnable, OUTPUT);  
-  digitalWrite(leftEnable, HIGH);
-  digitalWrite(rightEnable, HIGH); 
+  attachInterrupt(0,leftEncoder,RISING); // pin 2
+  attachInterrupt(1,rightEncoder,RISING); // pin 3
 
   /* Setup motor pins to output */
   sbi(leftPwmPortDirection,leftPWM);
@@ -64,12 +55,12 @@ void setup() {
   sbi(rightPortDirection,rightB);  
 
   /* Set PWM frequency to 20kHz - see the datasheet http://www.atmel.com/Images/doc8025.pdf page 128-135 */
-  // Set up PWM, Phase and Frequency Correct on pin 18 (OC1A) & pin 17 (OC1B) with ICR1 as TOP using Timer1
+  // Set up PWM, Phase and Frequency Correct on pin 9 (OC1A) & pin 10 (OC1B) with ICR1 as TOP using Timer1
   TCCR1B = _BV(WGM13) | _BV(CS10); // Set PWM Phase and Frequency Correct with ICR1 as TOP and no prescaling
   ICR1H = (PWMVALUE >> 8); // ICR1 is the TOP value - this is set so the frequency is equal to 20kHz
   ICR1L = (PWMVALUE & 0xFF);
 
-  /* Enable PWM on pin 18 (OC1A) & pin 17 (OC1B) */
+  /* Enable PWM on pin 9 (OC1A) & pin 10 (OC1B) */
   // Clear OC1A/OC1B on compare match when up-counting
   // Set OC1A/OC1B on compare match when downcountin
   TCCR1A = _BV(COM1A1) | _BV(COM1B1);
@@ -77,35 +68,24 @@ void setup() {
   setPWM(rightPWM,0);
 
   /* Setup pin for buzzer to beep when finished calibrating */
-  pinMode(buzzer,OUTPUT);
+  pinMode(buzzer,OUTPUT);  
 
   /* Setup IMU Inputs */
-  Wire.begin();
-  i2cWrite(0x1B,0x00); // Set Full Scale Range to ±250deg/s
-  i2cWrite(0x1C,0x00); // Set Full Scale Range to ±2g
-  i2cWrite(0x19,0x27); // Set the sample rate to 200Hz
-  i2cWrite(0x6B,0x01); // PLL with X axis gyroscope reference and disable sleep mode
+  analogReference(EXTERNAL); // Set voltage reference to 3.3V by connecting AREF to 3.3V
+  pinMode(gyroY,INPUT);
+  pinMode(accY,INPUT);
+  pinMode(accZ,INPUT);      
 
-  uint8_t buf;
-  i2cRead(0x75,1,&buf);
-  if(buf != 0x68) { // Read "WHO_AM_I" register
-    Serial.println(F("Error reading sensor"));
-    while(1); 
-  }
-
-  if (Usb.Init() == -1) { // Check if USB Host is working
-   Serial.print(F("OSC did not start"));
-   while(1); // Halt
-  }
+  if (Usb.Init() == -1) // Check if USB Host Shield is working
+    while(1); // Halt
 
   /* Calibrate the gyro and accelerometer relative to ground */
-  delay(100);
-  calibrate();
+  calibrateSensors();
   
   /* Beep to indicate that it is now ready */
-  analogWrite(buzzer,128);
+  digitalWrite(buzzer,HIGH);
   delay(100);  
-  analogWrite(buzzer,0);
+  digitalWrite(buzzer,LOW);
 
   /* Setup timing */
   loopStartTime = micros();
@@ -114,19 +94,13 @@ void setup() {
 
 void loop() {
   /* Calculate pitch */
-  uint8_t data[8];
-  while (!i2cRead(0x3D,8,data));
-  accY = ((data[0] << 8) | data[1]);
-  accZ = ((data[2] << 8) | data[3]);
-  gyroX = ((data[6] << 8) | data[7]);
-
-  accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
-  gyroRate = (double)gyroX/131.0;
-  gyroAngle += gyroRate*((double)(micros()-timer)/1000000.0);
-
-  pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-timer)/1000000.0); // Calculate the angle using a Kalman filter
+  accYangle = getAccY();
+  gyroYrate = getGyroYrate();
+  gyroAngle += gyroYrate*((double)(micros()-timer)/1000000);
+  // See my guide for more info about calculation the angles and the Kalman filter: http://arduino.cc/forum/index.php/topic,58048.0.htm
+  pitch = kalman.getAngle(accYangle, gyroYrate, (double)(micros() - timer)/1000000); // Calculate the angle using a Kalman filter
   timer = micros();
-  //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
+  //Serial.print(accYangle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
   /* Drive motors */
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
@@ -160,54 +134,39 @@ void loop() {
     Usb.Task();
     if(sendPIDValues) {
       sendPIDValues = false;
-      
       strcpy(stringBuf,"P,");
-      SerialBT.doubleToString(Kp,convBuf);
-      strcat(stringBuf,convBuf);
-      
+      strcat(stringBuf,SerialBT.doubleToString(Kp,2));
       strcat(stringBuf,",");
-      SerialBT.doubleToString(Ki,convBuf);
-      strcat(stringBuf,convBuf);
-      
+      strcat(stringBuf,SerialBT.doubleToString(Ki,2));
       strcat(stringBuf,",");
-      SerialBT.doubleToString(Kd,convBuf);
-      strcat(stringBuf,convBuf);
-      
+      strcat(stringBuf,SerialBT.doubleToString(Kd,2));
       strcat(stringBuf,",");
-      SerialBT.doubleToString(targetAngle,convBuf);
-      strcat(stringBuf,convBuf);
-      
+      strcat(stringBuf,SerialBT.doubleToString(targetAngle,2));
       SerialBT.println(stringBuf);
-      dataCounter = 1; // Set the counter to 1, to prevent it from sending data in the next loop
+      dataCounter = 0; // Set the counter to 0, to prevent it from sending data in the next loop
     } else if(sendData) {
       switch(dataCounter) {
         case 0:      
           strcpy(stringBuf,"V,");
-          SerialBT.doubleToString(accAngle,convBuf);
-          strcat(stringBuf,convBuf);
-          
+          strcat(stringBuf,SerialBT.doubleToString(accYangle,2));
           strcat(stringBuf,",");
-          SerialBT.doubleToString(gyroAngle,convBuf);
-          strcat(stringBuf,convBuf);
-          
+          strcat(stringBuf,SerialBT.doubleToString(gyroAngle,2));
           strcat(stringBuf,",");
-          SerialBT.doubleToString(pitch,convBuf);
-          strcat(stringBuf,convBuf);
-          
+          strcat(stringBuf,SerialBT.doubleToString(pitch,2));
           SerialBT.println(stringBuf);
           break;
       }    
       dataCounter++;
-      if(dataCounter >= 10)
+      if(dataCounter > 4)
         dataCounter = 0;    
     }
   }
-  
+
   /* Use a time fixed loop */
   lastLoopUsefulTime = micros() - loopStartTime;
   if (lastLoopUsefulTime < STD_LOOP_TIME) {
     while((micros() - loopStartTime) < STD_LOOP_TIME)
-      Usb.Task();
+        Usb.Task();
   }
   //Serial.print(lastLoopUsefulTime);Serial.print(',');Serial.println(micros() - loopStartTime);
   loopStartTime = micros();    
@@ -246,6 +205,8 @@ void PID(double restAngle, double offset, double turning) {
   double PIDValue = pTerm + iTerm + dTerm;
 
   /* Steer robot sideways */
+  double PIDLeft;
+  double PIDRight;
   if (steerLeft) {
     turning -= abs((double)wheelVelocity/velocityScaleTurning); // Scale down at high speed
     if(turning < 0)
@@ -357,7 +318,7 @@ void readBTD() {
         PS3.disconnect();
       else if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
         steer(updatePS3);
-    }
+    } 
     if(Wii.wiimoteConnected && !commandSent) {
       if(Wii.getButtonClick(HOME)) // You can use getButtonPress to see if the button is held down
         Wii.disconnect();
@@ -534,48 +495,40 @@ void stopAndReset() {
   iTerm = 0;
   targetPosition = wheelPosition;
 }
-void calibrate() {
-  uint8_t data[4];
-  i2cRead(0x3D,4,data);  
-  accY = ((data[0] << 8) | data[1]);
-  accZ = ((data[2] << 8) | data[3]);
-  double accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
+double getGyroYrate() {
+  // (gyroAdc-gyroZero)/Sensitivity (In quids) - Sensitivity = 0.00333/3.3*1023=1.0323
+  double gyroRate = -((double)((double)analogRead(gyroY) - zeroValues[0]) / 1.0323);
+  return gyroRate;
+}
+double getAccY() {
+  double accYval = ((double)analogRead(accY) - zeroValues[1]);  
+  double accZval = ((double)analogRead(accZ) - zeroValues[2]);
+  // Convert to 360 degrees resolution
+  // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
+  // We are then convert it to 0 to 2π and then from radians to degrees
+  return (atan2(-accYval,-accZval)+PI)*RAD_TO_DEG;
+}
+void calibrateSensors() {
+  for (uint8_t i = 0; i < 100; i++) { // Take the average of 100 readings
+    zeroValues[0] += analogRead(gyroY);
+    zeroValues[1] += analogRead(accY);
+    zeroValues[2] += analogRead(accZ);
+    delay(10);
+  }
+  zeroValues[0] /= 100; // Gyro X-axis
+  zeroValues[1] /= 100; // Accelerometer Y-axis
+  zeroValues[2] /= 100; // Accelerometer Z-axis
 
-  if(accAngle < 180) { // Check which side is lying down
+  if(zeroValues[1] > 500) { // Check which side is lying down - 1g is equal to 0.33V or 102.3 quids (0.33/3.3*1023=102.3)
+    zeroValues[1] -= 102.3; // +1g when lying at one of the sides
     kalman.setAngle(90); // It starts at 90 degress and 270 when facing the other way
     gyroAngle = 90;
   } else {
+    zeroValues[1] += 102.3; // -1g when lying at the other side
     kalman.setAngle(270);
     gyroAngle = 270;
   }
 }
-void i2cWrite(uint8_t registerAddress, uint8_t data) {
-  Wire.beginTransmission(IMUAddress);
-  Wire.write(registerAddress);
-  Wire.write(data);
-  Wire.endTransmission(); // Send stop
-}
-uint8_t i2cRead(uint8_t registerAddress, uint8_t nbytes, uint8_t * data) {
-  unsigned long timeOutTime = micros();
-  Wire.beginTransmission(IMUAddress);
-  Wire.write(registerAddress);
-  Wire.endTransmission(false); // Don't release the bus
-  Wire.requestFrom(IMUAddress, nbytes); // Send a repeated start and then release the bus after reading
-  for(uint8_t i = 0; i < nbytes; i++) {
-    if (Wire.available())
-      data[i] = Wire.read();
-    else {
-      timeOutTime = micros();
-      while (((micros() - timeOutTime) < I2C_TIMEOUT) && !Wire.available());
-      if (Wire.available())
-        data[i] = Wire.read();
-      else
-        return 0; // Error in communication
-    }
-  }
-  return 1;
-}
-
 void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is a value in percentage 0-100%
   if(speedRaw > 100)
     speedRaw = 100;
@@ -594,12 +547,12 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
   else if (motor == right) {
     setPWM(rightPWM,speed); // Right motor pwm
     if (direction == forward) {
-      sbi(rightPort,rightA);
-      cbi(rightPort,rightB);
-    } 
-    else if (direction == backward) {
       cbi(rightPort,rightA);
       sbi(rightPort,rightB);
+    } 
+    else if (direction == backward) {
+      sbi(rightPort,rightA);
+      cbi(rightPort,rightB);
     }
   }
 }
@@ -627,16 +580,16 @@ void setPWM(uint8_t pin, int dutyCycle) { // dutyCycle is a value between 0-ICR
 
 /* Interrupt routine and encoder read functions - I read using the port registers for faster processing */
 void leftEncoder() { 
-  if(PINA & _BV(PINA6))
+  if(PING & _BV(PING5)) // read pin 4 (PG5)
     leftCounter--;
   else
     leftCounter++;
 }
 void rightEncoder() {
-  if(PINA & _BV(PINA7))
-    rightCounter++;
-  else
+  if(PINE & _BV(PINE3)) // read pin 5 (PE3)
     rightCounter--;
+  else
+    rightCounter++;
 }
 long readLeftEncoder() { // The encoders decrease when motors are traveling forward and increase when traveling backward
   return leftCounter;

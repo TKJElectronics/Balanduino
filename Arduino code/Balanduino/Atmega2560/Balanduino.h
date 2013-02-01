@@ -4,7 +4,6 @@
 #include <stdint.h> // Needed for uint8_t
 
 char stringBuf[30];
-char convBuf[10];
 
 bool sendData;
 bool sendPIDValues;
@@ -36,56 +35,56 @@ enum Command {
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
 /* Left motor */
-#define leftPort PORTC
-#define leftPortDirection DDRC
-#define leftPwmPortDirection DDRD
+#define leftPort PORTH
+#define leftPortDirection DDRH
+#define leftPwmPortDirection DDRB
 
-#define leftA PINC6 // PC6 - M1A - pin 23
-#define leftB PINC7 // PC7 - M1B - pin 24
-#define leftPWM PIND5 // PD5 - PWM1A (OC1A) - pin 18
+#define leftA PINH3 // PH3 - pin 6 (2INA on the Pololu motor driver)
+#define leftB PINH4 // PH4 - pin 7 (2INB on the Pololu motor driver)
+#define leftPWM PINB5 // PB5 - pin 11 (OC1A) - (2PWM on the Pololu motor driver)
 
 /* Right motor */
-#define rightPort PORTB
-#define rightPortDirection DDRB
-#define rightPwmPortDirection DDRD
+#define rightPort PORTH
+#define rightPortDirection DDRH
+#define rightPwmPortDirection DDRB
 
-#define rightA PINB0 // PB0 - M2A - pin 25
-#define rightB PINB1 // PB1 - M2B - pin 26
-#define rightPWM PIND4 // PD4 - PWM1B (OC1B) - pin 17
+#define rightA PINH5 // PH5 - pin 8 (1INA on the Pololu motor driver)
+#define rightB PINH6 // PH6 - pin 9 (1INB on the Pololu motor driver)
+#define rightPWM PINB6 // PB6 - pin 12 (OC1B) - (1PWM on the Pololu motor driver)
 
-#define leftEnable 21
-#define rightEnable 22 
+/* 
+  Note that the right motor is connected as so to the Pololu motor driver:
+  Black wire - output 1A
+  Red wire - output 1B
+  And the left motor is connected as so to the Pololu motor driver:
+  Red wire - output 2A
+  Black wire - output 2B
+*/  
 
 /* Encoders */
-#define leftEncoder1 15
-#define leftEncoder2 30
-#define rightEncoder1 16
-#define rightEncoder2 31
+#define leftEncoder1 2 // Yellow wire
+#define leftEncoder2 4 // White wire
+#define rightEncoder1 3 // White wire
+#define rightEncoder2 5 // Yellow wire
 
-volatile int32_t leftCounter = 0;
-volatile int32_t rightCounter = 0;
+volatile long leftCounter = 0;
+volatile long rightCounter = 0;
 
-#define buzzer 5 // Connected to a BC547 transistor - there is a protection diode at the buzzer as well
+/* IMU */
+#define gyroY A0
+#define accY A1
+#define accZ A2
+
+#define buzzer 10 // Connected to a BC547 transistor - there is a protection diode at the buzzer as well
 
 // Zero voltage values for the sensors - [0] = gyroY, [1] = accY, [2] = accZ
 double zeroValues[3] = { 0 };
 
-const uint8_t IMUAddress = 0x68;
-#define I2C_TIMEOUT  1000 // Used to check for errors in I2C communication
-
-/* IMU Data */
-int16_t accY;
-int16_t accZ;
-int16_t gyroX;
-
 // Results
-double accAngle;
-double gyroRate;
+double accYangle;
+double gyroYrate;
 double gyroAngle;
 double pitch;
-
-double PIDLeft;
-double PIDRight;
 
 /* PID variables */
 double Kp = 7;
