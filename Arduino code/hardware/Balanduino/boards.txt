@@ -5,7 +5,7 @@ balanduino.name=Balanduino w/ ATmega644A
 balanduino.upload.tool=avrdude
 balanduino.upload.protocol=arduino
 balanduino.upload.maximum_size=63488
-balanduino.upload.speed=19200
+balanduino.upload.speed=57600
 
 balanduino.bootloader.tool=avrdude
 balanduino.bootloader.path=atmega
