@@ -1088,9 +1088,9 @@ void flash_led(uint8_t count)
 {
 	while (count--) {
 		LED_PORT |= _BV(LED);
-		_delay_ms(100);
+		_delay_ms(50);
 		LED_PORT &= ~_BV(LED);
-		_delay_ms(100);
+		_delay_ms(50);
 	}
 }
 
