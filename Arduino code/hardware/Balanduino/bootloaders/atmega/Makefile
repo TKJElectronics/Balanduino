@@ -240,7 +240,7 @@ atmega644a: $(PROGRAM)_atmega644a.hex
 
 atmega644a_8m: TARGET = atmega644a
 atmega644a_8m: MCU_TARGET = atmega644a
-atmega644a_8m: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>4' '-DNUM_LED_FLASHES=2' '-DBAUD_RATE=57600'
+atmega644a_8m: CFLAGS += '-DMAX_TIME_COUNT=F_CPU>>4' '-DNUM_LED_FLASHES=2' '-DBAUD_RATE=38400'
 atmega644a_8m: AVR_FREQ = 8000000L
 atmega644a_8m: LDSECTION  = --section-start=.text=0xF800
 atmega644a_8m: $(PROGRAM)_atmega644a_8m.hex	
