@@ -87,7 +87,7 @@ void setup() {
   i2cWrite(0x6B,0x01); // PLL with X axis gyroscope reference and disable sleep mode
 
   uint8_t buf;
-  i2cRead(0x75,1,&buf);
+  while(!i2cRead(0x75,1,&buf));
   if(buf != 0x68) { // Read "WHO_AM_I" register
     Serial.print(F("Error reading sensor"));
     while(1); 
@@ -116,7 +116,7 @@ void setup() {
 void loop() {
   /* Calculate pitch */
   uint8_t data[8];
-  while (!i2cRead(0x3D,8,data));
+  while(!i2cRead(0x3D,8,data));
   accY = ((data[0] << 8) | data[1]);
   accZ = ((data[2] << 8) | data[3]);
   gyroX = ((data[6] << 8) | data[7]);
@@ -285,7 +285,7 @@ void readBTD() {
     if(SerialBT.available()) {
       char input[30];
       uint8_t i = 0;
-      while (1) {
+      while(1) {
         input[i] = SerialBT.read();
         if(input[i] == 0) // Error while reading the string
           return;
@@ -561,7 +561,7 @@ void stopAndReset() {
 }
 void calibrate() {
   uint8_t data[4];
-  while (!i2cRead(0x3D,4,data));
+  while(!i2cRead(0x3D,4,data));
   accY = ((data[0] << 8) | data[1]);
   accZ = ((data[2] << 8) | data[3]);
   double accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
@@ -586,7 +586,7 @@ uint8_t i2cRead(uint8_t registerAddress, uint8_t nbytes, uint8_t * data) {
       data[i] = Wire.read();
     else {
       timeOutTime = micros();
-      while (((micros() - timeOutTime) < I2C_TIMEOUT) && !Wire.available());
+      while(((micros() - timeOutTime) < I2C_TIMEOUT) && !Wire.available());
       if (Wire.available())
         data[i] = Wire.read();
       else
