@@ -6,7 +6,7 @@
  * The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
  * The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
  * It can also be controlled by a PS3, Wii or a Xbox controller
- * For details, see http://blog.tkjelectronics.dk/2012/02/the-balancing-robot/
+ * For details, see http://blog.tkjelectronics.dk/2012/03/the-balancing-robot/
  */
 
 #include "Balanduino.h"
@@ -198,7 +198,7 @@ void loop() {
           break;
       }    
       dataCounter++;
-      if(dataCounter >= 10)
+      if(dataCounter >= 5)
         dataCounter = 0;    
     }
   }
