@@ -1,11 +1,11 @@
 [submodule "BalanduinoAndroidApp"]
 	path = BalanduinoAndroidApp
 	url = https://github.com/TKJElectronics/BalanduinoAndroidApp.git
-[submodule "Arduino code/libraries/KalmanFilter"]
-	path = Arduino code/libraries/KalmanFilter
+[submodule "Firmware/libraries/KalmanFilter"]
+	path = Firmware/libraries/KalmanFilter
 	url = https://github.com/TKJElectronics/KalmanFilter.git
-[submodule "Arduino code/libraries/USB_Host_Shield_2.0"]
-	path = Arduino code/libraries/USB_Host_Shield_2.0
+[submodule "Firmware/libraries/USB_Host_Shield_2.0"]
+	path = Firmware/libraries/USB_Host_Shield_2.0
 	url = https://github.com/felis/USB_Host_Shield_2.0.git
 [submodule "BalanduinoProcessingApp"]
 	path = BalanduinoProcessingApp
