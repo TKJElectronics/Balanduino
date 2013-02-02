@@ -4,9 +4,6 @@
 [submodule "BalanduinoProcessingApp"]
 	path = BalanduinoProcessingApp
 	url = https://github.com/TKJElectronics/BalanduinoProcessingApp.git
-[submodule "Firmware/libraries/USB_Host_Shield_2.0"]
-	path = Firmware/libraries/USB_Host_Shield_2.0
-	url = https://github.com/felis/USB_Host_Shield_2.0.git
 [submodule "Firmware/libraries/KalmanFilter"]
 	path = Firmware/libraries/KalmanFilter
 	url = https://github.com/TKJElectronics/KalmanFilter.git
