@@ -39,21 +39,21 @@ WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 //WII Wii(&Btd,PAIR);
 
 void setup() {
-  /* Start UART */
+  /* Initialize UART */
   Serial.begin(115200);
   
   /* Setup encoders */
   pinMode(leftEncoder1,INPUT);
   pinMode(leftEncoder2,INPUT);
   pinMode(rightEncoder1,INPUT);
-  pinMode(rightEncoder2,INPUT); 
+  pinMode(rightEncoder2,INPUT);
   attachInterrupt(0,leftEncoder,RISING);
   attachInterrupt(1,rightEncoder,RISING);
 
   pinMode(leftEnable, OUTPUT);
-  pinMode(rightEnable, OUTPUT);  
+  pinMode(rightEnable, OUTPUT);
   digitalWrite(leftEnable, HIGH);
-  digitalWrite(rightEnable, HIGH); 
+  digitalWrite(rightEnable, HIGH);
 
   /* Setup motor pins to output */
   sbi(leftPwmPortDirection,leftPWM);
@@ -61,7 +61,7 @@ void setup() {
   sbi(leftPortDirection,leftB);
   sbi(rightPwmPortDirection,rightPWM);
   sbi(rightPortDirection,rightA);
-  sbi(rightPortDirection,rightB);  
+  sbi(rightPortDirection,rightB);
 
   /* Set PWM frequency to 20kHz - see the datasheet http://www.atmel.com/Images/doc8025.pdf page 128-135 */
   // Set up PWM, Phase and Frequency Correct on pin 18 (OC1A) & pin 17 (OC1B) with ICR1 as TOP using Timer1
@@ -89,7 +89,7 @@ void setup() {
   uint8_t buf;
   i2cRead(0x75,1,&buf);
   if(buf != 0x68) { // Read "WHO_AM_I" register
-    Serial.println(F("Error reading sensor"));
+    Serial.print(F("Error reading sensor"));
     while(1); 
   }
 
@@ -98,14 +98,15 @@ void setup() {
    while(1); // Halt
   }
 
-  /* Calibrate the gyro and accelerometer relative to ground */
-  delay(100);
-  calibrate();
+  delay(100); // Wait for the sensor to get ready
+  calibrate(); // Set kalman and gyro starting angle
   
   /* Beep to indicate that it is now ready */
+  cbi(TCCR0B,CS00); // Set precaler to 8
   analogWrite(buzzer,128);
-  delay(100);  
+  delay(800); // This is really 100ms
   analogWrite(buzzer,0);
+  sbi(TCCR0B,CS00); // Set precaler back to 64
 
   /* Setup timing */
   loopStartTime = micros();
@@ -122,7 +123,7 @@ void loop() {
 
   accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
   gyroRate = (double)gyroX/131.0;
-  gyroAngle += gyroRate*((double)(micros()-timer)/1000000.0);
+  gyroAngle += gyroRate*((double)(micros()-timer)/1000000.0); // Gyro angle is only used for debugging
 
   pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-timer)/1000000.0); // Calculate the angle using a Kalman filter
   timer = micros();
@@ -207,7 +208,8 @@ void loop() {
   lastLoopUsefulTime = micros() - loopStartTime;
   if (lastLoopUsefulTime < STD_LOOP_TIME) {
     while((micros() - loopStartTime) < STD_LOOP_TIME)
-      Usb.Task();
+      if((micros() - loopStartTime) < (STD_LOOP_TIME-1000))
+        Usb.Task();
   }
   //Serial.print(lastLoopUsefulTime);Serial.print(',');Serial.println(micros() - loopStartTime);
   loopStartTime = micros();    
@@ -342,26 +344,20 @@ void readBTD() {
   } else {
     commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
     if(PS3.PS3Connected) {
-      if(PS3.getButtonClick(PS))
-        PS3.disconnect();
-      else if(PS3.getButtonPress(SELECT)) {
+      if(PS3.getButtonPress(SELECT)) {
         stopAndReset();
         while(!PS3.getButtonPress(START))
-          Usb.Task();        
+          Usb.Task();
       }
       else if((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137))
         steer(updatePS3);
     } 
     else if(PS3.PS3NavigationConnected) {
-      if(PS3.getButtonClick(PS))
-        PS3.disconnect();
-      else if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
+      if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
         steer(updatePS3);
     }
     if(Wii.wiimoteConnected && !commandSent) {
-      if(Wii.getButtonClick(HOME)) // You can use getButtonPress to see if the button is held down
-        Wii.disconnect();
-      else if(Wii.getButtonPress(B))
+      if(Wii.getButtonPress(B))
         steer(updateWii);
       else if(Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117))
         steer(updateWii);
@@ -377,6 +373,14 @@ void readBTD() {
     }
     if(!commandSent) // If there hasn't been send a command by now, then send stop
       steer(stop);
+  }
+  if(PS3.PS3Connected || PS3.PS3NavigationConnected) {
+      if(PS3.getButtonClick(PS))
+        PS3.disconnect();
+  }
+  if(Wii.wiimoteConnected) {
+      if(Wii.getButtonClick(HOME)) // You can use getButtonPress to see if the button is held down
+        Wii.disconnect();
   }
 }
 void steer(Command command) {
@@ -536,18 +540,13 @@ void stopAndReset() {
 }
 void calibrate() {
   uint8_t data[4];
-  i2cRead(0x3D,4,data);  
+  while (!i2cRead(0x3D,4,data));
   accY = ((data[0] << 8) | data[1]);
   accZ = ((data[2] << 8) | data[3]);
   double accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
-
-  if(accAngle < 180) { // Check which side is lying down
-    kalman.setAngle(90); // It starts at 90 degress and 270 when facing the other way
-    gyroAngle = 90;
-  } else {
-    kalman.setAngle(270);
-    gyroAngle = 270;
-  }
+  
+  kalman.setAngle(accAngle); // Set starting angle
+  gyroAngle = accAngle;
 }
 void i2cWrite(uint8_t registerAddress, uint8_t data) {
   Wire.beginTransmission(IMUAddress);
@@ -579,7 +578,7 @@ uint8_t i2cRead(uint8_t registerAddress, uint8_t nbytes, uint8_t * data) {
 void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is a value in percentage 0-100%
   if(speedRaw > 100)
     speedRaw = 100;
-  int speed = speedRaw*((double)PWMVALUE)/100; // Scale from 100 to PWMVALUE
+  int speed = speedRaw*((double)PWMVALUE)/100.0; // Scale from 100 to PWMVALUE
   if (motor == left) {
     setPWM(leftPWM,speed); // Left motor pwm
     if (direction == forward) {

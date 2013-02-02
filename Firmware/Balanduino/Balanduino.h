@@ -65,10 +65,7 @@ enum Command {
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
-#define buzzer 5 // Connected to a BC547 transistor - there is a protection diode at the buzzer as well
-
-// Zero voltage values for the sensors - [0] = gyroY, [1] = accY, [2] = accZ
-double zeroValues[3] = { 0 };
+#define buzzer 5
 
 const uint8_t IMUAddress = 0x68;
 #define I2C_TIMEOUT  1000 // Used to check for errors in I2C communication
