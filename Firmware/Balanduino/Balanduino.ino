@@ -380,7 +380,7 @@ void readBTD() {
       if(PS3.getButtonClick(PS))
         PS3.disconnect();
   }
-  if(Wii.wiimoteConnected) {
+  if(Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
       if(Wii.getButtonClick(HOME)) // You can use getButtonPress to see if the button is held down
         Wii.disconnect();
   }
