@@ -38,6 +38,7 @@ WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 //WII Wii(&Btd,PAIR);
 
 void setup() {
+  Serial.begin(115200);
   /* Setup encoders */
   pinMode(leftEncoder1,INPUT);
   pinMode(leftEncoder2,INPUT);
@@ -100,7 +101,7 @@ void loop() {
   // See my guide for more info about calculation the angles and the Kalman filter: http://arduino.cc/forum/index.php/topic,58048.0.htm
   pitch = kalman.getAngle(accYangle, gyroYrate, (double)(micros() - timer)/1000000); // Calculate the angle using a Kalman filter
   timer = micros();
-  //Serial.print(accYangle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
+  //Serial.print(accYangle);Serial.print('\t');Serial.print(gyroYrate);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
   /* Drive motors */
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
@@ -135,24 +136,36 @@ void loop() {
     if(sendPIDValues) {
       sendPIDValues = false;
       strcpy(stringBuf,"P,");
-      strcat(stringBuf,SerialBT.doubleToString(Kp,2));
+      SerialBT.doubleToString(Kp,convBuf);
+      strcat(stringBuf,convBuf);
+
+      strcat(stringBuf,",");      
+      SerialBT.doubleToString(Ki,convBuf);
+      strcat(stringBuf,convBuf);
+      
+      strcat(stringBuf,",");      
+      SerialBT.doubleToString(Kd,convBuf);
+      strcat(stringBuf,convBuf);
+      
       strcat(stringBuf,",");
-      strcat(stringBuf,SerialBT.doubleToString(Ki,2));
-      strcat(stringBuf,",");
-      strcat(stringBuf,SerialBT.doubleToString(Kd,2));
-      strcat(stringBuf,",");
-      strcat(stringBuf,SerialBT.doubleToString(targetAngle,2));
+      SerialBT.doubleToString(targetAngle,convBuf);
+      strcat(stringBuf,convBuf);
+      
       SerialBT.println(stringBuf);
+      
       dataCounter = 0; // Set the counter to 0, to prevent it from sending data in the next loop
     } else if(sendData) {
       switch(dataCounter) {
         case 0:      
           strcpy(stringBuf,"V,");
-          strcat(stringBuf,SerialBT.doubleToString(accYangle,2));
+          SerialBT.doubleToString(accYangle,convBuf);
+          strcat(stringBuf,convBuf);
           strcat(stringBuf,",");
-          strcat(stringBuf,SerialBT.doubleToString(gyroAngle,2));
+          SerialBT.doubleToString(gyroAngle,convBuf);
+          strcat(stringBuf,convBuf);
           strcat(stringBuf,",");
-          strcat(stringBuf,SerialBT.doubleToString(pitch,2));
+          SerialBT.doubleToString(pitch,convBuf);
+          strcat(stringBuf,convBuf);
           SerialBT.println(stringBuf);
           break;
       }    

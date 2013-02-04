@@ -4,6 +4,7 @@
 #include <stdint.h> // Needed for uint8_t
 
 char stringBuf[30];
+char convBuf[10];
 
 bool sendData;
 bool sendPIDValues;
