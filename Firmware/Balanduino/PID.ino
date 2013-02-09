@@ -51,7 +51,7 @@ void PID(double restAngle, double offset, double turning) {
     PIDRight = PIDValue;
   }
 
-  PIDLeft *= 0.95; // compensate for difference in the motors
+  //PIDLeft *= 0.95; // compensate for difference in the motors
 
   /* Set PWM Values */
   if (PIDLeft >= 0)

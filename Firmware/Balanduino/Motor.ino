@@ -56,13 +56,13 @@ void stopAndReset() {
 
 /* Interrupt routine and encoder read functions - I read using the port registers for faster processing */
 void leftEncoder() { 
-  if(PINA & _BV(PINA6))
+  if((bool)(PIND & _BV(PIND2)) == (bool)(PINA & _BV(PINA6)))
     leftCounter--;
   else
     leftCounter++;
 }
 void rightEncoder() {
-  if(PINA & _BV(PINA7))
+  if((bool)(PIND & _BV(PIND3)) == (bool)(PINA & _BV(PINA7)))
     rightCounter++;
   else
     rightCounter--;

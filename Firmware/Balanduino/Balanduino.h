@@ -85,9 +85,9 @@ double PIDLeft;
 double PIDRight;
 
 /* PID variables */
-double Kp = 7;
-double Ki = 2;
-double Kd = 8;
+double Kp = 11; // 7
+double Ki = 1; // 2
+double Kd = 5; // 8
 double targetAngle = 180;
 
 double lastError; // Store position error
@@ -122,12 +122,12 @@ int32_t wheelPosition;
 int32_t lastWheelPosition;
 int32_t wheelVelocity;
 int32_t targetPosition;
-const uint16_t zoneA = 4000;
-const uint16_t zoneB = 2000;
-const double positionScaleA = 250; // One resolution is 464 pulses
-const double positionScaleB = 500; 
-const double positionScaleC = 1000;
-const double velocityScaleMove = 35;
-const double velocityScaleStop = 30;
-const double velocityScaleTurning = 35;
+const uint16_t zoneA = 4000*2;
+const uint16_t zoneB = 2000*2;
+const double positionScaleA = 250*2; // One resolution is 464 pulses
+const double positionScaleB = 500*2; 
+const double positionScaleC = 1000*2;
+const double velocityScaleMove = 35*2;
+const double velocityScaleStop = 30*2;
+const double velocityScaleTurning = 35*2;
 #endif

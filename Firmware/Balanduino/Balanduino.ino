@@ -47,8 +47,8 @@ void setup() {
   pinMode(leftEncoder2,INPUT);
   pinMode(rightEncoder1,INPUT);
   pinMode(rightEncoder2,INPUT);
-  attachInterrupt(0,leftEncoder,RISING);
-  attachInterrupt(1,rightEncoder,RISING);
+  attachInterrupt(0,leftEncoder,CHANGE);
+  attachInterrupt(1,rightEncoder,CHANGE);
 
   pinMode(leftEnable, OUTPUT);
   pinMode(rightEnable, OUTPUT);
