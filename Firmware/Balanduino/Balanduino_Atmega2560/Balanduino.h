@@ -92,6 +92,7 @@ double Kp = 7;
 double Ki = 2;
 double Kd = 8;
 double targetAngle = 180;
+double lastRestAngle = targetAngle;
 
 double lastError; // Store position error
 double iTerm; // Store integral term
