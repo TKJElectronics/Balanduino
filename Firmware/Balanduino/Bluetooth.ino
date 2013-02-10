@@ -302,7 +302,7 @@ void steer(Command command) {
   }
   
   else if(command == stop) {
-    steerStop = true;    
+    steerStop = true;
     if(lastCommand != stop) { // Set new stop position
       targetPosition = wheelPosition;
       stopped = false;

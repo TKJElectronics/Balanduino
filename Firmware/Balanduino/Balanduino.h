@@ -84,20 +84,21 @@ double pitch;
 double PIDLeft;
 double PIDRight;
 
-/* PID variables */
+/* PID variables for angle */
 double Kp = 11; // 7
 double Ki = 1; // 2
-double Kd = 5; // 8
+double Kd = 3; // 5 - 8
 double targetAngle = 180;
+double lastRestAngle = targetAngle;
 
-double lastError; // Store position error
+double lastError; // Store last angle error
 double iTerm; // Store integral term
 
 /* Used for timing */
 uint32_t timer;
 
 const uint16_t STD_LOOP_TIME = 10000; // Fixed time loop of 10 milliseconds
-uint32_t lastLoopUsefulTime = STD_LOOP_TIME;
+uint16_t lastLoopUsefulTime = STD_LOOP_TIME;
 uint32_t loopStartTime;
 
 bool steerForward;

@@ -1,11 +1,13 @@
 void PID(double restAngle, double offset, double turning) {
   /* Steer robot */
   if (steerForward) {
-    offset += (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed and scale up when reversing - wheel velocity is negative when driving forward
+    if(wheelVelocity < 0)
+      offset += (double)wheelVelocity/(velocityScaleMove*0.8); // Scale down offset at high speed - wheel velocity is negative when driving forward
     restAngle -= offset;
   } 
   else if (steerBackward) {
-    offset -= (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed and scale up when reversing - wheel velocity is negative when driving forward
+    if(wheelVelocity > 0)
+      offset -= (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed - wheel velocity is negative when driving forward
     restAngle += offset;
   }
   /* Brake */
@@ -18,11 +20,18 @@ void PID(double restAngle, double offset, double turning) {
     else // Inside zone C
       restAngle -= (double)positionError/positionScaleC;   
     restAngle -= (double)wheelVelocity/velocityScaleStop;
-    if (restAngle < 160) // Limit rest Angle
-      restAngle = 160;
-    else if (restAngle > 200)
-      restAngle = 200;
+    if (restAngle < 175) // Limit rest Angle
+      restAngle = 175;
+    else if (restAngle > 185)
+      restAngle = 185;
   }
+  
+  if(restAngle - lastRestAngle > 1) // Don't change restAngle with more than 1 degree in each loop
+    restAngle = lastRestAngle+1;
+  else if(restAngle - lastRestAngle < -1)
+    restAngle = lastRestAngle-1;
+  lastRestAngle = restAngle;  
+  
   /* Update PID values */
   double error = (restAngle - pitch);
   double pTerm = Kp * error;
@@ -57,9 +66,9 @@ void PID(double restAngle, double offset, double turning) {
   if (PIDLeft >= 0)
     moveMotor(left, forward, PIDLeft);
   else
-    moveMotor(left, backward, PIDLeft * -1);
+    moveMotor(left, backward, -PIDLeft);
   if (PIDRight >= 0)
     moveMotor(right, forward, PIDRight);
   else
-    moveMotor(right, backward, PIDRight * -1);
+    moveMotor(right, backward, -PIDRight);
 }

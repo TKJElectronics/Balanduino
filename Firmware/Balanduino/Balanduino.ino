@@ -157,6 +157,7 @@ void loop() {
     wheelPosition = readLeftEncoder() + readRightEncoder();
     wheelVelocity = wheelPosition - lastWheelPosition;
     lastWheelPosition = wheelPosition;
+    //Serial.print(wheelPosition);Serial.print('\t');Serial.print(targetPosition);Serial.print('\t');Serial.println(wheelVelocity);
     if (abs(wheelVelocity) <= 20 && !stopped) { // Set new targetPosition if braking
       targetPosition = wheelPosition;
       stopped = true;
