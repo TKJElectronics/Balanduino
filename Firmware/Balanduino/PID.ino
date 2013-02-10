@@ -1,11 +1,11 @@
 void PID(double restAngle, double offset, double turning) {
   /* Steer robot */
   if (steerForward) {
-    offset += (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed and scale up when reversing
+    offset += (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed and scale up when reversing - wheel velocity is negative when driving forward
     restAngle -= offset;
   } 
   else if (steerBackward) {
-    offset -= (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed and scale up when reversing
+    offset -= (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed and scale up when reversing - wheel velocity is negative when driving forward
     restAngle += offset;
   }
   /* Brake */
