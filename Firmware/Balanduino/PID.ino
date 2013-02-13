@@ -7,7 +7,7 @@ void PID(double restAngle, double offset, double turning) {
   } 
   else if (steerBackward) {
     if(wheelVelocity > 0)
-      offset -= (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed - wheel velocity is negative when driving forward
+      offset -= (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed - wheel velocity is positive when driving backward
     restAngle += offset;
   }
   /* Brake */
@@ -40,6 +40,9 @@ void PID(double restAngle, double offset, double turning) {
   lastError = error;
   double PIDValue = pTerm + iTerm + dTerm;
 
+  double PIDLeft;
+  double PIDRight;
+  
   /* Steer robot sideways */
   if (steerLeft) {
     turning -= abs((double)wheelVelocity/velocityScaleTurning); // Scale down at high speed

@@ -1,7 +1,7 @@
 void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is a value in percentage 0-100%
   if(speedRaw > 100)
     speedRaw = 100;
-  uint16_t speed = speedRaw*((double)PWMVALUE)/100.0; // Scale from 100 to PWMVALUE
+  uint16_t speed = speedRaw*((double)PWMVALUE)/100.0; // Scale from 0-100 to 0-PWMVALUE
   if (motor == left) {
     setPWM(leftPWM,speed); // Left motor pwm
     if (direction == forward) {
@@ -48,10 +48,11 @@ void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0
 }
 void stopAndReset() {
   stopMotor(left);
-  stopMotor(right);  
+  stopMotor(right);
   lastError = 0;
   iTerm = 0;
   targetPosition = wheelPosition;
+  lastRestAngle = targetOffset;
 }
 
 /* Interrupt routine and encoder read functions - I read using the port registers for faster processing */

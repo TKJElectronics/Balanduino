@@ -5,7 +5,7 @@ void sendBluetoothData() {
       sendPIDValues = false;
       
       strcpy(stringBuf,"P,");
-      SerialBT.doubleToString(Kp,convBuf);
+      SerialBT.doubleToString(Kp,convBuf); // We use this helper function in the SPP library to convert from a double to a string
       strcat(stringBuf,convBuf);
       
       strcat(stringBuf,",");
@@ -25,7 +25,7 @@ void sendBluetoothData() {
     } else if(sendData) {
       if(dataCounter == 0) {
           strcpy(stringBuf,"V,");
-          SerialBT.doubleToString(accAngle,convBuf);
+          SerialBT.doubleToString(accAngle,convBuf); // We use this helper function in the SPP library to convert from a double to a string
           strcat(stringBuf,convBuf);
           
           strcat(stringBuf,",");
@@ -39,7 +39,7 @@ void sendBluetoothData() {
           SerialBT.println(stringBuf);
       }
       dataCounter++;
-      if(dataCounter >= 5) // Only send data every 5th time
+      if(dataCounter >= 5) // Only send data every 5th loop
         dataCounter = 0;    
     }
   }
@@ -76,17 +76,17 @@ void readBTD() {
         Ki = atof(strtok(NULL, ";"));
       } else if(input[0] == 'D') {
         strtok(input, ","); // Ignore 'D'
-        Kd = atof(strtok(NULL, ";"));  
+        Kd = atof(strtok(NULL, ";"));
       } else if(input[0] == 'T') { // Target Angle
         strtok(input, ","); // Ignore 'T'
-        targetAngle = atof(strtok(NULL, ";"));  
-      } else if(input[0] == 'G') { // The processing/Android application sends when it need the current values
+        targetAngle = atof(strtok(NULL, ";"));
+      } else if(input[0] == 'G') { // The Processing/Android application sends when it need the PID or IMU values
         if(input[1] == 'P') // PID Values
           sendPIDValues = true;
-        else if(input[1] == 'B') // Begin
-          sendData = true; // Send output to processing/Android application
-        else if(input[1] == 'S') // Stop
-          sendData = false; // Stop sending output to processing/Android application
+        else if(input[1] == 'B') // Begin sending IMU values
+          sendData = true; // Send output to Processing/Android application
+        else if(input[1] == 'S') // Stop sending IMU values
+          sendData = false; // Stop sending output to Processing/Android application
       }
       /* Remote control */
       else if(input[0] == 'S') // Stop
@@ -134,7 +134,7 @@ void readBTD() {
       else if(Wii.getAnalogHat(LeftHatY) > 2200 || Wii.getAnalogHat(LeftHatY) < 1800 || Wii.getAnalogHat(RightHatY) > 2200 || Wii.getAnalogHat(RightHatY) < 1800)
         steer(updateWii);
     }
-    if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0] && !commandSent) { // We will only read from the first controller
+    if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0] && !commandSent) { // We will only read from the first controller, up to four is supported by one receiver
       if(Xbox.getButtonPress(0,BACK)) {
         stopAndReset();
         while(!Xbox.getButtonPress(0,START))
@@ -157,44 +157,45 @@ void readBTD() {
 }
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
-    
-  // Set all false
+  
+  // Set all to false
   steerForward = false;
   steerBackward = false;
   steerStop = false;
   steerLeft = false;
   steerRight = false;
-  if(command == joystick) {    
+  
+  if(command == joystick) {
     if(sppData2 > 0) {
-      targetOffset = scale(sppData2,0,1,0,7);        
+      targetOffset = scale(sppData2,0,1,0,7);
       steerForward = true;
     } else if(sppData2 < 0) {
       targetOffset = scale(sppData2,0,-1,0,7);
       steerBackward = true;
-    } 
+    }
     if(sppData1 > 0) {
-      turningOffset = scale(sppData1,0,1,0,20);        
+      turningOffset = scale(sppData1,0,1,0,20);
       steerRight = true;
     } else if(sppData1 < 0) {
       turningOffset = scale(sppData1,0,-1,0,20);
-      steerLeft = true;     
+      steerLeft = true;
     }
   } else if(command == imu) {
       if(sppData2 > 0) {
-        targetOffset = scale(sppData2,0,36,0,7);        
+        targetOffset = scale(sppData2,0,36,0,7);
         steerForward = true;
-      }     
+      }
       else if(sppData2 < 0) {
         targetOffset = scale(sppData2,0,-36,0,7);
         steerBackward = true;
       }
       if(sppData1 > 0) {
-        turningOffset = scale(sppData1,0,45,0,20);        
+        turningOffset = scale(sppData1,0,45,0,20);
         steerLeft = true;
       }
       else if(sppData1 < 0) {
         turningOffset = scale(sppData1,0,-45,0,20);
-        steerRight = true;     
+        steerRight = true;
       }
   } else if(command == updatePS3) {
     if(PS3.PS3Connected) {
@@ -207,11 +208,11 @@ void steer(Command command) {
       }
       if(((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) {
         turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
-        steerLeft = true;      
-      } else if (((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) {   
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20  
-        steerRight = true;  
-      }  
+        steerLeft = true;
+      } else if (((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) {
+        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
+        steerRight = true;
+      }
     } else { // It must be a Navigation controller then
       if(PS3.getAnalogHat(LeftHatY) < 117) {
         targetOffset = scale(PS3.getAnalogHat(LeftHatY),116,0,0,7); // Scale from 116-0 to 0-7
@@ -222,46 +223,46 @@ void steer(Command command) {
       }
       if(PS3.getAnalogHat(LeftHatX) < 55) {
         turningOffset = scale(PS3.getAnalogHat(LeftHatX),54,0,0,20); // Scale from 54-0 to 0-20
-        steerLeft = true;     
+        steerLeft = true;
       } else if(PS3.getAnalogHat(LeftHatX) > 200) {
         turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,20); // Scale from 201-255 to 0-20
         steerRight = true;
       }
     }
-  } 
+  }
   else if(command == updateWii) {
     if(!Wii.wiiUProControllerConnected) {
       if(Wii.getButtonPress(B)) {
         if(Wii.getPitch() > 180) {
-          targetOffset = scale(Wii.getPitch(),180,216,0,7);        
+          targetOffset = scale(Wii.getPitch(),180,216,0,7);
           steerForward = true;
-        }     
+        }
         else if(Wii.getPitch() < 180) {
           targetOffset = scale(Wii.getPitch(),180,144,0,7);
           steerBackward = true;
         }
         if(Wii.getRoll() > 180) {
-          turningOffset = scale(Wii.getRoll(),180,225,0,20);        
+          turningOffset = scale(Wii.getRoll(),180,225,0,20);
           steerRight = true;
         }
         else if(Wii.getRoll() < 180) {
           turningOffset = scale(Wii.getRoll(),180,135,0,20);
-          steerLeft = true;     
+          steerLeft = true;
         }
       }
-      else {
+      else { // Read the Navigation controller
         if(Wii.getAnalogHat(HatY) > 137) {
           targetOffset = scale(Wii.getAnalogHat(HatY),138,230,0,7);
           steerForward = true;
-        } 
+        }
         else if(Wii.getAnalogHat(HatY) < 117) {
           targetOffset = scale(Wii.getAnalogHat(HatY),116,25,0,7);
           steerBackward = true;
         }
         if(Wii.getAnalogHat(HatX) > 137) {
           turningOffset = scale(Wii.getAnalogHat(HatX),138,230,0,20);
-          steerRight = true;     
-        } 
+          steerRight = true;
+        }
         else if(Wii.getAnalogHat(HatX) < 117) {
           turningOffset = scale(Wii.getAnalogHat(HatX),116,25,0,20);
           steerLeft = true;
@@ -281,7 +282,7 @@ void steer(Command command) {
       } else if(((int32_t)Wii.getAnalogHat(LeftHatY) - (int32_t)Wii.getAnalogHat(RightHatY)) > 200) {
         turningOffset = scale(abs((int32_t)Wii.getAnalogHat(LeftHatY) - (int32_t)Wii.getAnalogHat(RightHatY)),0,2400,0,20); // Scale from 0-2400 to 0-20
         steerRight = true;
-      }   
+      }
     }
   }
   else if(command == updateXbox) {
@@ -294,10 +295,10 @@ void steer(Command command) {
     }
     if(((int64_t)Xbox.getAnalogHat(0,LeftHatY) - (int64_t)Xbox.getAnalogHat(0,RightHatY)) > 7500) {
       turningOffset = scale(abs((int64_t)Xbox.getAnalogHat(0,LeftHatY) - (int64_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
-       steerLeft = true;      
-    } else if (((int64_t)Xbox.getAnalogHat(0,RightHatY) - (int64_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {   
-      turningOffset = scale(abs((int64_t)Xbox.getAnalogHat(0,LeftHatY) - (int64_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20  
-      steerRight = true;  
+       steerLeft = true;
+    } else if(((int64_t)Xbox.getAnalogHat(0,RightHatY) - (int64_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {
+      turningOffset = scale(abs((int64_t)Xbox.getAnalogHat(0,LeftHatY) - (int64_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
+      steerRight = true;
     }
   }
   
@@ -313,7 +314,7 @@ void steer(Command command) {
 double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax) { // Like map() just returns a double
   double output;
   if(inputMin < inputMax)
-    output = (input-inputMin)/((inputMax-inputMin)/(outputMax-outputMin));              
+    output = (input-inputMin)/((inputMax-inputMin)/(outputMax-outputMin));
   else
     output = (inputMin-input)/((inputMin-inputMax)/(outputMax-outputMin));
   if(output > outputMax)
