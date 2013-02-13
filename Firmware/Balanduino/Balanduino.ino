@@ -79,7 +79,7 @@ void setup() {
   setPWM(leftPWM,0); // Turn off pwm on both pins
   setPWM(rightPWM,0);  
   
-  if (Usb.Init() == -1) { // Check if USB Host is working
+  if(Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
     while(1); // Halt
   }
@@ -164,7 +164,7 @@ void loop() {
     wheelVelocity = wheelPosition - lastWheelPosition;
     lastWheelPosition = wheelPosition;
     //Serial.print(wheelPosition);Serial.print('\t');Serial.print(targetPosition);Serial.print('\t');Serial.println(wheelVelocity);
-    if (abs(wheelVelocity) <= 20 && !stopped) { // Set new targetPosition if braking
+    if(abs(wheelVelocity) <= 20 && !stopped) { // Set new targetPosition if braking
       targetPosition = wheelPosition;
       stopped = true;
     }

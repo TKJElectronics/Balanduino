@@ -54,7 +54,7 @@ void readBTD() {
         input[i] = SerialBT.read();
         if(input[i] == 0) // Error while reading the string
           return;
-        if (input[i] == ';') // Keep reading until it reads a semicolon
+        if(input[i] == ';') // Keep reading until it reads a semicolon
           break;
         i++;
       }      
@@ -209,7 +209,7 @@ void steer(Command command) {
       if(((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) {
         turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
         steerLeft = true;
-      } else if (((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) {
+      } else if(((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) {
         turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
         steerRight = true;
       }
@@ -276,7 +276,7 @@ void steer(Command command) {
         targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY),3598,1600,0,7); // Scale from 3598-1600 to 0-7
         steerBackward = true;
       }
-      if (((int32_t)Wii.getAnalogHat(RightHatY) - (int32_t)Wii.getAnalogHat(LeftHatY)) > 200) {
+      if(((int32_t)Wii.getAnalogHat(RightHatY) - (int32_t)Wii.getAnalogHat(LeftHatY)) > 200) {
         turningOffset = scale(abs((int32_t)Wii.getAnalogHat(LeftHatY) - (int32_t)Wii.getAnalogHat(RightHatY)),0,2400,0,20); // Scale from 0-2400 to 0-20
         steerLeft = true;
       } else if(((int32_t)Wii.getAnalogHat(LeftHatY) - (int32_t)Wii.getAnalogHat(RightHatY)) > 200) {

@@ -11,12 +11,12 @@ uint8_t i2cRead(uint8_t registerAddress, uint8_t* data, uint8_t nbytes) {
   Wire.endTransmission(false); // Don't release the bus
   Wire.requestFrom(IMUAddress, nbytes); // Send a repeated start and then release the bus after reading
   for(uint8_t i = 0; i < nbytes; i++) {
-    if (Wire.available())
+    if(Wire.available())
       data[i] = Wire.read();
     else {
       timeOutTimer = micros();
       while(((micros() - timeOutTimer) < I2C_TIMEOUT) && !Wire.available());
-      if (Wire.available())
+      if(Wire.available())
         data[i] = Wire.read();
       else
         return 0; // Error in communication
