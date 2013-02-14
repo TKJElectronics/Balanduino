@@ -8,7 +8,6 @@ char convBuf[10];
 
 bool sendData;
 bool sendPIDValues;
-uint8_t dataCounter;
 
 const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a pwm frequency up to 20kHz
 const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, we use no prescaling so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
@@ -81,21 +80,20 @@ double gyroAngle;
 double pitch;
 
 /* PID variables */
-double Kp = 11; // 7
-double Ki = 1; // 2
-double Kd = 3; // 5 - 8
+double Kp = 11;
+double Ki = 1;
+double Kd = 3; // 5
 double targetAngle = 180;
 double lastRestAngle = targetAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 double lastError; // Store last angle error
-double iTerm; // Store integral term
+double integratedError; // Store integrated error
 
 /* Used for timing */
-uint32_t timer; // Timer used for the Kalman filter
-
-const uint16_t STD_LOOP_TIME = 10000; // Fixed time loop of 10 milliseconds
-uint16_t lastLoopUsefulTime = STD_LOOP_TIME;
-uint32_t loopStartTime;
+uint32_t kalmanTimer; // Timer used for the Kalman filter
+uint32_t pidTimer; // Timer used for the PID loop
+uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
+uint32_t dataTimer; // This is used so it doesn't send data to often
 
 /* Direction set by the controllers or SPP library */
 bool steerForward;
@@ -117,7 +115,6 @@ double sppData2 = 0;
 
 bool commandSent = false; // This is used so multiple controller can be used at once
 
-uint8_t loopCounter = 0; // Used to update wheel velocity
 int32_t wheelPosition; // Wheel position based on encoder readings
 int32_t lastWheelPosition; // Used to calculate the wheel velocity
 int32_t wheelVelocity; // Wheel velocity based on encoder readings

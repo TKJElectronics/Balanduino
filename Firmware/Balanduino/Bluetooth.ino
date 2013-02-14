@@ -21,26 +21,24 @@ void sendBluetoothData() {
       strcat(stringBuf,convBuf);
       
       SerialBT.println(stringBuf);
-      dataCounter = 1; // Set the counter to 1, to prevent it from sending data in the next loop
+      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
     } else if(sendData) {
-      if(dataCounter == 0) {
-          strcpy(stringBuf,"V,");
-          SerialBT.doubleToString(accAngle,convBuf); // We use this helper function in the SPP library to convert from a double to a string
-          strcat(stringBuf,convBuf);
-          
-          strcat(stringBuf,",");
-          SerialBT.doubleToString(gyroAngle,convBuf);
-          strcat(stringBuf,convBuf);
-          
-          strcat(stringBuf,",");
-          SerialBT.doubleToString(pitch,convBuf);
-          strcat(stringBuf,convBuf);
-          
-          SerialBT.println(stringBuf);
-      }
-      dataCounter++;
-      if(dataCounter >= 5) // Only send data every 5th loop
-        dataCounter = 0;    
+      if(micros() - dataTimer > 50000) { // Send data every 50ms
+        dataTimer = micros();
+        strcpy(stringBuf,"V,");
+        SerialBT.doubleToString(accAngle,convBuf); // We use this helper function in the SPP library to convert from a double to a string
+        strcat(stringBuf,convBuf);
+        
+        strcat(stringBuf,",");
+        SerialBT.doubleToString(gyroAngle,convBuf);
+        strcat(stringBuf,convBuf);
+        
+        strcat(stringBuf,",");
+        SerialBT.doubleToString(pitch,convBuf);
+        strcat(stringBuf,convBuf);
+        
+        SerialBT.println(stringBuf);
+      }  
     }
   }
 }

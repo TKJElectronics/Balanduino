@@ -1,4 +1,4 @@
-void PID(double restAngle, double offset, double turning) {
+void PID(double restAngle, double offset, double turning, double dt) {
   /* Steer robot */
   if(steerForward) {
     if(wheelVelocity < 0)
@@ -35,8 +35,9 @@ void PID(double restAngle, double offset, double turning) {
   /* Update PID values */
   double error = (restAngle - pitch);
   double pTerm = Kp * error;
-  iTerm += Ki * error;
-  double dTerm = Kd * (error - lastError);
+  integratedError += error*dt;
+  double iTerm = (Ki*100.0) * integratedError;
+  double dTerm = (Kd/100.0) * (error - lastError)/dt;
   lastError = error;
   double PIDValue = pTerm + iTerm + dTerm;
 

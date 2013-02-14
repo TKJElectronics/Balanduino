@@ -11,7 +11,6 @@
 
 #include "Balanduino.h"
 #include <Wire.h>
-
  
 // These are all open source libraries written by Kristian Lauszus, TKJ Electronics
 // The USB libraries are located at the following link: https://github.com/felis/USB_Host_Shield_2.0
@@ -88,7 +87,8 @@ void setup() {
   Wire.begin();
   i2cWrite(0x1B,0x00); // Set Gyro Full Scale Range to ±250deg/s
   i2cWrite(0x1C,0x00); // Set Accelerometer Full Scale Range to ±2g
-  i2cWrite(0x19,0x27); // Set the sample rate to 200Hz
+  i2cWrite(0x19,0x13); // Set the sample rate to 400Hz
+  i2cWrite(0x1A,0x00); // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
   i2cWrite(0x6B,0x01); // PLL with X axis gyroscope reference and disable sleep mode
 
   uint8_t buf;
@@ -121,9 +121,11 @@ void setup() {
   analogWrite(buzzer,0);
   sbi(TCCR0B,CS00); // Set precaler back to 64
 
-  /* Setup timing */
-  loopStartTime = micros();
-  timer = loopStartTime;
+  /* Setup timing */  
+  kalmanTimer = micros();
+  pidTimer = kalmanTimer;
+  encoderTimer = kalmanTimer;
+  dataTimer = kalmanTimer;
 }
 
 void loop() {
@@ -138,10 +140,10 @@ void loop() {
   // We then convert it to 0 to 2π and then from radians to degrees
   accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
   gyroRate = (double)gyroX/131.0; // Convert to deg/s
-  gyroAngle += gyroRate*((double)(micros()-timer)/1000000.0); // Gyro angle is only used for debugging
+  gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
 
-  pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-timer)/1000000.0); // Calculate the angle using a Kalman filter
-  timer = micros();
+  pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-kalmanTimer)/1000000.0); // Calculate the angle using a Kalman filter
+  kalmanTimer = micros();
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
   /* Drive motors */
@@ -153,13 +155,13 @@ void loop() {
   }
   else {
     layingDown = false; // It's no longer laying down
-    PID(targetAngle,targetOffset,turningOffset);
+    PID(targetAngle,targetOffset,turningOffset,(double)(micros()-pidTimer)/1000000.0);
   }
+  pidTimer = micros();
 
-  /* Update wheel velocity every 100ms */
-  loopCounter++;
-  if(loopCounter == 10) {
-    loopCounter = 0; // Reset loop counter
+  /* Update encoders */
+  if(micros() -  encoderTimer >= 100000) { // Update encoder values every 100ms
+    encoderTimer = micros();
     wheelPosition = readLeftEncoder() + readRightEncoder();
     wheelVelocity = wheelPosition - lastWheelPosition;
     lastWheelPosition = wheelPosition;
@@ -173,17 +175,4 @@ void loop() {
   /* Read the Bluetooth dongle and send PID and IMU values */
   readBTD();
   sendBluetoothData();
-  
-  /* Use a time fixed loop */
-  lastLoopUsefulTime = micros() - loopStartTime;
-  if(lastLoopUsefulTime < STD_LOOP_TIME) {
-    while((micros() - loopStartTime) < STD_LOOP_TIME) {
-      if((micros() - loopStartTime) < (STD_LOOP_TIME-1000)) // Don't poll USB endpoint if it's about to exit the while loop
-        Usb.Task(); // The BTD library read the poll interval from the descriptor, so it doesn't poll the endpoint too fast
-      else
-        delayMicroseconds(STD_LOOP_TIME - (micros() - loopStartTime));
-    }
-  }
-  //Serial.print(lastLoopUsefulTime);Serial.print(',');Serial.println(micros() - loopStartTime);
-  loopStartTime = micros();    
 }

@@ -50,7 +50,7 @@ void stopAndReset() {
   stopMotor(left);
   stopMotor(right);
   lastError = 0;
-  iTerm = 0;
+  integratedError = 0;
   targetPosition = wheelPosition;
 }
 
