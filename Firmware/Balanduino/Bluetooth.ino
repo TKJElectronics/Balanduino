@@ -55,15 +55,12 @@ void readBTD() {
         if(input[i] == ';') // Keep reading until it reads a semicolon
           break;
         i++;
-      }      
-      /*Serial.print("Data: ");
-      Serial.write((uint8_t*)input,i);
-      Serial.println();*/
+      }
       if(input[0] == 'A') { // Abort
         stopAndReset();
         while(SerialBT.read() != 'C') // Wait until continue is send
           Usb.Task();
-      } 
+      }
       
       /* Set PID and target angle */
       else if(input[0] == 'P') {
@@ -100,8 +97,6 @@ void readBTD() {
         sppData1 = atof(strtok(NULL, ",")); // Pitch
         sppData2 = atof(strtok(NULL, ";")); // Roll
         steer(imu);
-        //SerialBT.printNumberln(sppData1);
-        //SerialBT.printNumberln(sppData2);
       }
     }
   } else {
@@ -145,12 +140,12 @@ void readBTD() {
       steer(stop);
   }
   if(PS3.PS3Connected || PS3.PS3NavigationConnected) {
-      if(PS3.getButtonClick(PS))
-        PS3.disconnect();
+    if(PS3.getButtonClick(PS))
+      PS3.disconnect();
   }
   if(Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
-      if(Wii.getButtonClick(HOME))
-        Wii.disconnect();
+    if(Wii.getButtonClick(HOME))
+      Wii.disconnect();
   }
 }
 void steer(Command command) {
@@ -274,28 +269,28 @@ void steer(Command command) {
         targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY),3598,1600,0,7); // Scale from 3598-1600 to 0-7
         steerBackward = true;
       }
-      if(((int32_t)Wii.getAnalogHat(RightHatY) - (int32_t)Wii.getAnalogHat(LeftHatY)) > 200) {
-        turningOffset = scale(abs((int32_t)Wii.getAnalogHat(LeftHatY) - (int32_t)Wii.getAnalogHat(RightHatY)),0,2400,0,20); // Scale from 0-2400 to 0-20
+      if(((int16_t)Wii.getAnalogHat(RightHatY) - (int16_t)Wii.getAnalogHat(LeftHatY)) > 200) {
+        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,20); // Scale from 0-2400 to 0-20
         steerLeft = true;
-      } else if(((int32_t)Wii.getAnalogHat(LeftHatY) - (int32_t)Wii.getAnalogHat(RightHatY)) > 200) {
-        turningOffset = scale(abs((int32_t)Wii.getAnalogHat(LeftHatY) - (int32_t)Wii.getAnalogHat(RightHatY)),0,2400,0,20); // Scale from 0-2400 to 0-20
+      } else if(((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)) > 200) {
+        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,20); // Scale from 0-2400 to 0-20
         steerRight = true;
       }
     }
   }
   else if(command == updateXbox) {
-    if(Xbox.getAnalogHat(0,LeftHatY) < -7500 && Xbox.getAnalogHat(0,RightHatY) < -7500) {
-      targetOffset = scale(Xbox.getAnalogHat(0,LeftHatY)+Xbox.getAnalogHat(0,RightHatY),-7500,-32768,0,7); // Scale from -7500 to -32768 to 0-7
+    if(Xbox.getAnalogHat(0,LeftHatY) > 7500 && Xbox.getAnalogHat(0,RightHatY) > 7500) {
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),15002,65534,0,7); // Scale from 15002-65534 to 0-7
       steerForward = true;
-    } else if(Xbox.getAnalogHat(0,LeftHatY) > 7500 && Xbox.getAnalogHat(0,RightHatY) > 7500) {
-      targetOffset = scale(Xbox.getAnalogHat(0,LeftHatY)+Xbox.getAnalogHat(0,RightHatY),7500,32767,0,7); // Scale from 7500-32767 to 0-7
+    } else if(Xbox.getAnalogHat(0,LeftHatY) < -7500 && Xbox.getAnalogHat(0,RightHatY) < -7500) {
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),-15002,-65536,0,7); // Scale from -15002-(-65536) to 0-7
       steerBackward = true;
     }
-    if(((int64_t)Xbox.getAnalogHat(0,LeftHatY) - (int64_t)Xbox.getAnalogHat(0,RightHatY)) > 7500) {
-      turningOffset = scale(abs((int64_t)Xbox.getAnalogHat(0,LeftHatY) - (int64_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
-       steerLeft = true;
-    } else if(((int64_t)Xbox.getAnalogHat(0,RightHatY) - (int64_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {
-      turningOffset = scale(abs((int64_t)Xbox.getAnalogHat(0,LeftHatY) - (int64_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
+    if(((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)) > 7500) {
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
+      steerLeft = true;
+    } else if(((int32_t)Xbox.getAnalogHat(0,RightHatY) - (int32_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
       steerRight = true;
     }
   }
