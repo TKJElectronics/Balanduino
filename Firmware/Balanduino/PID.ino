@@ -17,8 +17,10 @@ void PID(double restAngle, double offset, double turning, double dt) {
       restAngle -= (double)positionError/positionScaleA;
     else if(abs(positionError) > zoneB) // Inside zone B
       restAngle -= (double)positionError/positionScaleB;
-    else // Inside zone C
+    else if(abs(positionError) > zoneC) // Inside zone C
       restAngle -= (double)positionError/positionScaleC;
+    else // Inside zone D
+      restAngle -= (double)positionError/positionScaleD;  
     restAngle -= (double)wheelVelocity/velocityScaleStop;
     if(restAngle < 170) // Limit rest Angle
       restAngle = 170;

@@ -82,7 +82,7 @@ double pitch;
 /* PID variables */
 double Kp = 11;
 double Ki = 1;
-double Kd = 3; // 5
+double Kd = 3;
 double targetAngle = 180;
 double lastRestAngle = targetAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
@@ -120,12 +120,14 @@ int32_t lastWheelPosition; // Used to calculate the wheel velocity
 int32_t wheelVelocity; // Wheel velocity based on encoder readings
 int32_t targetPosition; // The encoder position the robot should be at
 
-const uint16_t zoneA = 4000*2;
-const uint16_t zoneB = 2000*2;
-const double positionScaleA = 250*2; // One resolution is 928 pulses
-const double positionScaleB = 500*2; 
-const double positionScaleC = 1000*2;
-const double velocityScaleMove = 35*2;
-const double velocityScaleStop = 30*2;
-const double velocityScaleTurning = 35*2;
+const uint16_t zoneA = 8000;
+const uint16_t zoneB = 4000;
+const uint16_t zoneC = 1000;
+const double positionScaleA = 500; // One resolution is 928 pulses per encoder
+const double positionScaleB = 800;
+const double positionScaleC = 1000;
+const double positionScaleD = 500;
+const double velocityScaleMove = 70;
+const double velocityScaleStop = 60;
+const double velocityScaleTurning = 70;
 #endif
