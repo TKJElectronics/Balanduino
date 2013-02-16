@@ -286,10 +286,10 @@ void steer(Command command) {
       targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),-15002,-65536,0,7); // Scale from -15002-(-65536) to 0-7
       steerBackward = true;
     }
-    if(((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)) > 7500) {
+    if(((int32_t)Xbox.getAnalogHat(0,RightHatY) - (int32_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {
       turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
       steerLeft = true;
-    } else if(((int32_t)Xbox.getAnalogHat(0,RightHatY) - (int32_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {
+    } else if(((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)) > 7500) {
       turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
       steerRight = true;
     }
