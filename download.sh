@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 # Script to automaticly download a project including all submodules
 # It then updates all submodules and removes all files related to git
 # It then zips it, so it's ready to upload
