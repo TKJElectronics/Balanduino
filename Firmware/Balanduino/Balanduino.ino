@@ -126,6 +126,7 @@ void setup() {
   pidTimer = kalmanTimer;
   encoderTimer = kalmanTimer;
   dataTimer = kalmanTimer;
+  wiiTimer = kalmanTimer;
 }
 
 void loop() {
@@ -175,4 +176,9 @@ void loop() {
   /* Read the Bluetooth dongle and send PID and IMU values */
   readBTD();
   sendBluetoothData();
+  if(Wii.wiimoteConnected) { // We have to read much more often from the Wiimote to prevent lag
+    while((micros() - wiiTimer) < 10000)
+      Usb.Task();   
+  }
+  wiiTimer = micros(); 
 }

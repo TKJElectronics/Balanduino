@@ -80,7 +80,7 @@ double gyroAngle;
 double pitch;
 
 /* PID variables */
-double Kp = 11;
+double Kp = 10;
 double Ki = 1;
 double Kd = 3;
 double targetAngle = 180;
@@ -94,6 +94,7 @@ uint32_t kalmanTimer; // Timer used for the Kalman filter
 uint32_t pidTimer; // Timer used for the PID loop
 uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
 uint32_t dataTimer; // This is used so it doesn't send data to often
+uint32_t wiiTimer; // This is used to read the USB endpoint more often when it's connected to a Wiimote
 
 /* Direction set by the controllers or SPP library */
 bool steerForward;
