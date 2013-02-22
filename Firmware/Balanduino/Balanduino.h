@@ -80,11 +80,21 @@ double gyroAngle;
 double pitch;
 
 /* PID variables */
-double Kp = 10;
-double Ki = 1;
-double Kd = 3;
-double targetAngle = 180;
-double lastRestAngle = targetAngle; // Used to limit the new restAngle if it's much larger than the previous one
+const double defaultKp = 10;
+const double defaultKi = 1;
+const double defaultKd = 3;
+const double defaultTargetAngle = 180;
+
+const uint8_t KpAddr = 0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value
+const uint8_t KiAddr = 4;
+const uint8_t KdAddr = 8;
+const uint8_t targetAngleAddr = 12;
+
+double Kp;
+double Ki;
+double Kd;
+double targetAngle;
+double lastRestAngle = defaultTargetAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 double lastError; // Store last angle error
 double integratedError; // Store integrated error

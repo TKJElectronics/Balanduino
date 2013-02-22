@@ -66,16 +66,26 @@ void readBTD() {
       else if(input[0] == 'P') {
         strtok(input, ","); // Ignore 'P'
         Kp = atof(strtok(NULL, ";"));
+        updateKp();
       } else if(input[0] == 'I') {
         strtok(input, ","); // Ignore 'I'
         Ki = atof(strtok(NULL, ";"));
+        updateKi();
       } else if(input[0] == 'D') {
         strtok(input, ","); // Ignore 'D'
         Kd = atof(strtok(NULL, ";"));
+        updateKd();
       } else if(input[0] == 'T') { // Target Angle
         strtok(input, ","); // Ignore 'T'
         targetAngle = atof(strtok(NULL, ";"));
-      } else if(input[0] == 'G') { // The Processing/Android application sends when it need the PID or IMU values
+        updateTargetAngle();
+      } else if(input[0] == 'R') {
+        restoreEEPROMValues(); // Restore the default PID values and target angle
+        sendPIDValues = true;
+      }
+      
+      /* For sending PID and IMU values */
+      else if(input[0] == 'G') { // The Processing/Android application sends when it needs the PID or IMU values
         if(input[1] == 'P') // PID Values
           sendPIDValues = true;
         else if(input[1] == 'B') // Begin sending IMU values
@@ -83,6 +93,7 @@ void readBTD() {
         else if(input[1] == 'S') // Stop sending IMU values
           sendData = false; // Stop sending output to Processing/Android application
       }
+        
       /* Remote control */
       else if(input[0] == 'S') // Stop
         steer(stop);

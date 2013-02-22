@@ -10,6 +10,7 @@
  */
 
 #include "Balanduino.h"
+#include "EEPROMAnything.h"
 #include <Wire.h>
  
 // These are all open source libraries written by Kristian Lauszus, TKJ Electronics
@@ -42,6 +43,9 @@ WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 void setup() {
   /* Initialize UART */
   //Serial.begin(115200);
+  
+  readEEPROMValues(); // Read the last PID values and target angle
+  //restoreEEPROMValues(); // Uncomment this the first time you program the robot to write the default values to the eeprom
   
   /* Setup encoders */
   pinMode(leftEncoder1,INPUT);
