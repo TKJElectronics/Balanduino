@@ -82,10 +82,10 @@ const double defaultKi = 1;
 const double defaultKd = 3;
 const double defaultTargetAngle = 180;
 
-const uint8_t KpAddr = 0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value
-const uint8_t KiAddr = 4;
-const uint8_t KdAddr = 8;
-const uint8_t targetAngleAddr = 12;
+const uint8_t KpAddr = sizeof(double)*0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value
+const uint8_t KiAddr = sizeof(double)*1;
+const uint8_t KdAddr = sizeof(double)*2;
+const uint8_t targetAngleAddr = sizeof(double)*3;
 
 double Kp;
 double Ki;

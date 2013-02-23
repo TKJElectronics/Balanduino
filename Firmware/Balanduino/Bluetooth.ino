@@ -84,6 +84,9 @@ void readBTD() {
         sendPIDValues = true;
       }
       
+      else if(input[0] == 'W') // Pair with a new Wiimote or Wii U Pro Controller
+        Btd.pairWithWiimote();
+      
       /* For sending PID and IMU values */
       else if(input[0] == 'G') { // The Processing/Android application sends when it needs the PID or IMU values
         if(input[1] == 'P') // PID Values

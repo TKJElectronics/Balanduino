@@ -1,6 +1,6 @@
 /*
  * The code is released under the GNU General Public License.
- * Developed by Kristian Lauszus, TKJ Electronics
+ * Developed by Kristian Lauszus, TKJ Electronics 2013
  * This is the algorithm for the Balanduino balancing robot.
  * It can be controlled by either an Android app or a Processing application via bluetooth.
  * The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
@@ -38,6 +38,7 @@ PS3BT PS3(&Btd,0x00,0x15,0x83,0x3D,0x0A,0x57); // Also remember to uncomment DEB
 // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
 WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 // You have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote or press sync if you are using a Wii U Pro Controller - you only have to do this once
+// Or you can simply send the string "W;" to the robot to start the pairing sequence
 //WII Wii(&Btd,PAIR);
 
 void setup() {
