@@ -2,7 +2,7 @@ void PID(double restAngle, double offset, double turning, double dt) {
   /* Steer robot */
   if(steerForward) {
     if(wheelVelocity < 0)
-      offset += (double)wheelVelocity/(velocityScaleMove*0.8); // Scale down offset at high speed - wheel velocity is negative when driving forward
+      offset += (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed - wheel velocity is negative when driving forward
     restAngle -= offset;
   }
   else if(steerBackward) {
@@ -65,8 +65,6 @@ void PID(double restAngle, double offset, double turning, double dt) {
     PIDLeft = PIDValue;
     PIDRight = PIDValue;
   }
-
-  //PIDLeft *= 0.95; // compensate for difference in the motors
 
   /* Set PWM Values */
   if(PIDLeft >= 0)

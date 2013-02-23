@@ -1,7 +1,7 @@
 #ifndef _balanduino_h_
 #define _balanduino_h_
 
-#include <stdint.h> // Needed for uint8_t
+#include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
 char stringBuf[30];
 char convBuf[10];
@@ -64,9 +64,6 @@ volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
 const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconected using the jumper
-
-const uint8_t IMUAddress = 0x68; // AD0 is logic low on the PCB
-const uint16_t I2C_TIMEOUT = 1000; // Used to check for errors in I2C communication
 
 /* IMU Data */
 int16_t accY;

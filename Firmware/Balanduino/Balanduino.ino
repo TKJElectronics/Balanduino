@@ -44,8 +44,8 @@ void setup() {
   /* Initialize UART */
   //Serial.begin(115200);
   
-  readEEPROMValues(); // Read the last PID values and target angle
-  //restoreEEPROMValues(); // Uncomment this the first time you program the robot to write the default values to the eeprom
+  /* Read the last PID values and target angle */
+  readEEPROMValues();
   
   /* Setup encoders */
   pinMode(leftEncoder1,INPUT);
@@ -89,14 +89,14 @@ void setup() {
 
   /* Setup IMU Inputs */
   Wire.begin();
-  i2cWrite(0x1B,0x00); // Set Gyro Full Scale Range to ±250deg/s
-  i2cWrite(0x1C,0x00); // Set Accelerometer Full Scale Range to ±2g
-  i2cWrite(0x19,0x13); // Set the sample rate to 400Hz
-  i2cWrite(0x1A,0x00); // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
-  i2cWrite(0x6B,0x01); // PLL with X axis gyroscope reference and disable sleep mode
+  while(i2cWrite(0x1B,0x00,false)); // Set Gyro Full Scale Range to ±250deg/s
+  while(i2cWrite(0x1C,0x00,false)); // Set Accelerometer Full Scale Range to ±2g
+  while(i2cWrite(0x19,0x13,false)); // Set the sample rate to 400Hz
+  while(i2cWrite(0x1A,0x00,false)); // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
+  while(i2cWrite(0x6B,0x01,true)); // PLL with X axis gyroscope reference and disable sleep mode
 
   uint8_t buf;
-  while(!i2cRead(0x75,&buf,1));
+  while(i2cRead(0x75,&buf,1));
   if(buf != 0x68) { // Read "WHO_AM_I" register
     Serial.print(F("Error reading sensor"));
     while(1); // Halt
@@ -106,7 +106,7 @@ void setup() {
   
   /* Set kalman and gyro starting angle */
   uint8_t data[4];
-  while(!i2cRead(0x3D,data,4));
+  while(i2cRead(0x3D,data,4));
   accY = ((data[0] << 8) | data[1]);
   accZ = ((data[2] << 8) | data[3]);
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
@@ -136,7 +136,7 @@ void setup() {
 void loop() {
   /* Calculate pitch */
   uint8_t data[8];
-  while(!i2cRead(0x3D,data,8));
+  while(i2cRead(0x3D,data,8));
   accY = ((data[0] << 8) | data[1]);
   accZ = ((data[2] << 8) | data[3]);
   gyroX = ((data[6] << 8) | data[7]);
