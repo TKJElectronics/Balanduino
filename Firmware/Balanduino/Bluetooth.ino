@@ -3,7 +3,7 @@ double runTime;
 void sendBluetoothData() {
   if(SerialBT.connected && (micros() - dataTimer > 50000)) {  // Only send data every 50ms
     Usb.Task();
-    if (sendPairConfirmation) {
+    if(sendPairConfirmation) {
       sendPairConfirmation = false;
       stringBuf[0] = 'W';
       stringBuf[1] = 'C';
@@ -32,12 +32,12 @@ void sendBluetoothData() {
       
       SerialBT.println(stringBuf);
       dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
-    } else if (sendSettings) {
+    } else if(sendSettings) {
       sendSettings = false;
       
       stringBuf[0] = 'S';
       stringBuf[1] = ',';
-      if (BackToSpot)
+      if(BackToSpot)
         stringBuf[2] = '1';
       else
         stringBuf[2] = '0';        
@@ -52,7 +52,7 @@ void sendBluetoothData() {
 
       SerialBT.println(stringBuf);
       dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
-    } else if (sendInfo) {      
+    } else if(sendInfo) {      
       sendInfo = false;
   
       stringBuf[0] = 'I';
@@ -162,10 +162,10 @@ void readBTD() {
         }
 
         else if(input[1] == 'B') { // Set Back To Spot
-          if (input[2] == ',' && input[3] == '0') {
+          if(input[2] == ',' && input[3] == '0') {
             BackToSpot = 0;
             updateBackToSpot();
-          } else if (input[2] == ',' && input[3] == '1') {
+          } else if(input[2] == ',' && input[3] == '1') {
             BackToSpot = 1;
             updateBackToSpot();
           }            
@@ -190,7 +190,7 @@ void readBTD() {
           steer(joystick);
         }
         else if(input[1] == 'M') { // IMU
-          SPPreceiveControlTimestamp = millis();        
+          SPPreceiveControlTimestamp = millis();
           strtok(input, ","); // Ignore 'M'
           sppData1 = atof(strtok(NULL, ",")); // Pitch
           sppData2 = atof(strtok(NULL, ";")); // Roll
@@ -209,7 +209,7 @@ void readBTD() {
     }
   }
  
-  if (millis() > (SPPreceiveControlTimestamp+SPPreceiveControlTimeout)) {
+  if(millis() > (SPPreceiveControlTimestamp+SPPreceiveControlTimeout)) {
     commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
     if(PS3.PS3Connected) {
       if(PS3.getButtonPress(SELECT)) {

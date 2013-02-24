@@ -154,7 +154,7 @@ double sppData2 = 0;
 bool commandSent = false; // This is used so multiple controller can be used at once
 
 uint32_t SPPreceiveControlTimestamp;
-const uint16_t SPPreceiveControlTimeout = 1000; // After how long time should we prioritize the other controllers instead of the serial control
+const uint16_t SPPreceiveControlTimeout = 500; // After how long time should we prioritize the other controllers instead of the serial control
 
 int32_t wheelPosition; // Wheel position based on encoder readings
 int32_t lastWheelPosition; // Used to calculate the wheel velocity
