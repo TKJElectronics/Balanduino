@@ -138,7 +138,7 @@ const uint8_t defaultControlAngleLimit = 7;
 uint8_t controlAngleLimit = defaultControlAngleLimit;
 
 const uint8_t defaultTurningAngleLimit = 20;
-int turningAngleLimit = defaultTurningAngleLimit;
+uint8_t turningAngleLimit = defaultTurningAngleLimit;
 
 double targetOffset = 0; // Offset for going forward and backward
 double turningOffset = 0; // Offset for turning left and right

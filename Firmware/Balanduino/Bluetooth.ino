@@ -1,5 +1,4 @@
 double runTime;
-char input[30];
 
 void sendBluetoothData() {
   if(SerialBT.connected) {
@@ -113,7 +112,9 @@ void readBTD() {
         if(input[i] == 0) // Error while reading the string
           return;
         if(input[i] == ';') // Keep reading until it reads a semicolon
-          break;            
+          break;
+          
+        testVar = input[i];    
         i++;
       }
       

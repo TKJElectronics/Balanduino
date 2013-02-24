@@ -1,6 +1,5 @@
 double oldKp, oldKi, oldKd, oldTargetAngle;
-int oldControlAngleLimit, oldTurningAngleLimit;
-uint8_t oldBackToSpot;
+uint8_t oldControlAngleLimit, oldTurningAngleLimit, oldBackToSpot;
 
 void checkInitializationFlags() {
   char i;
