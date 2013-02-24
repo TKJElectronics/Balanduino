@@ -3,6 +3,8 @@
 
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
+uint8_t testVar;
+
 /* Firmware Version Information */
 const uint8_t Version_Major = 0;
 const uint8_t Version_Minor = 8;
@@ -78,10 +80,12 @@ uint8_t batteryLevel = 100; // Battery Percentage
 const uint8_t InitializationFlagsAddr = 0;
 const uint8_t BackToSpotAddr = 3;
 const uint8_t controlAngleLimitAddr = 4;
-const uint8_t KpAddr = 5+sizeof(double)*0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value 
-const uint8_t KiAddr = 5+sizeof(double)*1;
-const uint8_t KdAddr = 5+sizeof(double)*2;
-const uint8_t targetAngleAddr = 5+sizeof(double)*3;
+const uint8_t turningAngleLimitAddr = 5;
+const uint8_t KpAddr = 6+sizeof(double)*0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value 
+const uint8_t KiAddr = 6+sizeof(double)*1;
+const uint8_t KdAddr = 6+sizeof(double)*2;
+const uint8_t targetAngleAddr = 6+sizeof(double)*3;
+
 
 /* IMU Data */
 int16_t accY;
@@ -133,6 +137,9 @@ uint8_t BackToSpot = defaultBackToSpot;
 const uint8_t defaultControlAngleLimit = 7;
 uint8_t controlAngleLimit = defaultControlAngleLimit;
 
+const uint8_t defaultTurningAngleLimit = 20;
+int turningAngleLimit = defaultTurningAngleLimit;
+
 double targetOffset = 0; // Offset for going forward and backward
 double turningOffset = 0; // Offset for turning left and right
 
@@ -155,6 +162,6 @@ const double positionScaleB = 800;
 const double positionScaleC = 1000;
 const double positionScaleD = 500;
 const double velocityScaleMove = 70;
-const double velocityScaleStop = 80;
+const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
 #endif

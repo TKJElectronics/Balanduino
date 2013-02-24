@@ -1,4 +1,5 @@
-double oldKp, oldKi, oldKd, oldTargetAngle, oldControlAngleLimit;
+double oldKp, oldKi, oldKd, oldTargetAngle;
+int oldControlAngleLimit, oldTurningAngleLimit;
 uint8_t oldBackToSpot;
 
 void checkInitializationFlags() {
@@ -30,13 +31,15 @@ void readEEPROMValues() {
   EEPROM_readAnything(KdAddr,Kd);
   EEPROM_readAnything(targetAngleAddr,targetAngle);
   EEPROM_readAnything(controlAngleLimitAddr,controlAngleLimit);  
-  //EEPROM_readAnything(BackToSpotAddr,BackToSpot);
+  EEPROM_readAnything(turningAngleLimitAddr,turningAngleLimit);    
+  EEPROM_readAnything(BackToSpotAddr,BackToSpot);  
   
   oldKp = Kp;
   oldKi = Ki;
   oldKd = Kd;
   oldTargetAngle = targetAngle;
   oldControlAngleLimit = controlAngleLimit;
+  oldTurningAngleLimit = turningAngleLimit;  
   oldBackToSpot = BackToSpot;
 }
 
@@ -65,6 +68,11 @@ void updateControlAngleLimit() {
     EEPROM_writeAnything(controlAngleLimitAddr,controlAngleLimit);
   oldControlAngleLimit = controlAngleLimit;
 }
+void updateTurningAngleLimit() {
+  if(turningAngleLimit != oldTurningAngleLimit)
+    EEPROM_writeAnything(turningAngleLimitAddr,turningAngleLimit);
+  oldTurningAngleLimit = turningAngleLimit;
+}
 void updateBackToSpot() {
   if(BackToSpot != oldBackToSpot)
     EEPROM_writeAnything(BackToSpotAddr,BackToSpot);
@@ -92,6 +100,10 @@ void restoreEEPROMValues() {
     controlAngleLimit = defaultControlAngleLimit;
     EEPROM_writeAnything(controlAngleLimitAddr,controlAngleLimit);
   }  
+  if(turningAngleLimit != defaultTurningAngleLimit) {
+    turningAngleLimit = defaultTurningAngleLimit;
+    EEPROM_writeAnything(turningAngleLimitAddr,turningAngleLimit);
+  }    
   if(BackToSpot != defaultBackToSpot) {
     BackToSpot = defaultBackToSpot;
     EEPROM_writeAnything(BackToSpotAddr,BackToSpot);
@@ -102,5 +114,6 @@ void restoreEEPROMValues() {
   oldKd = Kd;
   oldTargetAngle = targetAngle;  
   oldControlAngleLimit = controlAngleLimit;  
+  oldTurningAngleLimit = turningAngleLimit;  
   oldBackToSpot = BackToSpot;  
 }

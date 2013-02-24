@@ -1,3 +1,6 @@
+double runTime;
+char input[30];
+
 void sendBluetoothData() {
   if(SerialBT.connected) {
     Usb.Task();
@@ -42,9 +45,12 @@ void sendBluetoothData() {
       stringBuf[3] = ',';
       stringBuf[4] = '\0';
       
-      SerialBT.intToString((uint32_t)controlAngleLimit,convBuf);
-      strcat(stringBuf,convBuf);
-      
+      itoa(controlAngleLimit,convBuf,10);
+      strcat(stringBuf,convBuf); 
+      strcat(stringBuf,","); 
+      itoa(turningAngleLimit,convBuf,10);
+      strcat(stringBuf,convBuf);       
+
       SerialBT.println(stringBuf);
       dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
     } else if (sendInfo) {      
@@ -61,15 +67,18 @@ void sendBluetoothData() {
       stringBuf[8] = '\0';
       
       #if defined(__AVR_ATmega644__)
-        strcat(stringBuf,"644,");
+        strcat(stringBuf,"644,"); 
       #elif defined(__AVR_ATmega1284__)
-        strcat(stringBuf,"1284,");
+        strcat(stringBuf,"1284,"); 
       #else
-        strcat(stringBuf,"Unknown,");
+        strcat(stringBuf,"?,"); 
       #endif
       
-      SerialBT.intToString((uint32_t)batteryLevel,convBuf);
+      //itoa(batteryLevel,convBuf,10);
+      runTime = (double)millis() / 60000.0;
+      SerialBT.doubleToString(runTime,convBuf);
       strcat(stringBuf,convBuf); 
+      strcat(stringBuf, " min");
       
       SerialBT.println(stringBuf);
       dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
@@ -100,13 +109,14 @@ void readBTD() {
       char input[30];
       uint8_t i = 0;
       while(1) {
-        input[i] = SerialBT.read();
+        input[i] = SerialBT.read();   
         if(input[i] == 0) // Error while reading the string
           return;
         if(input[i] == ';') // Keep reading until it reads a semicolon
-          break;
+          break;            
         i++;
       }
+      
       if(input[0] == 'A') { // Abort
         stopAndReset();
         while(SerialBT.read() != 'C') // Wait until continue is send
@@ -116,7 +126,7 @@ void readBTD() {
       /* For sending PID and IMU values */
       else if(input[0] == 'G') { // The Processing/Android application sends when it needs the PID or IMU values
         if(input[1] == 'P') // PID Values
-          sendPIDValues = true;
+          sendPIDValues = true;      
         else if(input[1] == 'S') // Get settings
           sendSettings = true;
         else if(input[1] == 'I') // Get Firmware version
@@ -146,7 +156,21 @@ void readBTD() {
           strtok(input, ","); // Ignore 'A'
           controlAngleLimit = atoi(strtok(NULL, ";"));
           updateControlAngleLimit();
+        } else if(input[1] == 'U') { // Turning max angle
+          strtok(input, ","); // Ignore 'U'
+          turningAngleLimit = atoi(strtok(NULL, ";"));
+          updateTurningAngleLimit();             
         }
+
+        else if(input[1] == 'B') { // Set Back To Spot
+          if (input[2] == ',' && input[3] == '0') {
+            BackToSpot = 0;
+            updateBackToSpot();
+          } else if (input[2] == ',' && input[3] == '1') {
+            BackToSpot = 1;
+            updateBackToSpot();
+          }            
+        }           
       }
 
       else if(input[0] == 'I') { // IMU trasmitting states
@@ -250,10 +274,10 @@ void steer(Command command) {
       steerBackward = true;
     }
     if(sppData1 > 0) {
-      turningOffset = scale(sppData1,0,1,0,20);
+      turningOffset = scale(sppData1,0,1,0,turningAngleLimit);
       steerRight = true;
     } else if(sppData1 < 0) {
-      turningOffset = scale(sppData1,0,-1,0,20);
+      turningOffset = scale(sppData1,0,-1,0,turningAngleLimit);
       steerLeft = true;
     }
   } else if(command == imu) {
@@ -266,11 +290,11 @@ void steer(Command command) {
         steerBackward = true;
       }
       if(sppData1 > 0) {
-        turningOffset = scale(sppData1,0,45,0,20);
+        turningOffset = scale(sppData1,0,45,0,turningAngleLimit);
         steerLeft = true;
       }
       else if(sppData1 < 0) {
-        turningOffset = scale(sppData1,0,-45,0,20);
+        turningOffset = scale(sppData1,0,-45,0,turningAngleLimit);
         steerRight = true;
       }
   } else if(command == updatePS3) {
@@ -283,10 +307,10 @@ void steer(Command command) {
         steerBackward = true;
       }
       if(((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) {
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
+        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,turningAngleLimit); // Scale from 0-255 to 0-20
         steerLeft = true;
       } else if(((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) {
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,20); // Scale from 0-255 to 0-20
+        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,turningAngleLimit); // Scale from 0-255 to 0-20
         steerRight = true;
       }
     } else { // It must be a Navigation controller then
@@ -298,10 +322,10 @@ void steer(Command command) {
         steerBackward = true;
       }
       if(PS3.getAnalogHat(LeftHatX) < 55) {
-        turningOffset = scale(PS3.getAnalogHat(LeftHatX),54,0,0,20); // Scale from 54-0 to 0-20
+        turningOffset = scale(PS3.getAnalogHat(LeftHatX),54,0,0,turningAngleLimit); // Scale from 54-0 to 0-20
         steerLeft = true;
       } else if(PS3.getAnalogHat(LeftHatX) > 200) {
-        turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,20); // Scale from 201-255 to 0-20
+        turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,turningAngleLimit); // Scale from 201-255 to 0-20
         steerRight = true;
       }
     }
@@ -318,11 +342,11 @@ void steer(Command command) {
           steerBackward = true;
         }
         if(Wii.getRoll() > 180) {
-          turningOffset = scale(Wii.getRoll(),180,225,0,20);
+          turningOffset = scale(Wii.getRoll(),180,225,0,turningAngleLimit);
           steerRight = true;
         }
         else if(Wii.getRoll() < 180) {
-          turningOffset = scale(Wii.getRoll(),180,135,0,20);
+          turningOffset = scale(Wii.getRoll(),180,135,0,turningAngleLimit);
           steerLeft = true;
         }
       }
@@ -336,11 +360,11 @@ void steer(Command command) {
           steerBackward = true;
         }
         if(Wii.getAnalogHat(HatX) > 137) {
-          turningOffset = scale(Wii.getAnalogHat(HatX),138,230,0,20);
+          turningOffset = scale(Wii.getAnalogHat(HatX),138,230,0,turningAngleLimit);
           steerRight = true;
         }
         else if(Wii.getAnalogHat(HatX) < 117) {
-          turningOffset = scale(Wii.getAnalogHat(HatX),116,25,0,20);
+          turningOffset = scale(Wii.getAnalogHat(HatX),116,25,0,turningAngleLimit);
           steerLeft = true;
         }
       }
@@ -353,10 +377,10 @@ void steer(Command command) {
         steerBackward = true;
       }
       if(((int16_t)Wii.getAnalogHat(RightHatY) - (int16_t)Wii.getAnalogHat(LeftHatY)) > 200) {
-        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,20); // Scale from 0-2400 to 0-20
+        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,turningAngleLimit); // Scale from 0-2400 to 0-20
         steerLeft = true;
       } else if(((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)) > 200) {
-        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,20); // Scale from 0-2400 to 0-20
+        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,turningAngleLimit); // Scale from 0-2400 to 0-20
         steerRight = true;
       }
     }
@@ -370,10 +394,10 @@ void steer(Command command) {
       steerBackward = true;
     }
     if(((int32_t)Xbox.getAnalogHat(0,RightHatY) - (int32_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {
-      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-20
       steerLeft = true;
     } else if(((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)) > 7500) {
-      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,20); // Scale from 0-65535 to 0-20
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-20
       steerRight = true;
     }
   }
