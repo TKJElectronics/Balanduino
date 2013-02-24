@@ -52,11 +52,11 @@ void sendBluetoothData() {
   
       stringBuf[0] = 'I';
       stringBuf[1] = ',';
-      stringBuf[2] = Version_Major + 0x30;
+      stringBuf[2] = Version_Major + '0';
       stringBuf[3] = '.';
-      stringBuf[4] = Version_Minor + 0x30;
+      stringBuf[4] = Version_Minor + '0';
       stringBuf[5] = '.';
-      stringBuf[6] = Version_Patch + 0x30;      
+      stringBuf[6] = Version_Patch + '0';      
       stringBuf[7] = ',';      
       stringBuf[8] = '\0';
       
