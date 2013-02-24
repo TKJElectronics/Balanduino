@@ -37,9 +37,9 @@ void PID(double restAngle, double offset, double turning, double dt) {
     
     restAngle -= (double)wheelVelocity/velocityScaleStop;
     
-    if(restAngle < 170) // Limit rest Angle
+    if(restAngle < 174) // Limit rest Angle
       restAngle = 174;
-    else if(restAngle > 190)
+    else if(restAngle > 186)
       restAngle = 186;      
   }
   

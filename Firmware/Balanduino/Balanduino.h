@@ -153,8 +153,8 @@ double sppData2 = 0;
 
 bool commandSent = false; // This is used so multiple controller can be used at once
 
-long SPPreceiveControlTimestamp;
-const int SPPreceiveControlTimeout = 1000; // After how long time should we prioritize the other controllers instead of the serial control
+uint32_t SPPreceiveControlTimestamp;
+const uint16_t SPPreceiveControlTimeout = 1000; // After how long time should we prioritize the other controllers instead of the serial control
 
 int32_t wheelPosition; // Wheel position based on encoder readings
 int32_t lastWheelPosition; // Used to calculate the wheel velocity
@@ -167,11 +167,8 @@ const uint16_t zoneC = 1000;
 const double positionScaleA = 600; // One resolution is 928 pulses per encoder
 const double positionScaleB = 800;
 const double positionScaleC = 1000;
-const double positionScaleD = 2000;
+const double positionScaleD = 500;
 const double velocityScaleMove = 70;
-const double velocityScaleStopAB = 40;
-const double velocityScaleStopC = 60;
-const double velocityScaleStopD = 80;
 const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
 #endif

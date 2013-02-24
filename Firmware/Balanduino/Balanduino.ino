@@ -167,7 +167,7 @@ void loop() {
   pidTimer = micros();
 
   /* Update encoders */
-  if(micros() -  encoderTimer >= 100000) { // Update encoder values every 100ms
+  if (micros() - encoderTimer >= 100000) { // Update encoder values every 100ms
     encoderTimer = micros();
     wheelPosition = readLeftEncoder() + readRightEncoder();
     wheelVelocity = wheelPosition - lastWheelPosition;

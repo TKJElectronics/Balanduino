@@ -183,12 +183,14 @@ void readBTD() {
         if(input[1] == 'S') // Stop
           steer(stop);
         else if(input[1] == 'J') { // Joystick
+          SPPreceiveControlTimestamp = millis();
           strtok(input, ","); // Ignore 'J'
           sppData1 = atof(strtok(NULL, ",")); // x-axis
           sppData2 = atof(strtok(NULL, ";")); // y-axis
           steer(joystick);
         }
         else if(input[1] == 'M') { // IMU
+          SPPreceiveControlTimestamp = millis();        
           strtok(input, ","); // Ignore 'M'
           sppData1 = atof(strtok(NULL, ",")); // Pitch
           sppData2 = atof(strtok(NULL, ";")); // Roll
@@ -205,7 +207,9 @@ void readBTD() {
         }         
       }
     }
-  } else {
+  }
+ 
+  if (millis() > (SPPreceiveControlTimestamp+SPPreceiveControlTimeout)) {
     commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
     if(PS3.PS3Connected) {
       if(PS3.getButtonPress(SELECT)) {
