@@ -35,8 +35,8 @@ void PID(double restAngle, double offset, double turning, double dt) {
     
     if(restAngle < 170) // Limit rest Angle
       restAngle = 170;
-    else if(restAngle > 180)
-      restAngle = 180;
+    else if(restAngle > 190)
+      restAngle = 190;
   }
   
   if(restAngle - lastRestAngle > 1) // Don't change restAngle with more than 1 degree in each loop
