@@ -3,11 +3,19 @@
 
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
+/* Firmware Version Information */
+const uint8_t Version_Major = 0;
+const uint8_t Version_Minor = 8;
+const uint8_t Version_Patch = 1;
+
 char stringBuf[30];
 char convBuf[10];
 
 bool sendData;
+bool sendSettings;
+bool sendInfo;
 bool sendPIDValues;
+bool sendConfirmation;
 
 const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a pwm frequency up to 20kHz
 const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, we use no prescaling so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
@@ -64,6 +72,16 @@ volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
 const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconected using the jumper
+uint8_t batteryLevel = 100; // Battery Percentage
+
+/* EEProm Address Definitions */
+const uint8_t InitializationFlagsAddr = 0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value
+const uint8_t BackToSpotAddr = 3;
+const uint8_t KpAddr = 4+sizeof(double)*0; 
+const uint8_t KiAddr = 4+sizeof(double)*1;
+const uint8_t KdAddr = 4+sizeof(double)*2;
+const uint8_t targetAngleAddr = 4+sizeof(double)*3;
+const uint8_t controlAngleLimitAddr = 4+sizeof(double)*4;
 
 /* IMU Data */
 int16_t accY;
@@ -81,11 +99,6 @@ const double defaultKp = 10;
 const double defaultKi = 1;
 const double defaultKd = 3;
 const double defaultTargetAngle = 180;
-
-const uint8_t KpAddr = sizeof(double)*0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value
-const uint8_t KiAddr = sizeof(double)*1;
-const uint8_t KdAddr = sizeof(double)*2;
-const uint8_t targetAngleAddr = sizeof(double)*3;
 
 double Kp;
 double Ki;
@@ -114,6 +127,12 @@ bool stopped; // This is used to set a new target position after braking
 
 bool layingDown = true; // Use to indicate if the robot is laying down
 
+const double defaultBackToSpot = 0;
+uint8_t BackToSpot = defaultBackToSpot;
+
+const int defaultControlAngleLimit = 7;
+int controlAngleLimit = defaultControlAngleLimit;
+
 double targetOffset = 0; // Offset for going forward and backward
 double turningOffset = 0; // Offset for turning left and right
 
@@ -136,6 +155,6 @@ const double positionScaleB = 800;
 const double positionScaleC = 1000;
 const double positionScaleD = 500;
 const double velocityScaleMove = 70;
-const double velocityScaleStop = 60;
+const double velocityScaleStop = 80;
 const double velocityScaleTurning = 70;
 #endif

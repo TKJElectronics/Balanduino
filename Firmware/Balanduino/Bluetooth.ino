@@ -1,7 +1,17 @@
 void sendBluetoothData() {
   if(SerialBT.connected) {
     Usb.Task();
-    if(sendPIDValues) {
+    if (sendConfirmation) {
+      sendConfirmation = false;
+      stringBuf[0] = 'C';
+      stringBuf[1] = 'O';
+      stringBuf[2] = 'K';      
+      stringBuf[3] = 0x00;
+      
+      SerialBT.println(stringBuf);
+      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
+      
+    } else if(sendPIDValues) {
       sendPIDValues = false;
       
       strcpy(stringBuf,"P,");
@@ -22,6 +32,52 @@ void sendBluetoothData() {
       
       SerialBT.println(stringBuf);
       dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
+
+    } else if (sendSettings) {
+      sendSettings = false;
+      
+      stringBuf[0] = 'S';
+      stringBuf[1] = ',';
+      if (BackToSpot)
+        stringBuf[2] = '1';
+      else
+        stringBuf[2] = '0';        
+      stringBuf[3] = ',';
+      stringBuf[4] = 0x00;
+      
+      itoa(controlAngleLimit,convBuf,3);
+      strcat(stringBuf,convBuf); 
+      
+      SerialBT.println(stringBuf);
+      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop    
+      
+    } else if (sendInfo) {      
+      sendInfo = false;
+  
+      stringBuf[0] = 'I';
+      stringBuf[1] = ',';
+      stringBuf[2] = Version_Major + 0x30;
+      stringBuf[3] = '.';
+      stringBuf[4] = Version_Minor + 0x30;
+      stringBuf[5] = '.';
+      stringBuf[6] = Version_Patch + 0x30;      
+      stringBuf[7] = ',';      
+      stringBuf[8] = 0;
+      
+      #ifdef __atmega644__
+        strcat(stringBuf,"644,"); 
+      #elsifdef __atmega1284__
+        strcat(stringBuf,"1284,"); 
+      #else
+        strcat(stringBuf,"Unknown,"); 
+      #endif
+      
+      itoa(batteryLevel,convBuf,3);
+      strcat(stringBuf,convBuf); 
+      
+      SerialBT.println(stringBuf);
+      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop      
+      
     } else if(sendData) {
       if(micros() - dataTimer > 50000) { // Send data every 50ms
         dataTimer = micros();
@@ -60,32 +116,7 @@ void readBTD() {
         stopAndReset();
         while(SerialBT.read() != 'C') // Wait until continue is send
           Usb.Task();
-      }
-      
-      /* Set PID and target angle */
-      else if(input[0] == 'P') {
-        strtok(input, ","); // Ignore 'P'
-        Kp = atof(strtok(NULL, ";"));
-        updateKp();
-      } else if(input[0] == 'I') {
-        strtok(input, ","); // Ignore 'I'
-        Ki = atof(strtok(NULL, ";"));
-        updateKi();
-      } else if(input[0] == 'D') {
-        strtok(input, ","); // Ignore 'D'
-        Kd = atof(strtok(NULL, ";"));
-        updateKd();
-      } else if(input[0] == 'T') { // Target Angle
-        strtok(input, ","); // Ignore 'T'
-        targetAngle = atof(strtok(NULL, ";"));
-        updateTargetAngle();
-      } else if(input[0] == 'R') {
-        restoreEEPROMValues(); // Restore the default PID values and target angle
-        sendPIDValues = true;
-      }
-      
-      else if(input[0] == 'W') // Pair with a new Wiimote or Wii U Pro Controller
-        Btd.pairWithWiimote();
+      }     
       
       /* For sending PID and IMU values */
       else if(input[0] == 'G') { // The Processing/Android application sends when it needs the PID or IMU values
@@ -94,23 +125,69 @@ void readBTD() {
         else if(input[1] == 'B') // Begin sending IMU values
           sendData = true; // Send output to Processing/Android application
         else if(input[1] == 'S') // Stop sending IMU values
+          sendData = false; // Stop sending output to Processing/Android application          
+        else if(input[1] == 'S') // Get settings
+         sendSettings = true;          
+        else if(input[1] == 'I') // Get Firmware version
+          sendInfo = true;
+      }
+      
+      else if(input[0] == 'S') { // Set different values     
+        /* Set PID and target angle */
+        if(input[1] == 'P') {
+          strtok(input, ","); // Ignore 'P'
+          Kp = atof(strtok(NULL, ";"));
+          updateKp();
+        } else if(input[1] == 'I') {
+          strtok(input, ","); // Ignore 'I'
+          Ki = atof(strtok(NULL, ";"));
+          updateKi();
+        } else if(input[1] == 'D') {
+          strtok(input, ","); // Ignore 'D'
+          Kd = atof(strtok(NULL, ";"));
+          updateKd();
+        } else if(input[1] == 'T') { // Target Angle
+          strtok(input, ","); // Ignore 'T'
+          targetAngle = atof(strtok(NULL, ";"));
+          updateTargetAngle();        
+        }   
+        else if(input[1] == 'A') { // Controlling max angle
+          strtok(input, ","); // Ignore 'A'
+          controlAngleLimit = atoi(strtok(NULL, ";"));
+          updateControlAngleLimit();        
+        }                
+      }
+
+      else if(input[0] == 'I') { // IMU trasmitting states
+        if(input[1] == 'B') // Begin sending IMU values
+          sendData = true; // Send output to Processing/Android application
+        else if(input[1] == 'S') // Stop sending IMU values
           sendData = false; // Stop sending output to Processing/Android application
-      }
+      }     
+
+      else if(input[0] == 'C') { // Commands
+        if(input[1] == 'S') // Stop
+          steer(stop);
+        else if(input[1] == 'J') { // Joystick
+          strtok(input, ","); // Ignore 'J'
+          sppData1 = atof(strtok(NULL, ",")); // x-axis
+          sppData2 = atof(strtok(NULL, ";")); // y-axis
+          steer(joystick);
+        }
+        else if(input[1] == 'M') { // IMU
+          strtok(input, ","); // Ignore 'M'
+          sppData1 = atof(strtok(NULL, ",")); // Pitch
+          sppData2 = atof(strtok(NULL, ";")); // Roll
+          steer(imu);
+        }
         
-      /* Remote control */
-      else if(input[0] == 'S') // Stop
-        steer(stop);
-      else if(input[0] == 'J') { // Joystick
-        strtok(input, ","); // Ignore 'J'
-        sppData1 = atof(strtok(NULL, ",")); // x-axis
-        sppData2 = atof(strtok(NULL, ";")); // y-axis
-        steer(joystick);
-      }
-      else if(input[0] == 'M') { // IMU
-        strtok(input, ","); // Ignore 'M'
-        sppData1 = atof(strtok(NULL, ",")); // Pitch
-        sppData2 = atof(strtok(NULL, ";")); // Roll
-        steer(imu);
+        else if(input[1] == 'W') { // Pair with a new Wiimote or Wii U Pro Controller
+          Btd.pairWithWiimote();
+          sendConfirmation = true;  
+        } else if(input[1] == 'R') {
+          restoreEEPROMValues(); // Restore the default PID values and target angle
+          sendPIDValues = true;
+        }         
       }
     }
   } else {
