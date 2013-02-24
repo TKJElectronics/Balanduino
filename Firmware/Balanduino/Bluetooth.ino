@@ -1,7 +1,7 @@
 double runTime;
 
 void sendBluetoothData() {
-  if(SerialBT.connected) {
+  if(SerialBT.connected && (micros() - dataTimer > 50000)) {  // Only send data every 50ms
     Usb.Task();
     if (sendPairConfirmation) {
       sendPairConfirmation = false;
@@ -82,22 +82,20 @@ void sendBluetoothData() {
       SerialBT.println(stringBuf);
       dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
     } else if(sendData) {
-      if(micros() - dataTimer > 50000) { // Send data every 50ms
-        dataTimer = micros();
-        strcpy(stringBuf,"V,");
-        SerialBT.doubleToString(accAngle,convBuf); // We use this helper function in the SPP library to convert from a double to a string
-        strcat(stringBuf,convBuf);
+      dataTimer = micros();
+      strcpy(stringBuf,"V,");
+      SerialBT.doubleToString(accAngle,convBuf); // We use this helper function in the SPP library to convert from a double to a string
+      strcat(stringBuf,convBuf);
         
-        strcat(stringBuf,",");
-        SerialBT.doubleToString(gyroAngle,convBuf);
-        strcat(stringBuf,convBuf);
+      strcat(stringBuf,",");
+      SerialBT.doubleToString(gyroAngle,convBuf);
+      strcat(stringBuf,convBuf);
+      
+      strcat(stringBuf,",");
+      SerialBT.doubleToString(pitch,convBuf);
+      strcat(stringBuf,convBuf);
         
-        strcat(stringBuf,",");
-        SerialBT.doubleToString(pitch,convBuf);
-        strcat(stringBuf,convBuf);
-        
-        SerialBT.println(stringBuf);
-      }
+      SerialBT.println(stringBuf);
     }
   }
 }

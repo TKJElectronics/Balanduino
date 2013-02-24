@@ -100,7 +100,7 @@ double pitch;
 
 /* PID variables */
 const double defaultKp = 10;
-const double defaultKi = 1;
+const double defaultKi = 2;
 const double defaultKd = 3;
 const double defaultTargetAngle = 180;
 
@@ -112,6 +112,10 @@ double lastRestAngle = defaultTargetAngle; // Used to limit the new restAngle if
 
 double lastError; // Store last angle error
 double integratedError; // Store integrated error
+
+double error;
+double pTerm, iTerm, dTerm;
+double PIDValue, PIDLeft, PIDRight;
 
 /* Used for timing */
 uint32_t kalmanTimer; // Timer used for the Kalman filter
@@ -134,7 +138,7 @@ bool layingDown = true; // Use to indicate if the robot is laying down
 const uint8_t defaultBackToSpot = 1;
 uint8_t BackToSpot = defaultBackToSpot;
 
-const uint8_t defaultControlAngleLimit = 7;
+const uint8_t defaultControlAngleLimit = 8;
 uint8_t controlAngleLimit = defaultControlAngleLimit;
 
 const uint8_t defaultTurningAngleLimit = 20;
@@ -149,6 +153,9 @@ double sppData2 = 0;
 
 bool commandSent = false; // This is used so multiple controller can be used at once
 
+long SPPreceiveControlTimestamp;
+const int SPPreceiveControlTimeout = 1000; // After how long time should we prioritize the other controllers instead of the serial control
+
 int32_t wheelPosition; // Wheel position based on encoder readings
 int32_t lastWheelPosition; // Used to calculate the wheel velocity
 int32_t wheelVelocity; // Wheel velocity based on encoder readings
@@ -157,11 +164,14 @@ int32_t targetPosition; // The encoder position the robot should be at
 const uint16_t zoneA = 8000;
 const uint16_t zoneB = 4000;
 const uint16_t zoneC = 1000;
-const double positionScaleA = 500; // One resolution is 928 pulses per encoder
+const double positionScaleA = 600; // One resolution is 928 pulses per encoder
 const double positionScaleB = 800;
 const double positionScaleC = 1000;
-const double positionScaleD = 500;
+const double positionScaleD = 2000;
 const double velocityScaleMove = 70;
+const double velocityScaleStopAB = 40;
+const double velocityScaleStopC = 60;
+const double velocityScaleStopD = 80;
 const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
 #endif

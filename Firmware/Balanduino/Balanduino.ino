@@ -43,7 +43,7 @@ WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 
 void setup() {
   /* Initialize UART */
-  //Serial.begin(115200);
+  Serial.begin(57600);
   
   /* Read the last PID values and target angle */
   readEEPROMValues();

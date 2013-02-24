@@ -14,26 +14,33 @@ void PID(double restAngle, double offset, double turning, double dt) {
   else if(steerStop) {
     int32_t positionError = wheelPosition - targetPosition;
     if(BackToSpot) {
-      if(abs(positionError) > zoneA) // Inside zone A
+      if(abs(positionError) > zoneA) { // Inside zone A
         restAngle -= (double)positionError/positionScaleA;
-      else if(abs(positionError) > zoneB) // Inside zone B
+      } else if(abs(positionError) > zoneB) { // Inside zone B
         restAngle -= (double)positionError/positionScaleB;
-      else if(abs(positionError) > zoneC) // Inside zone C
+      } else if(abs(positionError) > zoneC) { // Inside zone C
         restAngle -= (double)positionError/positionScaleC;
-      else // Inside zone D
+      } else { // Inside zone D
         restAngle -= (double)positionError/positionScaleD;
+      }
     } else {
-      targetPosition = wheelPosition;
       if(abs(positionError) < zoneC)
         restAngle -= (double)positionError/positionScaleD;
+      else
+        targetPosition = wheelPosition;
     }
-    
-    restAngle -= (double)wheelVelocity/velocityScaleStop;
     
     if(restAngle < 170) // Limit rest Angle
       restAngle = 170;
     else if(restAngle > 190)
-      restAngle = 190;
+      restAngle = 190;    
+    
+    restAngle -= (double)wheelVelocity/velocityScaleStop;
+    
+    if(restAngle < 170) // Limit rest Angle
+      restAngle = 174;
+    else if(restAngle > 190)
+      restAngle = 186;      
   }
   
   if(restAngle - lastRestAngle > 1) // Don't change restAngle with more than 1 degree in each loop
@@ -43,16 +50,13 @@ void PID(double restAngle, double offset, double turning, double dt) {
   lastRestAngle = restAngle;
   
   /* Update PID values */
-  double error = (restAngle - pitch);
-  double pTerm = Kp * error;
+  error = (restAngle - pitch);
+  pTerm = Kp * error;
   integratedError += error*dt;
-  double iTerm = (Ki*100.0) * integratedError;
-  double dTerm = (Kd/100.0) * (error - lastError)/dt;
+  iTerm = (Ki*100.0) * integratedError;
+  dTerm = (Kd/100.0) * (error - lastError)/dt;
   lastError = error;
-  double PIDValue = pTerm + iTerm + dTerm;
-
-  double PIDLeft;
-  double PIDRight;
+  PIDValue = pTerm + iTerm + dTerm;
   
   /* Steer robot sideways */
   if(steerLeft) {
