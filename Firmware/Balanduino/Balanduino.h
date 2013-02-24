@@ -15,7 +15,7 @@ bool sendData;
 bool sendSettings;
 bool sendInfo;
 bool sendPIDValues;
-bool sendConfirmation;
+bool sendPairConfirmation;
 
 const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a pwm frequency up to 20kHz
 const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, we use no prescaling so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
@@ -75,13 +75,13 @@ const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconected usi
 uint8_t batteryLevel = 100; // Battery Percentage
 
 /* EEProm Address Definitions */
-const uint8_t InitializationFlagsAddr = 0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value
+const uint8_t InitializationFlagsAddr = 0;
 const uint8_t BackToSpotAddr = 3;
-const uint8_t KpAddr = 4+sizeof(double)*0; 
-const uint8_t KiAddr = 4+sizeof(double)*1;
-const uint8_t KdAddr = 4+sizeof(double)*2;
-const uint8_t targetAngleAddr = 4+sizeof(double)*3;
-const uint8_t controlAngleLimitAddr = 4+sizeof(double)*4;
+const uint8_t controlAngleLimitAddr = 4;
+const uint8_t KpAddr = 5+sizeof(double)*0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value 
+const uint8_t KiAddr = 5+sizeof(double)*1;
+const uint8_t KdAddr = 5+sizeof(double)*2;
+const uint8_t targetAngleAddr = 5+sizeof(double)*3;
 
 /* IMU Data */
 int16_t accY;
@@ -127,11 +127,11 @@ bool stopped; // This is used to set a new target position after braking
 
 bool layingDown = true; // Use to indicate if the robot is laying down
 
-const double defaultBackToSpot = 0;
+const uint8_t defaultBackToSpot = 1;
 uint8_t BackToSpot = defaultBackToSpot;
 
-const int defaultControlAngleLimit = 7;
-int controlAngleLimit = defaultControlAngleLimit;
+const uint8_t defaultControlAngleLimit = 7;
+uint8_t controlAngleLimit = defaultControlAngleLimit;
 
 double targetOffset = 0; // Offset for going forward and backward
 double turningOffset = 0; // Offset for turning left and right

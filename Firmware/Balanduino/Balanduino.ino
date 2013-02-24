@@ -43,7 +43,7 @@ WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 
 void setup() {
   /* Initialize UART */
-  Serial.begin(115200);
+  //Serial.begin(115200);
   
   /* Read the last PID values and target angle */
   readEEPROMValues();
@@ -82,8 +82,8 @@ void setup() {
   // Set OC1A/OC1B on compare match when downcounting
   TCCR1A = _BV(COM1A1) | _BV(COM1B1);
   setPWM(leftPWM,0); // Turn off pwm on both pins
-  setPWM(rightPWM,0);  
-   
+  setPWM(rightPWM,0);
+  
   if(Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
     while(1); // Halt

@@ -30,7 +30,7 @@ void readEEPROMValues() {
   EEPROM_readAnything(KdAddr,Kd);
   EEPROM_readAnything(targetAngleAddr,targetAngle);
   EEPROM_readAnything(controlAngleLimitAddr,controlAngleLimit);  
-  //EEPROM_readAnything(BackToSpotAddr,BackToSpot);  
+  //EEPROM_readAnything(BackToSpotAddr,BackToSpot);
   
   oldKp = Kp;
   oldKi = Ki;
@@ -93,7 +93,7 @@ void restoreEEPROMValues() {
     EEPROM_writeAnything(controlAngleLimitAddr,controlAngleLimit);
   }  
   if(BackToSpot != defaultBackToSpot) {
-    //BackToSpot = defaultBackToSpot;
+    BackToSpot = defaultBackToSpot;
     EEPROM_writeAnything(BackToSpotAddr,BackToSpot);
   }    
   

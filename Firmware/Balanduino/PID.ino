@@ -13,23 +13,20 @@ void PID(double restAngle, double offset, double turning, double dt) {
   /* Brake */
   else if(steerStop) {
     int32_t positionError = wheelPosition - targetPosition;
-    if(abs(positionError) > zoneA) // Inside zone A
-      if (BackToSpot)
+    if(BackToSpot) {
+      if(abs(positionError) > zoneA) // Inside zone A
         restAngle -= (double)positionError/positionScaleA;
-      else
-        targetPosition = wheelPosition;
-    else if(abs(positionError) > zoneB) // Inside zone B
-      if (BackToSpot)
+      else if(abs(positionError) > zoneB) // Inside zone B
         restAngle -= (double)positionError/positionScaleB;
-      else
-        targetPosition = wheelPosition;        
-    else if(abs(positionError) > zoneC) // Inside zone C
-      if (BackToSpot)    
+      else if(abs(positionError) > zoneC) // Inside zone C
         restAngle -= (double)positionError/positionScaleC;
-      else
-        targetPosition = wheelPosition;   
-    else // Inside zone D
-      restAngle -= (double)positionError/positionScaleD;  
+      else // Inside zone D
+        restAngle -= (double)positionError/positionScaleD;
+    } else {
+      targetPosition = wheelPosition;
+      if(abs(positionError) < zoneC)
+        restAngle -= (double)positionError/positionScaleD;
+    }
     
     restAngle -= (double)wheelVelocity/velocityScaleStop;
     

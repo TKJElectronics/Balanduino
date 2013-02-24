@@ -1,16 +1,14 @@
 void sendBluetoothData() {
   if(SerialBT.connected) {
     Usb.Task();
-    if (sendConfirmation) {
-      sendConfirmation = false;
-      stringBuf[0] = 'C';
-      stringBuf[1] = 'O';
-      stringBuf[2] = 'K';      
-      stringBuf[3] = 0x00;
+    if (sendPairConfirmation) {
+      sendPairConfirmation = false;
+      stringBuf[0] = 'W';
+      stringBuf[1] = 'C';
+      stringBuf[2] = '\0';
       
       SerialBT.println(stringBuf);
       dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
-      
     } else if(sendPIDValues) {
       sendPIDValues = false;
       
@@ -32,7 +30,6 @@ void sendBluetoothData() {
       
       SerialBT.println(stringBuf);
       dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
-
     } else if (sendSettings) {
       sendSettings = false;
       
@@ -43,14 +40,13 @@ void sendBluetoothData() {
       else
         stringBuf[2] = '0';        
       stringBuf[3] = ',';
-      stringBuf[4] = 0x00;
+      stringBuf[4] = '\0';
       
-      itoa(controlAngleLimit,convBuf,3);
-      strcat(stringBuf,convBuf); 
+      SerialBT.intToString((uint32_t)controlAngleLimit,convBuf);
+      strcat(stringBuf,convBuf);
       
       SerialBT.println(stringBuf);
-      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop    
-      
+      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
     } else if (sendInfo) {      
       sendInfo = false;
   
@@ -62,22 +58,21 @@ void sendBluetoothData() {
       stringBuf[5] = '.';
       stringBuf[6] = Version_Patch + 0x30;      
       stringBuf[7] = ',';      
-      stringBuf[8] = 0;
+      stringBuf[8] = '\0';
       
-      #ifdef __atmega644__
-        strcat(stringBuf,"644,"); 
-      #elsifdef __atmega1284__
-        strcat(stringBuf,"1284,"); 
+      #if defined(__AVR_ATmega644__)
+        strcat(stringBuf,"644,");
+      #elif defined(__AVR_ATmega1284__)
+        strcat(stringBuf,"1284,");
       #else
-        strcat(stringBuf,"Unknown,"); 
+        strcat(stringBuf,"Unknown,");
       #endif
       
-      itoa(batteryLevel,convBuf,3);
+      SerialBT.intToString((uint32_t)batteryLevel,convBuf);
       strcat(stringBuf,convBuf); 
       
       SerialBT.println(stringBuf);
-      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop      
-      
+      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
     } else if(sendData) {
       if(micros() - dataTimer > 50000) { // Send data every 50ms
         dataTimer = micros();
@@ -94,7 +89,7 @@ void sendBluetoothData() {
         strcat(stringBuf,convBuf);
         
         SerialBT.println(stringBuf);
-      }  
+      }
     }
   }
 }
@@ -122,12 +117,8 @@ void readBTD() {
       else if(input[0] == 'G') { // The Processing/Android application sends when it needs the PID or IMU values
         if(input[1] == 'P') // PID Values
           sendPIDValues = true;
-        else if(input[1] == 'B') // Begin sending IMU values
-          sendData = true; // Send output to Processing/Android application
-        else if(input[1] == 'S') // Stop sending IMU values
-          sendData = false; // Stop sending output to Processing/Android application          
         else if(input[1] == 'S') // Get settings
-         sendSettings = true;          
+          sendSettings = true;
         else if(input[1] == 'I') // Get Firmware version
           sendInfo = true;
       }
@@ -154,8 +145,8 @@ void readBTD() {
         else if(input[1] == 'A') { // Controlling max angle
           strtok(input, ","); // Ignore 'A'
           controlAngleLimit = atoi(strtok(NULL, ";"));
-          updateControlAngleLimit();        
-        }                
+          updateControlAngleLimit();
+        }
       }
 
       else if(input[0] == 'I') { // IMU trasmitting states
@@ -183,10 +174,11 @@ void readBTD() {
         
         else if(input[1] == 'W') { // Pair with a new Wiimote or Wii U Pro Controller
           Btd.pairWithWiimote();
-          sendConfirmation = true;  
+          sendPairConfirmation = true;  
         } else if(input[1] == 'R') {
           restoreEEPROMValues(); // Restore the default PID values and target angle
           sendPIDValues = true;
+          sendSettings = true;
         }         
       }
     }
@@ -251,10 +243,10 @@ void steer(Command command) {
   
   if(command == joystick) {
     if(sppData2 > 0) {
-      targetOffset = scale(sppData2,0,1,0,7);
+      targetOffset = scale(sppData2,0,1,0,controlAngleLimit);
       steerForward = true;
     } else if(sppData2 < 0) {
-      targetOffset = scale(sppData2,0,-1,0,7);
+      targetOffset = scale(sppData2,0,-1,0,controlAngleLimit);
       steerBackward = true;
     }
     if(sppData1 > 0) {
@@ -266,11 +258,11 @@ void steer(Command command) {
     }
   } else if(command == imu) {
       if(sppData2 > 0) {
-        targetOffset = scale(sppData2,0,36,0,7);
+        targetOffset = scale(sppData2,0,36,0,controlAngleLimit);
         steerForward = true;
       }
       else if(sppData2 < 0) {
-        targetOffset = scale(sppData2,0,-36,0,7);
+        targetOffset = scale(sppData2,0,-36,0,controlAngleLimit);
         steerBackward = true;
       }
       if(sppData1 > 0) {
@@ -284,10 +276,10 @@ void steer(Command command) {
   } else if(command == updatePS3) {
     if(PS3.PS3Connected) {
       if(PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),232,0,0,7); // Scale from 232-0 to 0-7
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),232,0,0,controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
         steerForward = true;
       } else if(PS3.getAnalogHat(LeftHatY) > 137 && PS3.getAnalogHat(RightHatY) > 137) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),276,510,0,7); // Scale from 276-510 to 0-7
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),276,510,0,controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
         steerBackward = true;
       }
       if(((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) {
@@ -299,10 +291,10 @@ void steer(Command command) {
       }
     } else { // It must be a Navigation controller then
       if(PS3.getAnalogHat(LeftHatY) < 117) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY),116,0,0,7); // Scale from 116-0 to 0-7
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY),116,0,0,controlAngleLimit); // Scale from 116-0 to 0-controlAngleLimit
         steerForward = true;
       } else if(PS3.getAnalogHat(LeftHatY) > 137) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY),138,255,0,7); // Scale from 138-255 to 0-7
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY),138,255,0,controlAngleLimit); // Scale from 138-255 to 0-controlAngleLimit
         steerBackward = true;
       }
       if(PS3.getAnalogHat(LeftHatX) < 55) {
@@ -318,11 +310,11 @@ void steer(Command command) {
     if(!Wii.wiiUProControllerConnected) {
       if(Wii.getButtonPress(B)) {
         if(Wii.getPitch() > 180) {
-          targetOffset = scale(Wii.getPitch(),180,216,0,7);
+          targetOffset = scale(Wii.getPitch(),180,216,0,controlAngleLimit);
           steerForward = true;
         }
         else if(Wii.getPitch() < 180) {
-          targetOffset = scale(Wii.getPitch(),180,144,0,7);
+          targetOffset = scale(Wii.getPitch(),180,144,0,controlAngleLimit);
           steerBackward = true;
         }
         if(Wii.getRoll() > 180) {
@@ -336,11 +328,11 @@ void steer(Command command) {
       }
       else { // Read the Navigation controller
         if(Wii.getAnalogHat(HatY) > 137) {
-          targetOffset = scale(Wii.getAnalogHat(HatY),138,230,0,7);
+          targetOffset = scale(Wii.getAnalogHat(HatY),138,230,0,controlAngleLimit);
           steerForward = true;
         }
         else if(Wii.getAnalogHat(HatY) < 117) {
-          targetOffset = scale(Wii.getAnalogHat(HatY),116,25,0,7);
+          targetOffset = scale(Wii.getAnalogHat(HatY),116,25,0,controlAngleLimit);
           steerBackward = true;
         }
         if(Wii.getAnalogHat(HatX) > 137) {
@@ -354,10 +346,10 @@ void steer(Command command) {
       }
     } else { // It must be a Wii U Pro Controller then
       if(Wii.getAnalogHat(LeftHatY) > 2200 && Wii.getAnalogHat(RightHatY) > 2200) {
-        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY),4402,6400,0,7); // Scale from 4402-6400 to 0-7
+        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY),4402,6400,0,controlAngleLimit); // Scale from 4402-6400 to 0-controlAngleLimit
         steerForward = true;
       } else if(Wii.getAnalogHat(LeftHatY) < 1800 && Wii.getAnalogHat(RightHatY) < 1800) {
-        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY),3598,1600,0,7); // Scale from 3598-1600 to 0-7
+        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY),3598,1600,0,controlAngleLimit); // Scale from 3598-1600 to 0-controlAngleLimit
         steerBackward = true;
       }
       if(((int16_t)Wii.getAnalogHat(RightHatY) - (int16_t)Wii.getAnalogHat(LeftHatY)) > 200) {
@@ -371,10 +363,10 @@ void steer(Command command) {
   }
   else if(command == updateXbox) {
     if(Xbox.getAnalogHat(0,LeftHatY) > 7500 && Xbox.getAnalogHat(0,RightHatY) > 7500) {
-      targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),15002,65534,0,7); // Scale from 15002-65534 to 0-7
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),15002,65534,0,controlAngleLimit); // Scale from 15002-65534 to 0-controlAngleLimit
       steerForward = true;
     } else if(Xbox.getAnalogHat(0,LeftHatY) < -7500 && Xbox.getAnalogHat(0,RightHatY) < -7500) {
-      targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),-15002,-65536,0,7); // Scale from -15002-(-65536) to 0-7
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),-15002,-65536,0,controlAngleLimit); // Scale from -15002-(-65536) to 0-controlAngleLimit
       steerBackward = true;
     }
     if(((int32_t)Xbox.getAnalogHat(0,RightHatY) - (int32_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {
