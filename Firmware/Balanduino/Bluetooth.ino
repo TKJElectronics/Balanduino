@@ -1,5 +1,3 @@
-double runTime;
-
 void sendBluetoothData() {
   if(SerialBT.connected && (micros() - dataTimer > 50000)) {  // Only send data every 50ms
     Usb.Task();
@@ -66,18 +64,19 @@ void sendBluetoothData() {
       stringBuf[8] = '\0';
       
       #if defined(__AVR_ATmega644__)
-        strcat(stringBuf,"644,"); 
+        strcat(stringBuf,"644,");
       #elif defined(__AVR_ATmega1284__)
-        strcat(stringBuf,"1284,"); 
+        strcat(stringBuf,"1284,");
       #else
-        strcat(stringBuf,"?,"); 
+        strcat(stringBuf,"?,");
       #endif
       
-      //itoa(batteryLevel,convBuf,10);
-      runTime = (double)millis() / 60000.0;
-      SerialBT.doubleToString(runTime,convBuf);
-      strcat(stringBuf,convBuf); 
-      strcat(stringBuf, " min");
+      itoa(batteryLevel,convBuf,10);
+      strcat(stringBuf,convBuf);
+      
+      strcat(stringBuf,",");
+      SerialBT.doubleToString((double)millis()/60000.0,convBuf);
+      strcat(stringBuf,convBuf);
       
       SerialBT.println(stringBuf);
       dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
