@@ -307,10 +307,10 @@ void steer(Command command) {
         steerBackward = true;
       }
       if(((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) {
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,turningAngleLimit); // Scale from 0-255 to 0-20
+        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,turningAngleLimit); // Scale from 0-255 to 0-turningAngleLimit
         steerLeft = true;
       } else if(((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) {
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,turningAngleLimit); // Scale from 0-255 to 0-20
+        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,turningAngleLimit); // Scale from 0-255 to 0-turningAngleLimit
         steerRight = true;
       }
     } else { // It must be a Navigation controller then
@@ -322,10 +322,10 @@ void steer(Command command) {
         steerBackward = true;
       }
       if(PS3.getAnalogHat(LeftHatX) < 55) {
-        turningOffset = scale(PS3.getAnalogHat(LeftHatX),54,0,0,turningAngleLimit); // Scale from 54-0 to 0-20
+        turningOffset = scale(PS3.getAnalogHat(LeftHatX),54,0,0,turningAngleLimit); // Scale from 54-0 to 0-turningAngleLimit
         steerLeft = true;
       } else if(PS3.getAnalogHat(LeftHatX) > 200) {
-        turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,turningAngleLimit); // Scale from 201-255 to 0-20
+        turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,turningAngleLimit); // Scale from 201-255 to 0-turningAngleLimit
         steerRight = true;
       }
     }
@@ -377,10 +377,10 @@ void steer(Command command) {
         steerBackward = true;
       }
       if(((int16_t)Wii.getAnalogHat(RightHatY) - (int16_t)Wii.getAnalogHat(LeftHatY)) > 200) {
-        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,turningAngleLimit); // Scale from 0-2400 to 0-20
+        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,turningAngleLimit); // Scale from 0-2400 to 0-turningAngleLimit
         steerLeft = true;
       } else if(((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)) > 200) {
-        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,turningAngleLimit); // Scale from 0-2400 to 0-20
+        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,turningAngleLimit); // Scale from 0-2400 to 0-turningAngleLimit
         steerRight = true;
       }
     }
@@ -394,10 +394,10 @@ void steer(Command command) {
       steerBackward = true;
     }
     if(((int32_t)Xbox.getAnalogHat(0,RightHatY) - (int32_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {
-      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-20
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-turningAngleLimit
       steerLeft = true;
     } else if(((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)) > 7500) {
-      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-20
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-turningAngleLimit
       steerRight = true;
     }
   }
