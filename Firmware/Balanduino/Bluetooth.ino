@@ -110,8 +110,6 @@ void readBTD() {
           return;
         if(input[i] == ';') // Keep reading until it reads a semicolon
           break;
-          
-        testVar = input[i];    
         i++;
       }
       

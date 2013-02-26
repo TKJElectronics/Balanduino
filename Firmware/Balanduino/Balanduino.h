@@ -3,8 +3,6 @@
 
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
-uint8_t testVar;
-
 /* Firmware Version Information */
 const uint8_t Version_Major = 0;
 const uint8_t Version_Minor = 8;
