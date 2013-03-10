@@ -27,12 +27,10 @@ Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source 
 
 // This will take care of all USB communication
 USB Usb;
-// You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
-XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
-
 // This is the main Bluetooth library, it will take care of all the usb and hci communication with the Bluetooth dongle
 BTD Btd(&Usb); // Uncomment DEBUG in "BTD.cpp" to save space
-
+// You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
+XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
 // Implementation for the Android Open Accessory Protocol. Simply connect your phone to get redirected to the Play Store
 ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
              "Balanduino", // Model Name
