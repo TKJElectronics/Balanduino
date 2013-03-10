@@ -12,6 +12,7 @@
 #include "Balanduino.h"
 #include "EEPROMAnything.h"
 #include <Wire.h>
+#include <adk.h>
  
 // These are all open source libraries written by Kristian Lauszus, TKJ Electronics
 // The USB libraries are located at the following link: https://github.com/felis/USB_Host_Shield_2.0
@@ -26,6 +27,14 @@ Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source 
 
 // This will take care of all USB communication
 USB Usb;
+// Implementation for the Android Open Accessory Protocol. Simply connect your phone to get redirected to the Play Store
+ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
+             "Balanduino", // Model Name
+             "Android App for Balanduino", // Description - user visible string
+             "0.3", // Version of the Android app
+             "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
+             "1234"); // Serial Number - this is not used
+
 // You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
 XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
 
