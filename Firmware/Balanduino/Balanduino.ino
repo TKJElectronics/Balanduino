@@ -27,6 +27,12 @@ Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source 
 
 // This will take care of all USB communication
 USB Usb;
+// You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
+XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
+
+// This is the main Bluetooth library, it will take care of all the usb and hci communication with the Bluetooth dongle
+BTD Btd(&Usb); // Uncomment DEBUG in "BTD.cpp" to save space
+
 // Implementation for the Android Open Accessory Protocol. Simply connect your phone to get redirected to the Play Store
 ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
              "Balanduino", // Model Name
@@ -35,11 +41,6 @@ ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
              "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
              "1234"); // Serial Number - this is not used
 
-// You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
-XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
-
-// This is the main Bluetooth library, it will take care of all the usb and hci communication with the Bluetooth dongle
-BTD Btd(&Usb); // Uncomment DEBUG in "BTD.cpp" to save space
 // The SPP (Serial Port Protocol) emulates a virtual Serial port, which is supported by most computers and mobile phones
 SPP SerialBT(&Btd,"Balanduino","0000"); // Also uncomment DEBUG in "SPP.cpp"
 // This is the PS3 library. It supports all the three original controller: the Dualshock 3, Navigation and Move controller
@@ -47,8 +48,9 @@ PS3BT PS3(&Btd,0x00,0x15,0x83,0x3D,0x0A,0x57); // Also remember to uncomment DEB
 // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
 WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 // You have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote or press sync if you are using a Wii U Pro Controller - you only have to do this once
-// Or you can simply send the string "W;" to the robot to start the pairing sequence
 //WII Wii(&Btd,PAIR);
+// Or you can simply send "CW;" to the robot to start the pairing sequence
+// This can also be done using the Android application
 
 void setup() {
   /* Initialize UART */
