@@ -20,6 +20,8 @@ The final structure should look like this:
 		* Balanduino.ino
 		* Balanduino.h
 		* Bluetooth.ino
+		* EEPROM.ino
+		* EEPROMAnything.h
 		* I2C.ino
 		* Motor.ino
 		* PID.ino	
@@ -32,6 +34,6 @@ The final structure should look like this:
 			* boards.txt
 	* libraries/
 		* USB\_Host\_Shield\_20/
-		* KalmanFilter/	
+		* KalmanFilter/
 
-For more information send me an email at <kristianl@tkjelectronics.dk>.
+For more information send us an email at <mail@tkjelectronics.com>.

@@ -4,12 +4,48 @@
 The code is released under the GNU General Public License.
 _________
 
-# Skal ændres
+This is the code for the Balanduino, the Open Source Balancing robot.
 
-This is the code for the Android app to control the Balancing robot.
+# Arduino compatible
 
-The source code for the robot can be found here: <https://github.com/TKJElectronics/BalancingRobotArduino>.
+To use the Balanduino as a normal Arduino board you need to add the hardware add-on to the Arduino IDE.
 
-Also check out the video: <http://www.youtube.com/watch?v=N28C_JqVhGU>.
+See the [Hardware Readme](Firmware/hardware/README.md) for more information.
 
-For more information see my blog post at <http://blog.tkjelectronics.dk/2012/03/the-balancing-robot/> or send me an email at <kristianl@tkjelectronics.dk>.
+# Hardware
+
+The Balanduino hardware consist of an ATmega644A running at 8MHz.
+
+A MPU-6050 3-axis accelerometer and gyroscope.
+The accelerometer and gyroscope readings are combined using the Kalman filter library: <https://github.com/TKJElectronics/KalmanFilter>.
+
+USB Host support is implemented using the MAX3421E and the USB Host library: <https://github.com/felis/USB_Host_Shield_2.0>.
+
+Two VNH5180 motor controller ICs is used to drive the two motors.
+
+More information can be found at the Kickstarter description: <http://www.kickstarter.com/projects/tkjelectronics/407013506>.
+
+# Remote control
+
+To control the robot you can use the following game controllers:
+
+* Normal PS3 Dualshock controller
+* PS3 Navigation controller
+* PS3 Move controller
+* Xbox 360 wireless controller
+* Wiimote including support for the Motion Plus and Nunchuck extension
+* Wii U Pro controller
+
+It it also possible to control the robot and adjust the PID values and others variables using the following Android application:
+
+[![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](http://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino)
+
+Source: <https://github.com/TKJElectronics/BalanduinoAndroidApp>
+
+Or by using the Processing application: <https://github.com/TKJElectronics/BalanduinoProcessingApp>.
+
+# Video presentation
+
+A video for the Kickstarter presentation of the robot can be found here: <http://www.youtube.com/watch?v=0cqVr4hAc_w>.
+
+For more information send us an email at <mail@tkjelectronics.com>.

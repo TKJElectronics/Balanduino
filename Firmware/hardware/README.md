@@ -15,9 +15,11 @@ Now move the Balanduino directory inside that folder. The final structure should
 		* Balanduino.ino
 		* Balanduino.h
 		* Bluetooth.ino
+		* EEPROM.ino
+		* EEPROMAnything.h
 		* I2C.ino
 		* Motor.ino
-		* PID.ino
+		* PID.ino	
 	* hardware/
 		* Balanduino/
 			* avr/
@@ -27,7 +29,6 @@ Now move the Balanduino directory inside that folder. The final structure should
 			* boards.txt
 	* libraries/
 		* USB\_Host\_Shield\_20/
-		* KalmanFilter/	
+		* KalmanFilter/
 
-For more information see the following site: [http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware](http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware)
-or send me an email at <kristianl@tkjelectronics.dk>.
+For more information see the following site: <http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware> or send us an email at <mail@tkjelectronics.com>.
