@@ -23,7 +23,7 @@ USB Host support is implemented using the MAX3421E and the USB Host library: <ht
 
 Two VNH5180 motor controller ICs is used to drive the two motors.
 
-More information can be found at the Kickstarter description: <http://www.kickstarter.com/projects/tkjelectronics/407013506>.
+More information can be found at the Kickstarter description: <http://www.kickstarter.com/projects/tkjelectronics/balanduino-balancing-robot-kit>.
 
 # Remote control
 
@@ -46,6 +46,6 @@ Or by using the Processing application: <https://github.com/TKJElectronics/Balan
 
 # Video presentation
 
-A video for the Kickstarter presentation of the robot can be found here: <http://www.youtube.com/watch?v=0cqVr4hAc_w>.
+A video for the Kickstarter presentation of the robot can be found here: <http://youtu.be/0cqVr4hAc_w>.
 
 For more information send us an email at <mail@tkjelectronics.com>.
