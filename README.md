@@ -46,6 +46,6 @@ Or by using the Processing application: <https://github.com/TKJElectronics/Balan
 
 # Video presentation
 
-A video for the Kickstarter presentation of the robot can be found here: <http://youtu.be/0cqVr4hAc_w>.
+A video for the Kickstarter presentation of the robot can be found here: <http://www.youtube.com/watch?v=_kQniPbg9zc>.
 
 For more information send us an email at <mail@tkjelectronics.com>.
