@@ -169,4 +169,10 @@ const double positionScaleD = 500;
 const double velocityScaleMove = 70;
 const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
+
+
+bool lineFollowingEnabled;
+bool line_RunOnce;
+bool lineDetected;
+
 #endif

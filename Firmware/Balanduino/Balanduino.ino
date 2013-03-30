@@ -30,21 +30,21 @@ USB Usb;
 // This is the main Bluetooth library, it will take care of all the usb and hci communication with the Bluetooth dongle
 BTD Btd(&Usb); // Uncomment DEBUG in "BTD.cpp" to save space
 // You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
-XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
+//XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
 // Implementation for the Android Open Accessory Protocol. Simply connect your phone to get redirected to the Play Store
-ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
+/*ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
              "Balanduino", // Model Name
              "Android App for Balanduino", // Description - user visible string
              "0.4", // Version of the Android app
              "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
-             "1234"); // Serial Number - this is not used
+             "1234"); // Serial Number - this is not used*/
 
 // The SPP (Serial Port Protocol) emulates a virtual Serial port, which is supported by most computers and mobile phones
 SPP SerialBT(&Btd,"Balanduino","0000"); // Also uncomment DEBUG in "SPP.cpp"
 // This is the PS3 library. It supports all the three original controller: the Dualshock 3, Navigation and Move controller
 PS3BT PS3(&Btd,0x00,0x15,0x83,0x3D,0x0A,0x57); // Also remember to uncomment DEBUG in "PS3BT.cpp" to save space
 // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
-WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
+//WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 // You have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote or press sync if you are using a Wii U Pro Controller - you only have to do this once
 //WII Wii(&Btd,PAIR);
 // Or you can simply send "CW;" to the robot to start the pairing sequence
@@ -136,6 +136,9 @@ void setup() {
   analogWrite(buzzer,0);
   sbi(TCCR0B,CS00); // Set precaler back to 64
 
+  pinMode(2, INPUT);
+  attachInterrupt(2, lineInterrupt, RISING);
+
   /* Setup timing */  
   kalmanTimer = micros();
   pidTimer = kalmanTimer;
@@ -188,12 +191,49 @@ void loop() {
     }
   }
 
+  if (lineFollowingEnabled) lineFollowingSteer();
+
   /* Read the Bluetooth dongle and send PID and IMU values */
   readBTD();
   sendBluetoothData();
-  if(Wii.wiimoteConnected) { // We have to read much more often from the Wiimote to prevent lag
+  /*if(Wii.wiimoteConnected) { // We have to read much more often from the Wiimote to prevent lag
     while((micros() - wiiTimer) < 10000)
       Usb.Task();   
-  }
+  }*/
   wiiTimer = micros(); 
+}
+
+
+void lineInterrupt()
+{
+  lineDetected = true;
+}
+
+boolean lineFollowingCurrentDirection = 0;
+boolean lineFollowingStateChanged = false;
+void lineFollowingSteer()
+{
+  // Set all to false
+  steerForward = true;
+  steerBackward = false;
+  steerStop = false;
+  steerLeft = false;
+  steerRight = false;
+  
+  turningOffset = turningAngleLimit / 4;
+  
+  if (!digitalRead(2)) {
+    if (!lineFollowingStateChanged) {
+      lineFollowingCurrentDirection = !lineFollowingCurrentDirection;
+      lineFollowingStateChanged = true;
+    }
+    targetOffset = controlAngleLimit / 2;    
+    if (lineFollowingCurrentDirection) 
+      steerLeft = true;
+    else
+      steerRight = true;        
+  } else { // Simply drive forward if Black line is detected
+    lineFollowingStateChanged = false;
+    targetOffset = controlAngleLimit / 3;    
+  }    
 }

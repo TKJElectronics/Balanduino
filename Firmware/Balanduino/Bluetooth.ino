@@ -205,7 +205,7 @@ void readBTD() {
       }
     }
   }
- 
+  
   if(millis() > (SPPreceiveControlTimestamp+SPPreceiveControlTimeout)) {
     commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
     if(PS3.PS3Connected) {
@@ -214,13 +214,17 @@ void readBTD() {
         while(!PS3.getButtonPress(START))
           Usb.Task();
       }
+      if (PS3.getButtonPress(TRIANGLE)) {
+        lineFollowingEnabled = !lineFollowingEnabled;
+        lineDetected = false;
+      }
       else if((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137))
         steer(updatePS3);
     } else if(PS3.PS3NavigationConnected) {
       if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
         steer(updatePS3);
     }
-    if(Wii.wiimoteConnected && !Wii.wiiUProControllerConnected && !commandSent) {
+    /*if(Wii.wiimoteConnected && !Wii.wiiUProControllerConnected && !commandSent) {
       if(Wii.getButtonPress(B))
         steer(updateWii);
       else if(Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117))
@@ -242,18 +246,18 @@ void readBTD() {
       }
       else if((Xbox.getAnalogHat(0,LeftHatY) < -7500) || (Xbox.getAnalogHat(0,RightHatY) < -7500) || (Xbox.getAnalogHat(0,LeftHatY) > 7500) || (Xbox.getAnalogHat(0,RightHatY) > 7500))
         steer(updateXbox);
-    }
-    if(!commandSent) // If there hasn't been send a command by now, then send stop
+    }*/
+    if(!commandSent && !lineFollowingEnabled) // If there hasn't been send a command by now, then send stop
       steer(stop);
   }
   if(PS3.PS3Connected || PS3.PS3NavigationConnected) {
     if(PS3.getButtonClick(PS))
       PS3.disconnect();
   }
-  if(Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
+  /*if(Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
     if(Wii.getButtonClick(HOME))
       Wii.disconnect();
-  }
+  }*/
 }
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
@@ -330,7 +334,7 @@ void steer(Command command) {
       }
     }
   }
-  else if(command == updateWii) {
+  /*else if(command == updateWii) {
     if(!Wii.wiiUProControllerConnected) {
       if(Wii.getButtonPress(B)) {
         if(Wii.getPitch() > 180) {
@@ -400,7 +404,7 @@ void steer(Command command) {
       turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-turningAngleLimit
       steerRight = true;
     }
-  }
+  }*/
   
   else if(command == stop) {
     steerStop = true;
