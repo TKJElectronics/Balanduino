@@ -1,3 +1,7 @@
+uint8_t ps3OldLed;
+uint8_t wiiOldLed;
+LED xboxOldLed;
+
 void sendBluetoothData() {
   if(SerialBT.connected && (micros() - dataTimer > 50000)) {  // Only send data every 50ms
     Usb.Task();
@@ -247,14 +251,91 @@ void readBTD() {
       steer(stop);
   }
   if(PS3.PS3Connected || PS3.PS3NavigationConnected) {
-    if(PS3.getButtonClick(PS))
+    if(PS3.getButtonClick(PS)) {
       PS3.disconnect();
+      ps3OldLed = 0; // Reset value
+    }
   }
   if(Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
-    if(Wii.getButtonClick(HOME))
+    if(Wii.getButtonClick(HOME)) {
       Wii.disconnect();
+      wiiOldLed = 0; // Reset value
+    }
+  }
+  
+  if(millis() - ledTimer > 1000) { // Update every 1s
+    ledTimer = millis();
+    updateLEDs();    
   }
 }
+
+void updateLEDs() {
+  uint8_t Led;
+  if(PS3.PS3Connected) {
+    if(PS3.getStatus(Shutdown)) { // Blink all LEDs
+      if(ps3OldLed)
+        Led = 0x00;
+      else
+        Led = 0x0F << 1;
+    }
+    else if(PS3.getStatus(Dying))
+      Led = 0x01 << 1;
+    else if(PS3.getStatus(Low))
+      Led = 0x03 << 1;
+    else if(PS3.getStatus(High))
+      Led = 0x07 << 1;
+    else if(PS3.getStatus(Full))
+      Led = 0x0F << 1;
+    if(Led != ps3OldLed) {
+      ps3OldLed = Led;
+      PS3.setLedRaw(Led);
+    }
+  } else if(PS3.PS3NavigationConnected) {
+    if(PS3.getStatus(Shutdown))
+      PS3.setLedToggle(LED1); // Blink LED
+  }
+  if(Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
+    uint8_t batteryLevel = Wii.getBatteryLevel();
+    //Serial.print("BatteryLevel: ");Serial.println(batteryLevel);
+    if(batteryLevel < 32) { // Blink all LEDs
+      if(wiiOldLed)
+        Led = 0x00;
+      else
+        Led = 0xF0;
+    }
+    else if(batteryLevel < 64)
+      Led = 0x10;
+    else if(batteryLevel < 128)
+      Led = 0x30;
+    else if(batteryLevel < 192)
+      Led = 0x70;
+    else
+      Led = 0xF0;
+    if(Led != wiiOldLed) {
+      wiiOldLed = Led;
+      Wii.setLedRaw(Led);
+      Wii.statusRequest(); // This will update battery level
+    }
+  }
+  if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0]) {
+    uint8_t batteryLevel = Xbox.getBatteryLevel(0);
+    //Serial.print("BatteryLevel: ");Serial.println(batteryLevel);
+    LED xboxLed;
+    if(batteryLevel == 0)
+      xboxLed = LED1;
+    else if(batteryLevel == 1)
+      xboxLed = LED2;
+    else if(batteryLevel == 2)
+      xboxLed = LED3;
+    else
+      xboxLed = LED4;
+    if(xboxLed != xboxOldLed) {
+      xboxOldLed = xboxLed;
+      Xbox.setLedOn(0,xboxLed);
+    }
+  }
+}
+
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
   
