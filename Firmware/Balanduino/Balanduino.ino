@@ -145,6 +145,7 @@ void setup() {
   encoderTimer = kalmanTimer;
   dataTimer = kalmanTimer;
   wiiTimer = kalmanTimer;
+  ledTimer = millis();
 }
 
 void loop() {
@@ -185,6 +186,7 @@ void loop() {
     encoderTimer = micros();
     wheelPosition = readLeftEncoder() + readRightEncoder();
     wheelVelocity = wheelPosition - lastWheelPosition;
+    //wheelVelocity = 0.5*(wheelPosition - lastWheelPosition)+0.5*wheelVelocity;
     lastWheelPosition = wheelPosition;
     //Serial.print(wheelPosition);Serial.print('\t');Serial.print(targetPosition);Serial.print('\t');Serial.println(wheelVelocity);
     if(abs(wheelVelocity) <= 40 && !stopped) { // Set new targetPosition if braking
