@@ -1,9 +1,18 @@
-uint8_t ps3OldLed;
-uint8_t wiiOldLed;
-LED xboxOldLed;
+#ifdef ENABLE_USB
 
+#ifdef ENABLE_PS3
+uint8_t ps3OldLed;
+#endif
+#ifdef ENABLE_WII
+uint8_t wiiOldLed;
+#endif
+#ifdef ENABLE_XBOX
+LED xboxOldLed;
+#endif
+
+#ifdef ENABLE_SPP
 void sendBluetoothData() {
-  if(SerialBT.connected && (micros() - dataTimer > 50000)) {  // Only send data every 50ms
+  if(SerialBT.connected && (millis() - dataTimer > 50)) {  // Only send data every 50ms
     Usb.Task();
     if(sendPairConfirmation) {
       sendPairConfirmation = false;
@@ -12,7 +21,7 @@ void sendBluetoothData() {
       stringBuf[2] = '\0';
       
       SerialBT.println(stringBuf);
-      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
+      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
     } else if(sendPIDValues) {
       sendPIDValues = false;
       
@@ -33,7 +42,7 @@ void sendBluetoothData() {
       strcat(stringBuf,convBuf);
       
       SerialBT.println(stringBuf);
-      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
+      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
     } else if(sendSettings) {
       sendSettings = false;
       
@@ -53,7 +62,7 @@ void sendBluetoothData() {
       strcat(stringBuf,convBuf);       
 
       SerialBT.println(stringBuf);
-      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
+      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
     } else if(sendInfo) {      
       sendInfo = false;
   
@@ -83,9 +92,9 @@ void sendBluetoothData() {
       strcat(stringBuf,convBuf);
       
       SerialBT.println(stringBuf);
-      dataTimer = micros(); // Reset the timer, to prevent it from sending data in the next loop
+      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
     } else if(sendData) {
-      dataTimer = micros();
+      dataTimer = millis();
       strcpy(stringBuf,"V,");
       SerialBT.doubleToString(accAngle,convBuf); // We use this helper function in the SPP library to convert from a double to a string
       strcat(stringBuf,convBuf);
@@ -102,8 +111,11 @@ void sendBluetoothData() {
     }
   }
 }
-void readBTD() {
+#endif // ENABLE_SPP
+
+void readUsb() {
   Usb.Task();
+#ifdef ENABLE_SPP
   if(SerialBT.connected) { // The SPP connection won't return data as fast as the controllers, so we will handle it separately
     if(SerialBT.available()) {
       char input[30];
@@ -209,9 +221,10 @@ void readBTD() {
       }
     }
   }
- 
+#endif // ENABLE_SPP
   if(millis() > (SPPreceiveControlTimestamp+SPPreceiveControlTimeout)) {
     commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
+#ifdef ENABLE_PS3
     if(PS3.PS3Connected) {
       if(PS3.getButtonPress(SELECT)) {
         stopAndReset();
@@ -224,6 +237,8 @@ void readBTD() {
       if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
         steer(updatePS3);
     }
+#endif // ENABLE_PS3
+#ifdef ENABLE_WII
     if(Wii.wiimoteConnected && !Wii.wiiUProControllerConnected && !commandSent) {
       if(Wii.getButtonPress(B))
         steer(updateWii);
@@ -238,6 +253,8 @@ void readBTD() {
       else if(Wii.getAnalogHat(LeftHatY) > 2200 || Wii.getAnalogHat(LeftHatY) < 1800 || Wii.getAnalogHat(RightHatY) > 2200 || Wii.getAnalogHat(RightHatY) < 1800)
         steer(updateWii);
     }
+#endif // ENABLE_WII
+#ifdef ENABLE_XBOX
     if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0] && !commandSent) { // We will only read from the first controller, up to four is supported by one receiver
       if(Xbox.getButtonPress(0,BACK)) {
         stopAndReset();
@@ -247,76 +264,88 @@ void readBTD() {
       else if((Xbox.getAnalogHat(0,LeftHatY) < -7500) || (Xbox.getAnalogHat(0,RightHatY) < -7500) || (Xbox.getAnalogHat(0,LeftHatY) > 7500) || (Xbox.getAnalogHat(0,RightHatY) > 7500))
         steer(updateXbox);
     }
+#endif // ENABLE_XBOX
     if(!commandSent) // If there hasn't been send a command by now, then send stop
       steer(stop);
   }
+#ifdef ENABLE_PS3
   if(PS3.PS3Connected || PS3.PS3NavigationConnected) {
     if(PS3.getButtonClick(PS)) {
       PS3.disconnect();
       ps3OldLed = 0; // Reset value
     }
   }
+#endif // ENABLE_PS3
+#ifdef ENABLE_WII
   if(Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
     if(Wii.getButtonClick(HOME)) {
       Wii.disconnect();
       wiiOldLed = 0; // Reset value
     }
   }
-  
+#endif // ENABLE_WII
+#if defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
   if(millis() - ledTimer > 1000) { // Update every 1s
     ledTimer = millis();
     updateLEDs();    
   }
+#endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 }
 
+#if defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 void updateLEDs() {
   uint8_t Led;
+#ifdef ENABLE_PS3
   if(PS3.PS3Connected) {
     if(PS3.getStatus(Shutdown)) { // Blink all LEDs
       if(ps3OldLed)
         Led = 0x00;
       else
-        Led = 0x0F << 1;
+        Led = 0x0F;
     }
     else if(PS3.getStatus(Dying))
-      Led = 0x01 << 1;
+      Led = 0x01;
     else if(PS3.getStatus(Low))
-      Led = 0x03 << 1;
+      Led = 0x03;
     else if(PS3.getStatus(High))
-      Led = 0x07 << 1;
+      Led = 0x07;
     else if(PS3.getStatus(Full))
-      Led = 0x0F << 1;
+      Led = 0x0F;
     if(Led != ps3OldLed) {
       ps3OldLed = Led;
-      PS3.setLedRaw(Led);
+      PS3.setLedRaw(Led << 1);
     }
   } else if(PS3.PS3NavigationConnected) {
     if(PS3.getStatus(Shutdown))
       PS3.setLedToggle(LED1); // Blink LED
   }
+#endif // ENABLE_PS3
+#ifdef ENABLE_WII
   if(Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
     uint8_t batteryLevel = Wii.getBatteryLevel();
     //Serial.print("BatteryLevel: ");Serial.println(batteryLevel);
-    if(batteryLevel < 32) { // Blink all LEDs
+    if(batteryLevel < 60) { // Blink all LEDs
       if(wiiOldLed)
         Led = 0x00;
       else
         Led = 0xF0;
     }
-    else if(batteryLevel < 64)
+    else if(batteryLevel < 110)
       Led = 0x10;
-    else if(batteryLevel < 128)
+    else if(batteryLevel < 160)
       Led = 0x30;
-    else if(batteryLevel < 192)
+    else if(batteryLevel < 210)
       Led = 0x70;
     else
       Led = 0xF0;
     if(Led != wiiOldLed) {
       wiiOldLed = Led;
-      Wii.setLedRaw(Led);
-      Wii.statusRequest(); // This will update battery level
+      Wii.setLedRaw(Led);      
     }
+    Wii.statusRequest(); // This will update battery level
   }
+#endif // ENABLE_WII
+#ifdef ENABLE_XBOX
   if(Xbox.XboxReceiverConnected && Xbox.Xbox360Connected[0]) {
     uint8_t batteryLevel = Xbox.getBatteryLevel(0);
     //Serial.print("BatteryLevel: ");Serial.println(batteryLevel);
@@ -334,8 +363,11 @@ void updateLEDs() {
       Xbox.setLedOn(0,xboxLed);
     }
   }
+#endif // ENABLE_XBOX
 }
+#endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
   
@@ -346,6 +378,7 @@ void steer(Command command) {
   steerLeft = false;
   steerRight = false;
   
+#ifdef ENABLE_SPP
   if(command == joystick) {
     if(sppData2 > 0) {
       targetOffset = scale(sppData2,0,1,0,controlAngleLimit);
@@ -378,7 +411,10 @@ void steer(Command command) {
         turningOffset = scale(sppData1,0,-45,0,turningAngleLimit);
         steerRight = true;
       }
-  } else if(command == updatePS3) {
+  }
+#endif // ENABLE_SPP
+#ifdef ENABLE_PS3
+  if(command == updatePS3) {
     if(PS3.PS3Connected) {
       if(PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) {
         targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),232,0,0,controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
@@ -411,7 +447,9 @@ void steer(Command command) {
       }
     }
   }
-  else if(command == updateWii) {
+#endif // ENABLE_PS3
+#ifdef ENABLE_WII
+  if(command == updateWii) {
     if(!Wii.wiiUProControllerConnected) {
       if(Wii.getButtonPress(B)) {
         if(Wii.getPitch() > 180) {
@@ -466,7 +504,9 @@ void steer(Command command) {
       }
     }
   }
-  else if(command == updateXbox) {
+#endif // ENABLE_WII
+#ifdef ENABLE_XBOX
+  if(command == updateXbox) {
     if(Xbox.getAnalogHat(0,LeftHatY) > 7500 && Xbox.getAnalogHat(0,RightHatY) > 7500) {
       targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),15002,65534,0,controlAngleLimit); // Scale from 15002-65534 to 0-controlAngleLimit
       steerForward = true;
@@ -482,8 +522,9 @@ void steer(Command command) {
       steerRight = true;
     }
   }
+#endif // ENABLE_XBOX
   
-  else if(command == stop) {
+  if(command == stop) {
     steerStop = true;
     if(lastCommand != stop) { // Set new stop position
       targetPosition = wheelPosition;
@@ -504,3 +545,6 @@ double scale(double input, double inputMin, double inputMax, double outputMin, d
     output = outputMin;
   return output;
 }
+#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
+
+#endif // ENABLE_USB

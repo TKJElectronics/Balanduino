@@ -8,29 +8,58 @@
  * It can also be controlled by a PS3, Wii or a Xbox controller
  * For details, see http://blog.tkjelectronics.dk/2012/03/the-balancing-robot/
  */
+ 
+/* Use this to enable and disable the different controllers */
+#define ENABLE_SPP
+#define ENABLE_PS3
+#define ENABLE_WII
+//#define ENABLE_XBOX
+//#define ENABLE_ADK
 
 #include "Balanduino.h"
 #include "EEPROMAnything.h"
 #include <Wire.h>
+
+#ifdef ENABLE_ADK
 #include <adk.h>
+#endif
  
 // These are all open source libraries written by Kristian Lauszus, TKJ Electronics
 // The USB libraries are located at the following link: https://github.com/felis/USB_Host_Shield_2.0
 #include <Kalman.h> // Kalman filter library - see: http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/
+#ifdef ENABLE_XBOX
 #include <XBOXRECV.h>
+#endif
+#ifdef ENABLE_SPP
 #include <SPP.h>
+#endif
+#ifdef ENABLE_PS3
 #include <PS3BT.h>
+#endif
+#ifdef ENABLE_WII
 #include <Wii.h>
+#endif
 
 // Create the Kalman library instance
 Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source code
 
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
+#define ENABLE_USB
 // This will take care of all USB communication
 USB Usb;
+#endif
+
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
 // This is the main Bluetooth library, it will take care of all the usb and hci communication with the Bluetooth dongle
 BTD Btd(&Usb); // Uncomment DEBUG in "BTD.cpp" to save space
+#endif
+
 // You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
+#ifdef ENABLE_XBOX
 XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
+#endif
+
+#ifdef ENABLE_ADK
 // Implementation for the Android Open Accessory Protocol. Simply connect your phone to get redirected to the Play Store
 ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
              "Balanduino", // Model Name
@@ -38,17 +67,24 @@ ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
              "0.4", // Version of the Android app
              "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
              "1234"); // Serial Number - this is not used
+#endif
 
+#ifdef ENABLE_SPP
 // The SPP (Serial Port Protocol) emulates a virtual Serial port, which is supported by most computers and mobile phones
 SPP SerialBT(&Btd,"Balanduino","0000"); // Also uncomment DEBUG in "SPP.cpp"
+#endif
+#ifdef ENABLE_PS3
 // This is the PS3 library. It supports all the three original controller: the Dualshock 3, Navigation and Move controller
 PS3BT PS3(&Btd,0x00,0x15,0x83,0x3D,0x0A,0x57); // Also remember to uncomment DEBUG in "PS3BT.cpp" to save space
+#endif
+#ifdef ENABLE_WII
 // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
 WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
 // You have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote or press sync if you are using a Wii U Pro Controller - you only have to do this once
 //WII Wii(&Btd,PAIR);
 // Or you can simply send "CW;" to the robot to start the pairing sequence
 // This can also be done using the Android application
+#endif
 
 void setup() {
   /* Initialize UART */
@@ -93,10 +129,12 @@ void setup() {
   setPWM(leftPWM,0); // Turn off pwm on both pins
   setPWM(rightPWM,0);
   
+#ifdef ENABLE_USB
   if(Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
     while(1); // Halt
   }
+#endif
 
   /* Setup IMU Inputs */
   Wire.begin();
@@ -140,9 +178,9 @@ void setup() {
   kalmanTimer = micros();
   pidTimer = kalmanTimer;
   encoderTimer = kalmanTimer;
-  dataTimer = kalmanTimer;
-  wiiTimer = kalmanTimer;
-  ledTimer = millis();
+  dataTimer = millis();
+  wiiTimer = dataTimer;
+  ledTimer = dataTimer;
 }
 
 void loop() {
@@ -193,11 +231,17 @@ void loop() {
   }
 
   /* Read the Bluetooth dongle and send PID and IMU values */
-  readBTD();
+#ifdef ENABLE_USB  
+  readUsb();
+#endif
+#ifdef ENABLE_SPP  
   sendBluetoothData();
+#endif
+#ifdef ENABLE_WII
   if(Wii.wiimoteConnected) { // We have to read much more often from the Wiimote to prevent lag
-    while((micros() - wiiTimer) < 10000)
-      Usb.Task();   
+    while((millis() - wiiTimer) < 10)
+      Usb.Task();
   }
-  wiiTimer = micros(); 
+  wiiTimer = millis();
+#endif
 }
