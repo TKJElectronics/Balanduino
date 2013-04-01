@@ -229,6 +229,7 @@ void loop() {
       stopped = true;
     }
   }
+  if (lineFollowingEnabled) lineFollowingSteer();
 
   /* Read the Bluetooth dongle and send PID and IMU values */
 #ifdef ENABLE_USB  
@@ -244,4 +245,38 @@ void loop() {
   }
   wiiTimer = millis();
 #endif
+}
+
+void lineInterrupt()
+{
+  lineDetected = true;
+}
+
+boolean lineFollowingCurrentDirection = 0;
+boolean lineFollowingStateChanged = false;
+void lineFollowingSteer()
+{
+  // Set all to false
+  steerForward = true;
+  steerBackward = false;
+  steerStop = false;
+  steerLeft = false;
+  steerRight = false;
+  
+  turningOffset = turningAngleLimit / 4;
+  
+  if (!digitalRead(2)) {
+    if (!lineFollowingStateChanged) {
+      lineFollowingCurrentDirection = !lineFollowingCurrentDirection;
+      lineFollowingStateChanged = true;
+    }
+    targetOffset = controlAngleLimit / 2;    
+    if (lineFollowingCurrentDirection) 
+      steerLeft = true;
+    else
+      steerRight = true;        
+  } else { // Simply drive forward if Black line is detected
+    lineFollowingStateChanged = false;
+    targetOffset = controlAngleLimit / 3;    
+  }    
 }
