@@ -75,7 +75,7 @@ SPP SerialBT(&Btd,"Balanduino","0000"); // Also uncomment DEBUG in "SPP.cpp"
 #endif
 #ifdef ENABLE_PS3
 // This is the PS3 library. It supports all the three original controller: the Dualshock 3, Navigation and Move controller
-PS3BT PS3(&Btd,0x00,0x15,0x83,0x3D,0x0A,0x57); // Also remember to uncomment DEBUG in "PS3BT.cpp" to save space
+PS3BT PS3(&Btd); // Also remember to uncomment DEBUG in "PS3BT.cpp" to save space
 #endif
 #ifdef ENABLE_WII
 // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
