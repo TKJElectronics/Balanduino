@@ -127,9 +127,10 @@ uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the P
 bool ps3Rumble; // These are used to check if a controller has connected
 bool wiiRumble;
 bool xboxRumble;
-bool ps3RumbleEnabled; // These are used to turn rumble off again
+bool ps3RumbleEnable; // These are used to turn rumble off again except for the PS3 controller which is turned on
 bool wiiRumbleEnabled;
 bool xboxRumbleEnabled;
+bool ps3RumbleDisable; // Used to turn rumble off again on the PS3 controller
 
 /* Direction set by the controllers or SPP library */
 bool steerForward;
