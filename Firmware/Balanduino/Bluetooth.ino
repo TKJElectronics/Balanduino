@@ -231,46 +231,48 @@ void readUsb() {
         stopAndReset();
         while(!PS3.getButtonPress(START))
           Usb.Task();
-	  }
-	}
+      }
+    }
 
     /* Common buttons */
     if(PS3.PS3Connected || PS3.PS3NavigationConnected) {
-	  if(PS3.getButtonClick(TRIANGLE))
-	    lineFollowingEnabled = !lineFollowingEnabled;		  
+      if(PS3.getButtonClick(TRIANGLE))
+        lineFollowingEnabled = !lineFollowingEnabled;		  
     }
 	
     /* Joystick control */
-    if( (PS3.PS3Connected && ((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137)))  ||  (PS3.PS3NavigationConnected && ((PS3.getAnalogHat(LeftHatX) > 200) || (PS3.getAnalogHat(LeftHatX) < 55) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(LeftHatY) < 117))) ) {
-	  steer(updatePS3);	
+    if( (PS3.PS3Connected && ((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137)))  ||  (PS3.PS3NavigationConnected && ((PS3.getAnalogHat(LeftHatX) > 200) || (PS3.getAnalogHat(LeftHatX) < 55) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(LeftHatY) < 117))) )
+      steer(updatePS3);	
 #endif // ENABLE_PS3
 #ifdef ENABLE_WII
-    if(Wii.wiimoteConnected && !Wii.wiiUProControllerConnected && !commandSent) {
-      if(Wii.getButtonPress(B))
-        steer(updateWii);
-      else if(Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117))
-        steer(updateWii);
-    } else if(Wii.wiiUProControllerConnected && !commandSent) { // The Wii U Pro Controller Joysticks has an range from approximately 800-3200
+    /* Dead man's switch */
+    if(Wii.wiimoteConnected) { 
       if(Wii.getButtonPress(MINUS)) {
         stopAndReset();
         while(!Wii.getButtonPress(PLUS))
           Usb.Task();
-      }
-      else if(Wii.getAnalogHat(LeftHatY) > 2200 || Wii.getAnalogHat(LeftHatY) < 1800 || Wii.getAnalogHat(RightHatY) > 2200 || Wii.getAnalogHat(RightHatY) < 1800)
-        steer(updateWii);
+      }     
     }
+    
+    /* Joystick control */
+    if(!commandSent && ( (Wii.wiimoteConnected && !Wii.wiiUProControllerConnected && Wii.getButtonPress(B))  ||  (Wii.nunchuckConnected && ((Wii.getAnalogHat(HatX) > 137) || (Wii.getAnalogHat(HatX) < 117) || (Wii.getAnalogHat(HatY) > 137) || (Wii.getAnalogHat(HatY) < 117)))  ||  (Wii.wiiUProControllerConnected && ((Wii.getAnalogHat(LeftHatY) > 2200) || (Wii.getAnalogHat(LeftHatY) < 1800) || (Wii.getAnalogHat(RightHatY) > 2200) || (Wii.getAnalogHat(RightHatY) < 1800))) ) ) // The Wii U Pro Controller Joysticks has an range from approximately 800-3200
+      steer(updateWii);    
 #endif // ENABLE_WII
 #ifdef ENABLE_XBOX
-    if(Xbox.Xbox360Connected[0] && !commandSent) { // We will only read from the first controller, up to four is supported by one receiver
-      if(Xbox.getButtonPress(0,BACK)) {
+    /* Dead man's switch */
+    if(Xbox.Xbox360Connected[0]) { // We will only read from the first controller, up to four is supported by one receiver
+      if(Xbox.getButtonPress(0,BACK)) { 
         stopAndReset();
         while(!Xbox.getButtonPress(0,START))
           Usb.Task();
       }
-      else if((Xbox.getAnalogHat(0,LeftHatY) < -7500) || (Xbox.getAnalogHat(0,RightHatY) < -7500) || (Xbox.getAnalogHat(0,LeftHatY) > 7500) || (Xbox.getAnalogHat(0,RightHatY) > 7500))
-        steer(updateXbox);
     }
+      
+    /* Joystick control */
+    if(Xbox.Xbox360Connected[0] && ((Xbox.getAnalogHat(0,LeftHatY) < -7500) || (Xbox.getAnalogHat(0,RightHatY) < -7500) || (Xbox.getAnalogHat(0,LeftHatY) > 7500) || (Xbox.getAnalogHat(0,RightHatY) > 7500)))
+      steer(updateXbox);
 #endif // ENABLE_XBOX
+
     if(!commandSent) // If there hasn't been send a command by now, then send stop
       steer(stop);
   }
