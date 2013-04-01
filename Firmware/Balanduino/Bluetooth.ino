@@ -222,25 +222,27 @@ void readUsb() {
     }
   }
 #endif // ENABLE_SPP
-  if(millis() > (SPPreceiveControlTimestamp+SPPreceiveControlTimeout)) {
+  if (millis() > (SPPreceiveControlTimestamp+SPPreceiveControlTimeout)) {
     commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
 #ifdef ENABLE_PS3
-    if(PS3.PS3Connected) {
-      if(PS3.getButtonPress(SELECT)) {
+    if (PS3.PS3Connected || PS3.PS3NavigationConnected) {
+      if (PS3.getButtonPress(SELECT)) {
         stopAndReset();
         while(!PS3.getButtonPress(START))
           Usb.Task();
-		return;
-      }
-	  
-	  if (PS3.getButtonClick(TRIANGLE))
-		lineFollowingEnabled = !lineFollowingEnabled;
-	  if((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137))
-	    steer(updatePS3);	 		
-    } else if(PS3.PS3NavigationConnected) {
-      if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
-        steer(updatePS3);
+      } else {	  
+		if (PS3.getButtonClick(TRIANGLE))
+		  lineFollowingEnabled = !lineFollowingEnabled;		  
+	  }
     }
+	
+	if (PS3.PS3Connected) {
+		if (PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
+			steer(updatePS3);
+	} else if (PS3.PS3NavigationConnected) {		  
+		if ((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137))
+			steer(updatePS3);	 		
+	}	
 #endif // ENABLE_PS3
 #ifdef ENABLE_WII
     if(Wii.wiimoteConnected && !Wii.wiiUProControllerConnected && !commandSent) {
