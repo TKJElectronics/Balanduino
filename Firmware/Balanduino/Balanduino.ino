@@ -249,11 +249,6 @@ void loop() {
 #endif
 }
 
-void lineInterrupt()
-{
-  lineDetected = true;
-}
-
 boolean lineFollowingCurrentDirection = 0;
 boolean lineFollowingStateChanged = false;
 void lineFollowingSteer()
