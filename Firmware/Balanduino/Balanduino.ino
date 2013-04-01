@@ -174,6 +174,8 @@ void setup() {
   analogWrite(buzzer,0);
   sbi(TCCR0B,CS00); // Set precaler back to 64
 
+  pinMode(2, INPUT); // Line following sensor
+  
   /* Setup timing */  
   kalmanTimer = micros();
   pidTimer = kalmanTimer;

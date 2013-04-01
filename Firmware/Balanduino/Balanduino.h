@@ -174,6 +174,5 @@ const double velocityScaleTurning = 70;
 
 bool lineFollowingEnabled;
 bool line_RunOnce;
-bool lineDetected;
 
 #endif

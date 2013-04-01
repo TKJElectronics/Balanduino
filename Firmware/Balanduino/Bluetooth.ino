@@ -230,9 +230,13 @@ void readUsb() {
         stopAndReset();
         while(!PS3.getButtonPress(START))
           Usb.Task();
+		return;
       }
-      else if((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137))
-        steer(updatePS3);
+	  
+	  if (PS3.getButtonClick(TRIANGLE))
+		lineFollowingEnabled = !lineFollowingEnabled;
+	  if((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137))
+	    steer(updatePS3);	 		
     } else if(PS3.PS3NavigationConnected) {
       if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
         steer(updatePS3);
