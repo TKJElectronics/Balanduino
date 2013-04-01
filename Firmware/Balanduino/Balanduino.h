@@ -123,6 +123,14 @@ uint32_t dataTimer; // This is used so it doesn't send data to often
 uint32_t wiiTimer; // This is used to read the USB endpoint more often when it's connected to a Wiimote
 uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, Wii and Xbox controllers
 
+/* Used to rumble controllers upon connection */
+bool ps3Rumble; // These are used to check if a controller has connected
+bool wiiRumble;
+bool xboxRumble;
+bool ps3RumbleEnabled; // These are used to turn rumble off again
+bool wiiRumbleEnabled;
+bool xboxRumbleEnabled;
+
 /* Direction set by the controllers or SPP library */
 bool steerForward;
 bool steerBackward;
