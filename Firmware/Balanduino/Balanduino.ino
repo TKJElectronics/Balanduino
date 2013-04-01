@@ -6,7 +6,7 @@
  * The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
  * The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
  * It can also be controlled by a PS3, Wii or a Xbox controller
- * For details, see http://blog.tkjelectronics.dk/2012/03/the-balancing-robot/
+ * For details, see: http://balanduino.net/
  */
  
 /* Use this to enable and disable the different controllers */
