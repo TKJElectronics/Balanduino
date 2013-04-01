@@ -278,10 +278,9 @@ void readUsb() {
 #ifdef ENABLE_PS3
   if(PS3.PS3Connected) { // Normal PS3 controller
     if(!ps3Rumble) {
-      ledTimer = millis() - 500; // This will turn the rumble off again after 500ms
-      PS3.setRumbleOn(RumbleLow); // The PS3 controller will automatically turn off again
+      ledTimer = millis() - 500; // Wait 500ms before turning rumble on
       ps3Rumble = true;
-      ps3RumbleEnabled = true;
+      ps3RumbleEnable = true; // We can't sent command to the PS3 controller that often, so we don't send the command here like the other controllers
     }
   } else
     ps3Rumble = false;
@@ -338,27 +337,34 @@ void updateLEDs() {
   uint8_t Led;
 #ifdef ENABLE_PS3
   if(PS3.PS3Connected) {
-    if(ps3RumbleEnabled) {
-      ps3RumbleEnabled = false;
+    if(ps3RumbleEnable) {
+      ps3RumbleEnable = false;      
+      PS3.setRumbleOn(RumbleLow);
+      ps3RumbleDisable = true;
+      ledTimer -= 500; // Turn off again in 500ms
+    } else if(ps3RumbleDisable) {
+      ps3RumbleDisable = false;
       PS3.setRumbleOff();
-    }
-    if(PS3.getStatus(Shutdown)) { // Blink all LEDs
-      if(ps3OldLed)
-        Led = 0x00;
-      else
+      ledTimer -= 500; // Run this function again in 500ms
+    } else {
+      if(PS3.getStatus(Shutdown)) { // Blink all LEDs
+        if(ps3OldLed)
+          Led = 0x00;
+        else
+          Led = 0x0F;
+      }
+      else if(PS3.getStatus(Dying))
+        Led = 0x01;
+      else if(PS3.getStatus(Low))
+        Led = 0x03;
+      else if(PS3.getStatus(High))
+        Led = 0x07;
+      else if(PS3.getStatus(Full))
         Led = 0x0F;
-    }
-    else if(PS3.getStatus(Dying))
-      Led = 0x01;
-    else if(PS3.getStatus(Low))
-      Led = 0x03;
-    else if(PS3.getStatus(High))
-      Led = 0x07;
-    else if(PS3.getStatus(Full))
-      Led = 0x0F;
-    if(Led != ps3OldLed) {
-      ps3OldLed = Led;
-      PS3.setLedRaw(Led << 1);
+      if(Led != ps3OldLed) {
+        ps3OldLed = Led;
+        PS3.setLedRaw(Led << 1);
+      }
     }
   } else if(PS3.PS3NavigationConnected) {
     if(PS3.getStatus(Shutdown))
