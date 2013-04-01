@@ -160,6 +160,8 @@ void loop() {
   accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
   gyroRate = (double)gyroX/131.0; // Convert to deg/s
   gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
+  if(gyroAngle < 0 || gyroAngle > 360)
+    gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
 
   pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-kalmanTimer)/1000000.0); // Calculate the angle using a Kalman filter
   kalmanTimer = micros();
