@@ -206,7 +206,7 @@ void loop() {
   /* Drive motors */
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
   // If it's already balancing it has to be ±45 degrees before it stops trying to balance
-  if((layingDown && (pitch < 170 || pitch > 190)) || (!layingDown && (pitch < 135 || pitch > 225))) {
+  if((layingDown && (pitch < targetAngle-10 || pitch > targetAngle+10)) || (!layingDown && (pitch < targetAngle-45 || pitch > targetAngle+45))) {
     layingDown = true; // The robot is in a unsolvable position, so turn off both motors and wait until it's vertical again
     stopAndReset();
   }

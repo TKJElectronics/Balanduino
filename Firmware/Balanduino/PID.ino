@@ -30,10 +30,10 @@ void PID(double restAngle, double offset, double turning, double dt) {
     }
     restAngle -= (double)wheelVelocity/velocityScaleStop;
     
-    if(restAngle < 170) // Limit rest Angle
-      restAngle = 170;
-    else if(restAngle > 190)
-      restAngle = 190;      
+    if(restAngle < targetAngle-10) // Limit rest Angle
+      restAngle = targetAngle-10;
+    else if(restAngle > targetAngle+10)
+      restAngle = targetAngle+10;      
   }
   
   if(restAngle - lastRestAngle > 1) // Don't change restAngle with more than 1 degree in each loop
