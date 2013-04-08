@@ -10,6 +10,8 @@ To compile the sketch you will need the newest version of the [Arduino IDE](http
 
 Then open the sketch by clicking on [Balanduino.ino](Balanduino.ino).
 
+The final structure should look like this:
+
 * Arduino/
 	* Balanduino/
 		* Balanduino.ino

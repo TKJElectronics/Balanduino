@@ -8,7 +8,9 @@ This is the Balanduino hardware add-on for the Arduino IDE.
 
 To use it, simply create a folder named hardware inside your sketchbook directory.
 
-Now move the Balanduino directory inside that folder. The final structure should look like this:
+Now move the Balanduino directory inside that folder.
+
+The final structure should look like this:
 
 * Arduino/
 	* Balanduino/
