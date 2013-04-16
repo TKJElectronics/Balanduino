@@ -77,7 +77,9 @@ static const uint8_t A5 = 12;
 
 #define NUM_DIGITAL_PINS            26
 #define NUM_ANALOG_INPUTS           6
+
 #define analogInputToDigitalPin(p)  ((p < 6) ? (p) + 7 : -1)
+#define analogPinToChannel(p)       ((p < 6) ? (p) : (p) - 7)
 
 #define digitalPinHasPWM(p)         ((p) == 3 || (p) == 4 || (p) == 5 || (p) == 6 || (p) == 17 || (p) == 18)
 
