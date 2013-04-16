@@ -6,6 +6,6 @@ _________
 
 This is the PCB for the Balanduino.
 
-To open the files you will need to download an install [EAGLE](http://www.cadsoftusa.com/download-eagle/).
+To open the files you will need to download and install [EAGLE](http://www.cadsoftusa.com/download-eagle/).
 
 For more information send us an email at <mail@tkjelectronics.com>.
