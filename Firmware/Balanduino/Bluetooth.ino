@@ -77,11 +77,11 @@ void sendBluetoothData() {
       stringBuf[8] = '\0';
       
       #if defined(__AVR_ATmega644__)
-        strcat(stringBuf,"644,");
+        strcat(stringBuf,"ATmega644,");
       #elif defined(__AVR_ATmega1284__)
-        strcat(stringBuf,"1284,");
+        strcat(stringBuf,"ATmega1284,");
       #else
-        strcat(stringBuf,"?,");
+        strcat(stringBuf,"Unknown,");
       #endif
       
       itoa(batteryLevel,convBuf,10);
