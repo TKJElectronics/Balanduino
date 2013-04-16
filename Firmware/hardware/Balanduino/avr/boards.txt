@@ -1,0 +1,24 @@
+##############################################################
+
+balanduino.name=Balanduino w/ ATmega644A
+
+balanduino.upload.tool=avrdude
+balanduino.upload.protocol=arduino
+balanduino.upload.maximum_size=63488
+balanduino.upload.speed=38400
+
+balanduino.bootloader.tool=avrdude
+balanduino.bootloader.path=
+balanduino.bootloader.file=ATmegaBOOT_168_atmega644a_8m.hex
+balanduino.bootloader.low_fuses=0xFD
+balanduino.bootloader.high_fuses=0xD4
+balanduino.bootloader.extended_fuses=0xFD
+balanduino.bootloader.unlock_bits=0x3F
+balanduino.bootloader.lock_bits=0x0F
+
+balanduino.build.mcu=atmega644
+balanduino.build.f_cpu=8000000L
+balanduino.build.core=arduino
+balanduino.build.variant=standard
+
+##############################################################
