@@ -78,8 +78,8 @@ void sendBluetoothData() {
       
       #if defined(__AVR_ATmega644__)
         strcat(stringBuf,"ATmega644,");
-      #elif defined(__AVR_ATmega1284__)
-        strcat(stringBuf,"ATmega1284,");
+      #elif defined(__AVR_ATmega1284P__)
+        strcat(stringBuf,"ATmega1284P,");
       #else
         strcat(stringBuf,"Unknown,");
       #endif
