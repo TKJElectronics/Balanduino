@@ -6,6 +6,14 @@ _________
 
 This is the code for the Balanduino, the Open Source Balancing robot.
 
+# Download
+
+To download the entire repository including all submodules run the following command in a terminal:
+
+```sh
+curl https://raw.github.com/TKJElectronics/Balanduino/master/download.sh | sh
+```
+
 # Arduino compatible
 
 To use the Balanduino as a normal Arduino board you need to add the hardware add-on to the Arduino IDE.
