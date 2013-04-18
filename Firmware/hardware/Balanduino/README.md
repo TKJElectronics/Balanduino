@@ -6,7 +6,7 @@ _________
 
 This is the Balanduino hardware add-on for the Arduino IDE.
 
-To use it, simply create a folder named hardware inside your sketchbook directory.
+To use it, simply create a folder named hardware inside your [sketchbook](http://arduino.cc/en/Guide/Environment#sketchbook) directory.
 
 Now move the Balanduino directory inside that folder.
 

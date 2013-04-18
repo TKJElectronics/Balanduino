@@ -6,7 +6,7 @@ _________
 
 This is the code for the Balanduino balancing robot.
 
-You should put all these directories and files inside your Arduino sketchbook folder.
+You should put all these directories and files inside your Arduino [sketchbook](http://arduino.cc/en/Guide/Environment#sketchbook) folder.
 
 The final structure should look like this:
 
