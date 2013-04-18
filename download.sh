@@ -1,9 +1,9 @@
 #! /bin/sh
-# Script to automaticly download a project including all submodules
+# Script to automaticly download the project including all submodules
 # It then updates all submodules and removes all files related to git
 # It then zips it, so it's ready to upload
 
-url=git@bitbucket.org:Lauszus/balanduino.git
+url=git://github.com/TKJElectronics/Balanduino.git
 
 dir="$(cd "$(dirname "$0")" && pwd)"
 echo "Working path:" $dir
