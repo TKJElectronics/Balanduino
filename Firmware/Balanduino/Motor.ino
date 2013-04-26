@@ -1,6 +1,6 @@
 void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is a value in percentage 0-100%
   if(speedRaw > 100)
-    speedRaw = 100;
+    speedRaw = 100.0;
   uint16_t speed = speedRaw*((double)PWMVALUE)/100.0; // Scale from 0-100 to 0-PWMVALUE
   if(motor == left) {
     setPWM(leftPWM,speed); // Left motor pwm
@@ -39,7 +39,7 @@ void stopMotor(Command motor) {
 }
 void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR
   if(pin == leftPWM) {
-    OCR1AH = (dutyCycle >> 8); 
+    OCR1AH = (dutyCycle >> 8);
     OCR1AL = (dutyCycle & 0xFF);
   } else if(pin == rightPWM) {
     OCR1BH = (dutyCycle >> 8);

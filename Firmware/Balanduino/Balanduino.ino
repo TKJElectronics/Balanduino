@@ -231,10 +231,10 @@ void loop() {
   }
 
   /* Read the Bluetooth dongle and send PID and IMU values */
-#ifdef ENABLE_USB  
+#ifdef ENABLE_USB
   readUsb();
 #endif
-#ifdef ENABLE_SPP  
+#ifdef ENABLE_SPP
   sendBluetoothData();
 #endif
 #ifdef ENABLE_WII

@@ -16,9 +16,7 @@ void sendBluetoothData() {
     Usb.Task();
     if(sendPairConfirmation) {
       sendPairConfirmation = false;
-      stringBuf[0] = 'W';
-      stringBuf[1] = 'C';
-      stringBuf[2] = '\0';
+      strcpy(stringBuf,"WC");
       
       SerialBT.println(stringBuf);
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
@@ -51,13 +49,13 @@ void sendBluetoothData() {
       if(BackToSpot)
         stringBuf[2] = '1';
       else
-        stringBuf[2] = '0';        
+        stringBuf[2] = '0';
       stringBuf[3] = ',';
       stringBuf[4] = '\0';
       
       itoa(controlAngleLimit,convBuf,10);
       strcat(stringBuf,convBuf); 
-      strcat(stringBuf,","); 
+      strcat(stringBuf,",");
       itoa(turningAngleLimit,convBuf,10);
       strcat(stringBuf,convBuf);       
 
@@ -65,23 +63,16 @@ void sendBluetoothData() {
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
     } else if(sendInfo) {      
       sendInfo = false;
-  
-      stringBuf[0] = 'I';
-      stringBuf[1] = ',';
-      stringBuf[2] = Version_Major + '0';
-      stringBuf[3] = '.';
-      stringBuf[4] = Version_Minor + '0';
-      stringBuf[5] = '.';
-      stringBuf[6] = Version_Patch + '0';      
-      stringBuf[7] = ',';      
-      stringBuf[8] = '\0';
+      
+      strcpy(stringBuf,"I,");
+      strcat(stringBuf,version);
       
       #if defined(__AVR_ATmega644__)
-        strcat(stringBuf,"ATmega644,");
+        strcat(stringBuf,",ATmega644,");
       #elif defined(__AVR_ATmega1284P__)
-        strcat(stringBuf,"ATmega1284P,");
+        strcat(stringBuf,",ATmega1284P,");
       #else
-        strcat(stringBuf,"Unknown,");
+        strcat(stringBuf,",Unknown,");
       #endif
       
       itoa(batteryLevel,convBuf,10);
@@ -127,13 +118,15 @@ void readUsb() {
         if(input[i] == ';') // Keep reading until it reads a semicolon
           break;
         i++;
+        if(i >= sizeof(input)) // String is too long
+          return;
       }
       
       if(input[0] == 'A') { // Abort
         stopAndReset();
         while(SerialBT.read() != 'C') // Wait until continue is send
           Usb.Task();
-      }     
+      }
       
       /* For sending PID and IMU values */
       else if(input[0] == 'G') { // The Processing/Android application sends when it needs the PID or IMU values
@@ -181,8 +174,8 @@ void readUsb() {
           } else if(input[2] == ',' && input[3] == '1') {
             BackToSpot = 1;
             updateBackToSpot();
-          }            
-        }           
+          }
+        }
       }
 
       else if(input[0] == 'I') { // IMU trasmitting states

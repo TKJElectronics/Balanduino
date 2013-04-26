@@ -4,9 +4,7 @@
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
 /* Firmware Version Information */
-const uint8_t Version_Major = 0;
-const uint8_t Version_Minor = 8;
-const uint8_t Version_Patch = 1;
+const char* version = "0.9.0";
 
 char stringBuf[30];
 char convBuf[10];
@@ -83,7 +81,6 @@ const uint8_t KpAddr = 6+sizeof(double)*0; // A double is 4-bytes long inside an
 const uint8_t KiAddr = 6+sizeof(double)*1;
 const uint8_t KdAddr = 6+sizeof(double)*2;
 const uint8_t targetAngleAddr = 6+sizeof(double)*3;
-
 
 /* IMU Data */
 int16_t accY;
