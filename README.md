@@ -25,7 +25,7 @@ See the [Hardware Readme](Firmware/hardware/README.md) for more information.
 The Balanduino hardware consist of an ATmega644A running at 8MHz.
 
 A MPU-6050 3-axis accelerometer and gyroscope.
-The accelerometer and gyroscope readings are combined using the Kalman filter library: <https://github.com/TKJElectronics/KalmanFilter>.
+The accelerometer and gyroscope readings are combined using a Kalman filter library. See my blog post: <http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/> and source <https://github.com/TKJElectronics/KalmanFilter> for more information.
 
 USB Host support is implemented using the MAX3421E and the USB Host library: <https://github.com/felis/USB_Host_Shield_2.0>.
 
