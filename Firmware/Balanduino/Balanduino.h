@@ -90,7 +90,7 @@ int16_t gyroX;
 uint8_t i2cBuffer[8]; // Buffer for I2C data
 
 // Results
-double accAngle;
+double accAngle, lastAccAngle;
 double gyroRate;
 double gyroAngle;
 double pitch;

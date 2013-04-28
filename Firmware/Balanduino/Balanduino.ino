@@ -191,13 +191,22 @@ void loop() {
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
   accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
+  
   gyroRate = (double)gyroX/131.0; // Convert to deg/s
   gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
   if(gyroAngle < 0 || gyroAngle > 360)
     gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
-
-  pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-kalmanTimer)/1000000.0); // Calculate the angle using a Kalman filter
+  
+  // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
+  if((accAngle < 10 && lastAccAngle > 350) || (accAngle > 350 && lastAccAngle < 10)) {
+    pitch = accAngle;
+    gyroAngle = accAngle;
+    kalman.setAngle(accAngle);
+  } else
+    pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-kalmanTimer)/1000000.0); // Calculate the angle using a Kalman filter
+  
   kalmanTimer = micros();
+  lastAccAngle = accAngle;
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
   /* Drive motors */
