@@ -143,10 +143,9 @@ void setup() {
   while(i2cWrite(0x19,0x13,false)); // Set the sample rate to 400Hz
   while(i2cWrite(0x1A,0x00,false)); // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
   while(i2cWrite(0x6B,0x01,true)); // PLL with X axis gyroscope reference and disable sleep mode
-
-  uint8_t buf;
-  while(i2cRead(0x75,&buf,1));
-  if(buf != 0x68) { // Read "WHO_AM_I" register
+  
+  while(i2cRead(0x75,i2cBuffer,1));
+  if(i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
     Serial.print(F("Error reading sensor"));
     while(1); // Halt
   }
@@ -154,10 +153,9 @@ void setup() {
   delay(100); // Wait for the sensor to get ready
   
   /* Set kalman and gyro starting angle */
-  uint8_t data[4];
-  while(i2cRead(0x3D,data,4));
-  accY = ((data[0] << 8) | data[1]);
-  accZ = ((data[2] << 8) | data[3]);
+  while(i2cRead(0x3D,i2cBuffer,4));
+  accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
+  accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
   accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
@@ -185,11 +183,10 @@ void setup() {
 
 void loop() {
   /* Calculate pitch */
-  uint8_t data[8];
-  while(i2cRead(0x3D,data,8));
-  accY = ((data[0] << 8) | data[1]);
-  accZ = ((data[2] << 8) | data[3]);
-  gyroX = ((data[6] << 8) | data[7]);
+  while(i2cRead(0x3D,i2cBuffer,8));
+  accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
+  accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
+  gyroX = ((i2cBuffer[6] << 8) | i2cBuffer[7]);
   
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
