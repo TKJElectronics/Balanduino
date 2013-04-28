@@ -198,7 +198,7 @@ void loop() {
     gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
   
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
-  if((accAngle < 10 && lastAccAngle > 350) || (accAngle > 350 && lastAccAngle < 10)) {
+  if((accAngle < 90 && pitch > 270) || (accAngle > 270 && pitch < 90)) {
     pitch = accAngle;
     gyroAngle = accAngle;
     kalman.setAngle(accAngle);
@@ -206,7 +206,6 @@ void loop() {
     pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-kalmanTimer)/1000000.0); // Calculate the angle using a Kalman filter
   
   kalmanTimer = micros();
-  lastAccAngle = accAngle;
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
   /* Drive motors */
