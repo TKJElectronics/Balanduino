@@ -138,11 +138,12 @@ void setup() {
 
   /* Setup IMU Inputs */
   Wire.begin();
-  while(i2cWrite(0x1B,0x00,false)); // Set Gyro Full Scale Range to ±250deg/s
-  while(i2cWrite(0x1C,0x00,false)); // Set Accelerometer Full Scale Range to ±2g
-  while(i2cWrite(0x19,0x13,false)); // Set the sample rate to 400Hz
-  while(i2cWrite(0x1A,0x00,false)); // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
-  while(i2cWrite(0x6B,0x01,true)); // PLL with X axis gyroscope reference and disable sleep mode
+  i2cBuffer[0] = 19; // Set the sample rate to 400Hz - 8kHz/(19+1) = 400Hz
+  i2cBuffer[1] = 0x00; // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
+  i2cBuffer[2] = 0x00; // Set Gyro Full Scale Range to ±250deg/s
+  i2cBuffer[3] = 0x00; // Set Accelerometer Full Scale Range to ±2g
+  while(i2cWrite(0x19,i2cBuffer,4,false)); // Write to all four registers at once
+  while(i2cWrite(0x6B,0x09,true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
   
   while(i2cRead(0x75,i2cBuffer,1));
   if(i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
