@@ -235,7 +235,7 @@ void loop() {
       stopped = true;
     }
     batteryLevel = (double)analogRead(A0)/(12.0/(12.0+47.0))/1023.0*3.3; // The VIN pin is connected to a 47k-12k voltage divider
-    if(batteryLevel < 10.2) // Equal to 3.4V per cell
+    if(batteryLevel < 10.2 && batteryLevel > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
       analogWrite(buzzer,128);
     else
       analogWrite(buzzer,0);
