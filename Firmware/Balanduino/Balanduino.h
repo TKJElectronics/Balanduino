@@ -70,7 +70,7 @@ volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
 const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconected using the jumper
-uint8_t batteryLevel = 100; // Battery Percentage
+double batteryLevel = 0; // Battery level in voltage
 
 /* EEProm Address Definitions */
 const uint8_t InitializationFlagsAddr = 0;

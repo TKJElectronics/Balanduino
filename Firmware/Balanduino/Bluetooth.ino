@@ -75,10 +75,10 @@ void sendBluetoothData() {
         strcat(stringBuf,",Unknown,");
       #endif
       
-      itoa(batteryLevel,convBuf,10);
+      SerialBT.doubleToString(batteryLevel,convBuf);
       strcat(stringBuf,convBuf);
       
-      strcat(stringBuf,",");
+      strcat(stringBuf,"V,");
       SerialBT.doubleToString((double)millis()/60000.0,convBuf);
       strcat(stringBuf,convBuf);
       

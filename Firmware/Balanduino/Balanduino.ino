@@ -234,6 +234,11 @@ void loop() {
       targetPosition = wheelPosition;
       stopped = true;
     }
+    batteryLevel = (double)analogRead(A0)/(12.0/(12.0+47.0))/1023.0*3.3; // The VIN pin is connected to a 47k-12k voltage divider
+    if(batteryLevel < 10.2) // Equal to 3.4V per cell
+      analogWrite(buzzer,128);
+    else
+      analogWrite(buzzer,0);
   }
 
   /* Read the Bluetooth dongle and send PID and IMU values */
