@@ -4,7 +4,7 @@
 The code is released under the GNU General Public License.
 _________
 
-This are the needed libraries in order to compile the code.
+These are the needed libraries in order to compile the code.
 
 To use it, simply download the libraries and moved them into your [libraries folder](http://arduino.cc/en/Guide/Libraries).
 
