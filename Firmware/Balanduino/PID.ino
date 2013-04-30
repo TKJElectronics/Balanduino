@@ -46,6 +46,7 @@ void PID(double restAngle, double offset, double turning, double dt) {
   error = (restAngle - pitch);
   pTerm = Kp * error;
   integratedError += error*dt;
+  integratedError = constrain(integratedError, -1.0, 1.0); // Limit the integrated error
   iTerm = (Ki*100.0) * integratedError;
   dTerm = (Kd/100.0) * (error - lastError)/dt;
   lastError = error;
