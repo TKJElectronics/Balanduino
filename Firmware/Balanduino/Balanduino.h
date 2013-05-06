@@ -6,9 +6,6 @@
 /* Firmware Version Information */
 const char* version = "0.9.0";
 
-char stringBuf[30];
-char convBuf[10];
-
 bool sendData;
 bool sendSettings;
 bool sendInfo;

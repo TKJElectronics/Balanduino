@@ -1,11 +1,6 @@
 #ifdef ENABLE_USB
 
-#ifdef ENABLE_PS3
-uint8_t ps3OldLed;
-#endif
-#ifdef ENABLE_WII
-uint8_t wiiOldLed;
-#endif
+uint8_t ps3OldLed, wiiOldLed;
 #ifdef ENABLE_XBOX
 LED xboxOldLed;
 #endif
@@ -13,99 +8,67 @@ LED xboxOldLed;
 #ifdef ENABLE_SPP
 void sendBluetoothData() {
   if(SerialBT.connected && (millis() - dataTimer > 50)) {  // Only send data every 50ms
-    Usb.Task();
     if(sendPairConfirmation) {
       sendPairConfirmation = false;
-      strcpy(stringBuf,"WC");
-      
-      SerialBT.println(stringBuf);
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
+      
+      SerialBT.println("WC");
     } else if(sendPIDValues) {
       sendPIDValues = false;
-      
-      strcpy(stringBuf,"P,");
-      SerialBT.doubleToString(Kp,convBuf); // We use this helper function in the SPP library to convert from a double to a string
-      strcat(stringBuf,convBuf);
-      
-      strcat(stringBuf,",");
-      SerialBT.doubleToString(Ki,convBuf);
-      strcat(stringBuf,convBuf);
-      
-      strcat(stringBuf,",");
-      SerialBT.doubleToString(Kd,convBuf);
-      strcat(stringBuf,convBuf);
-      
-      strcat(stringBuf,",");
-      SerialBT.doubleToString(targetAngle,convBuf);
-      strcat(stringBuf,convBuf);
-      
-      SerialBT.println(stringBuf);
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
+      
+      SerialBT.print("P,");
+      SerialBT.print(Kp);
+      SerialBT.print(',');
+      SerialBT.print(Ki);
+      SerialBT.print(',');
+      SerialBT.print(Kd);
+      SerialBT.print(',');
+      SerialBT.println(targetAngle);
     } else if(sendSettings) {
       sendSettings = false;
-      
-      stringBuf[0] = 'S';
-      stringBuf[1] = ',';
-      if(BackToSpot)
-        stringBuf[2] = '1';
-      else
-        stringBuf[2] = '0';
-      stringBuf[3] = ',';
-      stringBuf[4] = '\0';
-      
-      itoa(controlAngleLimit,convBuf,10);
-      strcat(stringBuf,convBuf); 
-      strcat(stringBuf,",");
-      itoa(turningAngleLimit,convBuf,10);
-      strcat(stringBuf,convBuf);       
-
-      SerialBT.println(stringBuf);
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
+      
+      SerialBT.print("S,");
+      SerialBT.print((char)(BackToSpot + '0')); // Convert to ASCII
+      SerialBT.print(',');
+      SerialBT.print(controlAngleLimit);
+      SerialBT.print(',');
+      SerialBT.println(turningAngleLimit);
     } else if(sendInfo) {      
       sendInfo = false;
+      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
       
-      strcpy(stringBuf,"I,");
-      strcat(stringBuf,version);
+      SerialBT.print("I,");
+      SerialBT.print(version);
       
       #if defined(__AVR_ATmega644__)
-        strcat(stringBuf,",ATmega644,");
+        SerialBT.print(",ATmega644,");
       #elif defined(__AVR_ATmega1284P__)
-        strcat(stringBuf,",ATmega1284P,");
+        SerialBT.print(",ATmega1284P,");
       #else
-        strcat(stringBuf,",Unknown,");
+        SerialBT.print(",Unknown,");
       #endif
       
-      SerialBT.doubleToString(batteryLevel,convBuf);
-      strcat(stringBuf,convBuf);
-      
-      strcat(stringBuf,"V,");
-      SerialBT.doubleToString((double)millis()/60000.0,convBuf);
-      strcat(stringBuf,convBuf);
-      
-      SerialBT.println(stringBuf);
-      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
+      SerialBT.print(batteryLevel);
+      SerialBT.print("V,");
+      SerialBT.println((double)millis()/60000.0);
     } else if(sendData) {
       dataTimer = millis();
-      strcpy(stringBuf,"V,");
-      SerialBT.doubleToString(accAngle,convBuf); // We use this helper function in the SPP library to convert from a double to a string
-      strcat(stringBuf,convBuf);
-        
-      strcat(stringBuf,",");
-      SerialBT.doubleToString(gyroAngle,convBuf);
-      strcat(stringBuf,convBuf);
       
-      strcat(stringBuf,",");
-      SerialBT.doubleToString(pitch,convBuf);
-      strcat(stringBuf,convBuf);
-        
-      SerialBT.println(stringBuf);
+      SerialBT.print("V,");
+      SerialBT.print(accAngle);
+      SerialBT.print(',');
+      SerialBT.print(gyroAngle);
+      SerialBT.print(',');
+      SerialBT.println(pitch);
     }
   }
 }
 #endif // ENABLE_SPP
 
 void readUsb() {
-  Usb.Task();
+  Usb.Task(); // The SPP data is actually not send until this is called, one could call SerialBT.send() directly as well
 #ifdef ENABLE_SPP
   if(SerialBT.connected) { // The SPP connection won't return data as fast as the controllers, so we will handle it separately
     if(SerialBT.available()) {
@@ -113,12 +76,12 @@ void readUsb() {
       uint8_t i = 0;
       while(1) {
         input[i] = SerialBT.read();   
-        if(input[i] == 0) // Error while reading the string
+        if(input[i] == -1) // Error while reading the string
           return;
         if(input[i] == ';') // Keep reading until it reads a semicolon
           break;
         i++;
-        if(i >= sizeof(input)) // String is too long
+        if(i >= sizeof(input)/sizeof(input[0])) // String is too long
           return;
       }
       
@@ -129,12 +92,12 @@ void readUsb() {
       }
       
       /* For sending PID and IMU values */
-      else if(input[0] == 'G') { // The Processing/Android application sends when it needs the PID or IMU values
-        if(input[1] == 'P') // PID Values
-          sendPIDValues = true;      
+      else if(input[0] == 'G') { // The Processing/Android application sends when it needs the PID, settings or info
+        if(input[1] == 'P') // Get PID Values
+          sendPIDValues = true;
         else if(input[1] == 'S') // Get settings
           sendSettings = true;
-        else if(input[1] == 'I') // Get Firmware version
+        else if(input[1] == 'I') // Get info
           sendInfo = true;
       }
       
@@ -202,11 +165,13 @@ void readUsb() {
           sppData2 = atof(strtok(NULL, ";")); // Roll
           steer(imu);
         }
-        
+#ifdef ENABLE_WII
         else if(input[1] == 'W') { // Pair with a new Wiimote or Wii U Pro Controller
-          Btd.pairWithWiimote();
+          Wii.pair();
           sendPairConfirmation = true;  
-        } else if(input[1] == 'R') {
+        }
+#endif // ENABLE_WII
+        else if(input[1] == 'R') {
           restoreEEPROMValues(); // Restore the default PID values and target angle
           sendPIDValues = true;
           sendSettings = true;
