@@ -65,11 +65,8 @@ void sendBluetoothData() {
     }
   }
 }
-#endif // ENABLE_SPP
 
-void readUsb() {
-  Usb.Task(); // The SPP data is actually not send until this is called, one could call SerialBT.send() directly as well
-#ifdef ENABLE_SPP
+void readSPPData() {
   if(SerialBT.connected) { // The SPP connection won't return data as fast as the controllers, so we will handle it separately
     if(SerialBT.available()) {
       char input[30];
@@ -131,13 +128,8 @@ void readUsb() {
         }
 
         else if(input[1] == 'B') { // Set Back To Spot
-          if(input[2] == ',' && input[3] == '0') {
-            BackToSpot = 0;
-            updateBackToSpot();
-          } else if(input[2] == ',' && input[3] == '1') {
-            BackToSpot = 1;
-            updateBackToSpot();
-          }
+          BackToSpot = input[3] - '0'; // Convert from ASCII to number
+          updateBackToSpot();
         }
       }
 
@@ -179,7 +171,16 @@ void readUsb() {
       }
     }
   }
+}
 #endif // ENABLE_SPP
+
+void readUsb() {
+  Usb.Task(); // The SPP data is actually not send until this is called, one could call SerialBT.send() directly as well
+  
+#ifdef ENABLE_SPP
+  readSPPData();
+#endif // ENABLE_SPP
+  
   if(millis() > (SPPreceiveControlTimestamp+SPPreceiveControlTimeout)) {
     commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
 #ifdef ENABLE_PS3
