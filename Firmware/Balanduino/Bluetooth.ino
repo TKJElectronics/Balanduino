@@ -30,7 +30,7 @@ void sendBluetoothData() {
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
       
       SerialBT.print("S,");
-      SerialBT.print((char)(BackToSpot + '0')); // Convert to ASCII
+      SerialBT.print(BackToSpot);
       SerialBT.print(',');
       SerialBT.print(controlAngleLimit);
       SerialBT.print(',');
