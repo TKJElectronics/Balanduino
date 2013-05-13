@@ -192,6 +192,8 @@ void readUsb() {
       }
       else if((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137))
         steer(updatePS3);
+      else if(PS3.getButtonPress(CROSS))
+        steer(updatePS3);
     } else if(PS3.PS3NavigationConnected) {
       if(PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
         steer(updatePS3);
@@ -441,6 +443,24 @@ void steer(Command command) {
       } else if(((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) {
         turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,turningAngleLimit); // Scale from 0-255 to 0-turningAngleLimit
         steerRight = true;
+      }
+      else if(PS3.getButtonPress(CROSS)) {
+        if(PS3.getAngle(Pitch) > 180) {
+          targetOffset = scale(PS3.getAngle(Pitch),180,216,0,controlAngleLimit);
+          steerForward = true;
+        }
+        else if(PS3.getAngle(Pitch) < 180) {
+          targetOffset = scale(PS3.getAngle(Pitch),180,144,0,controlAngleLimit);
+          steerBackward = true;
+        }
+        if(PS3.getAngle(Roll) > 180) {
+          turningOffset = scale(PS3.getAngle(Roll),180,225,0,turningAngleLimit);
+          steerRight = true;
+        }
+        else if(PS3.getAngle(Roll) < 180) {
+          turningOffset = scale(PS3.getAngle(Roll),180,135,0,turningAngleLimit);
+          steerLeft = true;
+        }
       }
     } else { // It must be a Navigation controller then
       if(PS3.getAnalogHat(LeftHatY) < 117) {
