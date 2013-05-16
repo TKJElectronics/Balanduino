@@ -318,7 +318,7 @@ void updateLEDs() {
         Led = 0x0F;
       if(Led != ps3OldLed) {
         ps3OldLed = Led;
-        PS3.setLedRaw(Led << 1);
+        PS3.setLedRaw(Led);
       }
     }
   } else if(PS3.PS3NavigationConnected) {
