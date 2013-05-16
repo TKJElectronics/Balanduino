@@ -217,12 +217,12 @@ void readUsb() {
 #endif // ENABLE_WII
 #ifdef ENABLE_XBOX
     if(Xbox.Xbox360Connected[0] && !commandSent) { // We will only read from the first controller, up to four is supported by one receiver
-      if(Xbox.getButtonPress(0,BACK)) {
+      if(Xbox.getButtonPress(BACK)) {
         stopAndReset();
-        while(!Xbox.getButtonPress(0,START))
+        while(!Xbox.getButtonPress(START))
           Usb.Task();
       }
-      else if((Xbox.getAnalogHat(0,LeftHatY) < -7500) || (Xbox.getAnalogHat(0,RightHatY) < -7500) || (Xbox.getAnalogHat(0,LeftHatY) > 7500) || (Xbox.getAnalogHat(0,RightHatY) > 7500))
+      else if((Xbox.getAnalogHat(LeftHatY) < -7500) || (Xbox.getAnalogHat(RightHatY) < -7500) || (Xbox.getAnalogHat(LeftHatY) > 7500) || (Xbox.getAnalogHat(RightHatY) > 7500))
         steer(updateXbox);
     }
 #endif // ENABLE_XBOX
@@ -255,7 +255,7 @@ void readUsb() {
   if(Xbox.Xbox360Connected[0]) { // Xbox wireless controller
     if(!xboxRumble) {
       ledTimer = millis() - 500; // This will turn the rumble off again after 500ms
-      Xbox.setRumbleOn(0,0x00,0xFF);
+      Xbox.setRumbleOn(0x00,0xFF);
       xboxRumble = true;
       xboxRumbleEnabled = true;      
     }
@@ -359,9 +359,9 @@ void updateLEDs() {
   if(Xbox.Xbox360Connected[0]) {
     if(xboxRumbleEnabled) {
       xboxRumbleEnabled = false;
-      Xbox.setRumbleOff(0);
+      Xbox.setRumbleOff();
     }
-    uint8_t batteryLevel = Xbox.getBatteryLevel(0);
+    uint8_t batteryLevel = Xbox.getBatteryLevel();
     //Serial.print("BatteryLevel: ");Serial.println(batteryLevel);
     LED xboxLed;
     if(batteryLevel == 0)
@@ -374,7 +374,7 @@ void updateLEDs() {
       xboxLed = LED4;
     if(xboxLed != xboxOldLed) {
       xboxOldLed = xboxLed;
-      Xbox.setLedOn(0,xboxLed);
+      Xbox.setLedOn(xboxLed);
     }
   }
 #endif // ENABLE_XBOX
@@ -539,18 +539,18 @@ void steer(Command command) {
 #endif // ENABLE_WII
 #ifdef ENABLE_XBOX
   if(command == updateXbox) {
-    if(Xbox.getAnalogHat(0,LeftHatY) > 7500 && Xbox.getAnalogHat(0,RightHatY) > 7500) {
-      targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),15002,65534,0,controlAngleLimit); // Scale from 15002-65534 to 0-controlAngleLimit
+    if(Xbox.getAnalogHat(LeftHatY) > 7500 && Xbox.getAnalogHat(RightHatY) > 7500) {
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY)+(int32_t)Xbox.getAnalogHat(RightHatY),15002,65534,0,controlAngleLimit); // Scale from 15002-65534 to 0-controlAngleLimit
       steerForward = true;
-    } else if(Xbox.getAnalogHat(0,LeftHatY) < -7500 && Xbox.getAnalogHat(0,RightHatY) < -7500) {
-      targetOffset = scale((int32_t)Xbox.getAnalogHat(0,LeftHatY)+(int32_t)Xbox.getAnalogHat(0,RightHatY),-15002,-65536,0,controlAngleLimit); // Scale from -15002-(-65536) to 0-controlAngleLimit
+    } else if(Xbox.getAnalogHat(LeftHatY) < -7500 && Xbox.getAnalogHat(RightHatY) < -7500) {
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY)+(int32_t)Xbox.getAnalogHat(RightHatY),-15002,-65536,0,controlAngleLimit); // Scale from -15002-(-65536) to 0-controlAngleLimit
       steerBackward = true;
     }
-    if(((int32_t)Xbox.getAnalogHat(0,RightHatY) - (int32_t)Xbox.getAnalogHat(0,LeftHatY)) > 7500) {
-      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-turningAngleLimit
+    if(((int32_t)Xbox.getAnalogHat(RightHatY) - (int32_t)Xbox.getAnalogHat(LeftHatY)) > 7500) {
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-turningAngleLimit
       steerLeft = true;
-    } else if(((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)) > 7500) {
-      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(0,LeftHatY) - (int32_t)Xbox.getAnalogHat(0,RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-turningAngleLimit
+    } else if(((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)) > 7500) {
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)),0,65535,0,turningAngleLimit); // Scale from 0-65535 to 0-turningAngleLimit
       steerRight = true;
     }
   }
