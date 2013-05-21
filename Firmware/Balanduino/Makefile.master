@@ -96,7 +96,7 @@ endif
 
 # Version-specific settings
 ifdef THIRD_PARTY_HARDWARE
-	ARD_BOARDS = $(THIRD_PARTY_HARDWARE)/boards.txt
+    ARD_BOARDS = $(THIRD_PARTY_HARDWARE)/boards.txt
     CORE = $(shell sed -n 's/$(BOARD)\.build\.core=\(.*\)/\1/p' < $(ARD_BOARDS))
     ARD_SRC_DIR = $(THIRD_PARTY_HARDWARE)/cores/$(CORE)
     ARD_MAIN = $(ARD_SRC_DIR)/main.cpp
