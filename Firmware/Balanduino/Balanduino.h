@@ -175,4 +175,40 @@ const double positionScaleD = 500;
 const double velocityScaleMove = 70;
 const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
+
+// Define functions so makefile works
+void sendBluetoothData();
+void readSPPData();
+void readUsb();
+void updateLEDs();
+void steer(Command command);
+double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax);
+
+void checkInitializationFlags();
+void setInitializationFlags();
+void readEEPROMValues();
+void updateKp();
+void updateKi();
+void updateKd();
+void updateTargetAngle();
+void updateControlAngleLimit();
+void updateTurningAngleLimit();
+void updateBackToSpot();
+void restoreEEPROMValues();
+
+uint8_t i2cWrite(uint8_t registerAddress, uint8_t data, bool sendStop);
+uint8_t i2cWrite(uint8_t registerAddress, uint8_t* data, uint8_t length, bool sendStop);
+uint8_t i2cRead(uint8_t registerAddress, uint8_t* data, uint8_t nbytes);
+
+void moveMotor(Command motor, Command direction, double speedRaw);
+void stopMotor(Command motor);
+void setPWM(uint8_t pin, uint16_t dutyCycle);
+void stopAndReset();
+void leftEncoder();
+void rightEncoder();
+int32_t readLeftEncoder();
+int32_t readRightEncoder();
+
+void PID(double restAngle, double offset, double turning, double dt);
+
 #endif
