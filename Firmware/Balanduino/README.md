@@ -33,6 +33,6 @@ The final structure should look like this:
 		* USB\_Host\_Shield\_20/
 		* KalmanFilter/
 
-Advance users can also use the included [Makefile](Makefile) if they prefer.
+Advanced users can also use the included [Makefile](Makefile) if they prefer.
 
 For more information send us an email at <mail@tkjelectronics.com>.
