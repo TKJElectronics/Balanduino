@@ -176,7 +176,7 @@ const double velocityScaleMove = 70;
 const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
 
-// Define functions so makefile works
+// Function prototypes
 void sendBluetoothData();
 void readSPPData();
 void readUsb();
