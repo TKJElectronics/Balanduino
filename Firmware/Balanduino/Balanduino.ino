@@ -178,11 +178,15 @@ void setup() {
   pidTimer = kalmanTimer;
   encoderTimer = kalmanTimer;
   dataTimer = millis();
-  wiiTimer = dataTimer;
   ledTimer = dataTimer;
 }
 
 void loop() {
+#ifdef ENABLE_WII
+  if(Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
+      Usb.Task();
+#endif
+
   /* Calculate pitch */
   while(i2cRead(0x3D,i2cBuffer,8));
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
@@ -208,6 +212,11 @@ void loop() {
   
   kalmanTimer = micros();
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
+  
+#ifdef ENABLE_WII
+  if(Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
+      Usb.Task();
+#endif
 
   /* Drive motors */
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
@@ -227,7 +236,6 @@ void loop() {
     encoderTimer = micros();
     wheelPosition = readLeftEncoder() + readRightEncoder();
     wheelVelocity = wheelPosition - lastWheelPosition;
-    //wheelVelocity = 0.5*(wheelPosition - lastWheelPosition)+0.5*wheelVelocity;
     lastWheelPosition = wheelPosition;
     //Serial.print(wheelPosition);Serial.print('\t');Serial.print(targetPosition);Serial.print('\t');Serial.println(wheelVelocity);
     if(abs(wheelVelocity) <= 40 && !stopped) { // Set new targetPosition if braking
@@ -247,12 +255,5 @@ void loop() {
 #endif
 #ifdef ENABLE_SPP
   sendBluetoothData();
-#endif
-#ifdef ENABLE_WII
-  if(Wii.wiimoteConnected) { // We have to read much more often from the Wiimote to prevent lag
-    while((millis() - wiiTimer) < 10)
-      Usb.Task();
-  }
-  wiiTimer = millis();
 #endif
 }

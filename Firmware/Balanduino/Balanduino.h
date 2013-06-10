@@ -116,7 +116,6 @@ uint32_t kalmanTimer; // Timer used for the Kalman filter
 uint32_t pidTimer; // Timer used for the PID loop
 uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
 uint32_t dataTimer; // This is used so it doesn't send data to often
-uint32_t wiiTimer; // This is used to read the USB endpoint more often when it's connected to a Wiimote
 uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, Wii and Xbox controllers
 
 /* Used to rumble controllers upon connection */
