@@ -6,26 +6,6 @@ _________
 
 This is the code for the Balanduino, the Open Source Balancing robot.
 
-# Download
-
-To download the entire repository including all submodules run the following command in a terminal:
-
-```sh
-curl https://raw.github.com/TKJElectronics/Balanduino/master/download.sh | sh
-```
-
-To clone the project use the recursive command to clone all the submodules as well:
-
-```
-git clone --recursive https://github.com/TKJElectronics/Balanduino.git
-```
-
-To update all submodules run the following command:
-
-```
-git submodule foreach --recursive git pull origin master
-```
-
 # Arduino compatible
 
 To use the Balanduino as a normal Arduino board you need to add the hardware add-on to the Arduino IDE.
@@ -69,5 +49,25 @@ Or by using the Processing application: <https://github.com/TKJElectronics/Balan
 A video for the Kickstarter presentation of the robot can be found here: <http://www.youtube.com/watch?v=_kQniPbg9zc>.
 
 A video filmed with a GoPro mounted on the robot can be seen here: <http://www.youtube.com/watch?v=CvFcnb_9anM>.
+
+# Download
+
+To download the entire repository including all submodules run the following command in a terminal:
+
+```sh
+curl https://raw.github.com/TKJElectronics/Balanduino/master/download.sh | sh
+```
+
+To clone the project use the recursive command to clone all the submodules as well:
+
+```
+git clone --recursive https://github.com/TKJElectronics/Balanduino.git
+```
+
+To update all submodules run the following command:
+
+```
+git submodule foreach --recursive git pull origin master
+```
 
 For more information send us an email at <mail@tkjelectronics.com>.
