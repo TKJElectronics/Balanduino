@@ -71,7 +71,7 @@
 
 # Global configuration.
 ARD_REV ?= 105
-ARD_HOME ?= /Applications/Arduino1.0.5.app/Contents/Resources/Java
+ARD_HOME ?= /opt/Arduino
 
 ifneq ($(wildcard $(ARD_HOME)/hardware/tools/avr/bin/avrdude),)
     ARD_BIN ?= $(ARD_HOME)/hardware/tools/avr/bin
