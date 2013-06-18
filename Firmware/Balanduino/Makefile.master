@@ -1,4 +1,15 @@
 #
+# Version 1.0.0
+#
+# This work is based on the following original.
+# it includes many fixes and enhancements.
+# Origin URL https://github.com/xxxajk/Arduino_Makefile_master
+#
+# Installation note.
+# Place this file in Arduino/Arduino_Makefile_master/
+# Even better:
+#        just 'git pull' from your Arduino directory (where your sketches are) 
+#
 # Copyright 2011 Alan Burlison, alan@bleaklow.com.  All rights reserved.
 # Use is subject to license terms.
 #
@@ -31,10 +42,10 @@
 # ----------
 # BOARD = mega
 # PORT = /dev/term/0
-# THIRD_PARTY_HARDWARE = /Arduino/hardware/Sanguino
+# THIRD_PARTY_HARDWARE = ../hardware/Sanguino
 # INC_DIRS = ../common
 # LIB_DIRS = ../libraries/Task ../../libraries/VirtualWire
-# include ../../Makefile.master
+# include ../Arduino_Makefile_master/Makefile.master
 # ----------
 #
 # Where:
@@ -48,7 +59,7 @@
 # your environment, either by editing this file directly or by defining them in
 # the Makefile that includes this one, in which case they will override the
 # definitions below:
-#   ARD_REV      : Arduino software revision, e.g. 0017, 0018
+#   ARD_REV      : arduino software revision, e.g. 0017, 0018
 #   ARD_HOME     : installation directory of the Arduino software.
 #   ARD_BIN      : location of compiler binaries
 #   AVRDUDE      : location of avrdude executable
@@ -82,8 +93,13 @@ endif
 
 PROGRAMMER ?= arduino
 MON_SPEED ?= 115200
-GCS = -Wl,--gc-sections
-#EXTRA_FLAGS =
+GCS ?= -Wl,--gc-sections
+# Optimiser flags.
+OPT_FLAGS ?= -Os -fno-exceptions -ffunction-sections -fdata-sections -MMD
+
+
+
+
 ### Nothing below here should require editing. ###
 
 # Check for the required definitions.
@@ -187,9 +203,6 @@ C_FLAGS = \
 
 CXX_FLAGS = \
     $(C_CXX_FLAGS)
-
-# Optimiser flags.
-OPT_FLAGS = -Os -fno-exceptions -ffunction-sections -fdata-sections -MMD
 
 # Build parameters.
 IMAGE = $(BUILD_DIR)/$(SKETCH)
@@ -305,7 +318,7 @@ $(IMAGE).hex : $(ARD_AR_OBJ) $(LIB_AR_OBJ) $(SKT_AR_OBJ) $(SKT_PDE_OBJ)
 
 upload : all
 	$(kill-monitor)
-	- $(AVRDUDE) -C$(AVRDUDE_CONF) -p$(MCU) -c$(PROGRAMMER) -P$(PORT) \
+	$(AVRDUDE) -C$(AVRDUDE_CONF) -p$(MCU) -c$(PROGRAMMER) -P$(PORT) \
 	    -b$(UPLOAD_SPEED) -D -Uflash:w:$(IMAGE).hex:i
 
 monitor :
