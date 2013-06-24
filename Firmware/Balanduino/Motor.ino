@@ -3,7 +3,7 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
     speedRaw = 100.0;
   uint16_t speed = speedRaw*((double)PWMVALUE)/100.0; // Scale from 0-100 to 0-PWMVALUE
   if(motor == left) {
-    setPWM(leftPWM,speed); // Left motor pwm
+    setPWM(leftPWM,speed); // Left motor PWM
     if(direction == forward) {
       cbi(leftPort,leftA);
       sbi(leftPort,leftB);
@@ -14,7 +14,7 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
     }
   } 
   else if(motor == right) {
-    setPWM(rightPWM,speed); // Right motor pwm
+    setPWM(rightPWM,speed); // Right motor PWM
     if(direction == forward) {
       sbi(rightPort,rightA);
       cbi(rightPort,rightB);
@@ -67,7 +67,7 @@ void rightEncoder() {
   else
     rightCounter--;
 }
-int32_t readLeftEncoder() { // The encoders decrease when motors are traveling forward and increase when traveling backward
+int32_t readLeftEncoder() { // The encoders decrease when motors are travelling forward and increase when travelling backward
   return leftCounter;
 }
 int32_t readRightEncoder() {
