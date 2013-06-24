@@ -1,3 +1,6 @@
+#ifndef _eepromanything_h_
+#define _eepromanything_h_
+
 #include <avr/eeprom.h>
 
 // Source: http://playground.arduino.cc/Code/EEPROMWriteAnything
@@ -19,3 +22,5 @@ template <class T> uint8_t EEPROM_readAnything(uint8_t addr, T& value) {
     *p++ = eeprom_read_byte((uint8_t*)addr++);
   return i;
 }
+
+#endif
