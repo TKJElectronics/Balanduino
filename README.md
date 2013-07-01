@@ -54,19 +54,19 @@ A video filmed with a GoPro mounted on the robot can be seen here: <http://www.y
 
 To download the entire repository including all submodules run the following command in a terminal:
 
-```sh
+```bash
 curl https://raw.github.com/TKJElectronics/Balanduino/master/download.sh | sh
 ```
 
 To clone the project use the recursive command to clone all the submodules as well:
 
-```
+```bash
 git clone --recursive https://github.com/TKJElectronics/Balanduino.git
 ```
 
 To update all submodules run the following command:
 
-```
+```bash
 git submodule foreach --recursive git pull origin master
 ```
 
