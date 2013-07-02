@@ -13,7 +13,7 @@ bool sendPIDValues;
 bool sendPairConfirmation;
 
 const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a pwm frequency up to 20kHz
-const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, we use no prescaling so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
+const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
 
 /* Used to make commands more readable */
 uint8_t lastCommand; // This is used set a new targetPosition
@@ -66,18 +66,30 @@ const uint8_t rightEncoder2 = 31;
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
-const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconected using the jumper
-double batteryLevel = 0; // Battery level in voltage
+const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconnected using the jumper
+double batteryVoltage; // Measured battery level
+
+// This struct will store all the configuration values
+typedef struct
+{
+  // PID variables
+  double P;
+  double I;
+  double D;
+  
+  double targetAngle; // Resting angle of the robot
+  uint8_t backToSpot; // Set whenever the robot should stay in the same spot
+  uint8_t controlAngleLimit; // Set the maximum tilting angle of the robot
+  uint8_t turningLimit; // Set the maximum turning value
+} cfg_t;
+
+extern cfg_t cfg;
 
 /* EEProm Address Definitions */
-const uint8_t InitializationFlagsAddr = 0;
-const uint8_t BackToSpotAddr = 3;
-const uint8_t controlAngleLimitAddr = 4;
-const uint8_t turningAngleLimitAddr = 5;
-const uint8_t KpAddr = 6+sizeof(double)*0; // A double is 4-bytes long inside an avr, so we will reserve four bytes for each value 
-const uint8_t KiAddr = 6+sizeof(double)*1;
-const uint8_t KdAddr = 6+sizeof(double)*2;
-const uint8_t targetAngleAddr = 6+sizeof(double)*3;
+const uint8_t initFlagsAddr = 0; // Set the first three bytes to "TKJ"
+const uint8_t configAddr = 3; // Save the configuration starting from this location
+
+double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 /* IMU Data */
 int16_t accY;
@@ -91,18 +103,6 @@ double accAngle;
 double gyroRate;
 double gyroAngle;
 double pitch;
-
-/* PID variables */
-const double defaultKp = 10;
-const double defaultKi = 2;
-const double defaultKd = 3;
-const double defaultTargetAngle = 180;
-
-double Kp;
-double Ki;
-double Kd;
-double targetAngle;
-double lastRestAngle = defaultTargetAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 double lastError; // Store last angle error
 double integratedError; // Store integrated error
@@ -138,15 +138,6 @@ bool stopped; // This is used to set a new target position after braking
 
 bool layingDown = true; // Use to indicate if the robot is laying down
 
-const uint8_t defaultBackToSpot = 1;
-uint8_t BackToSpot = defaultBackToSpot;
-
-const uint8_t defaultControlAngleLimit = 8;
-uint8_t controlAngleLimit = defaultControlAngleLimit;
-
-const uint8_t defaultTurningAngleLimit = 20;
-uint8_t turningAngleLimit = defaultTurningAngleLimit;
-
 double targetOffset = 0; // Offset for going forward and backward
 double turningOffset = 0; // Offset for turning left and right
 
@@ -156,8 +147,8 @@ double sppData2 = 0;
 
 bool commandSent = false; // This is used so multiple controller can be used at once
 
-uint32_t SPPreceiveControlTimestamp;
-const uint16_t SPPreceiveControlTimeout = 500; // After how long time should we prioritize the other controllers instead of the serial control
+uint32_t receiveControlTimer;
+const uint16_t receiveControlTimeout = 500; // After how long time should it should prioritize the other controllers instead of the serial control
 
 int32_t wheelPosition; // Wheel position based on encoder readings
 int32_t lastWheelPosition; // Used to calculate the wheel velocity

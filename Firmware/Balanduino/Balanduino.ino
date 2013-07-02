@@ -221,13 +221,13 @@ void loop() {
   /* Drive motors */
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
   // If it's already balancing it has to be ±45 degrees before it stops trying to balance
-  if((layingDown && (pitch < targetAngle-10 || pitch > targetAngle+10)) || (!layingDown && (pitch < targetAngle-45 || pitch > targetAngle+45))) {
+  if((layingDown && (pitch < cfg.targetAngle-10 || pitch > cfg.targetAngle+10)) || (!layingDown && (pitch < cfg.targetAngle-45 || pitch > cfg.targetAngle+45))) {
     layingDown = true; // The robot is in a unsolvable position, so turn off both motors and wait until it's vertical again
     stopAndReset();
   }
   else {
     layingDown = false; // It's no longer laying down
-    PID(targetAngle,targetOffset,turningOffset,(double)(micros()-pidTimer)/1000000.0);
+    PID(cfg.targetAngle,targetOffset,turningOffset,(double)(micros()-pidTimer)/1000000.0);
   }
   pidTimer = micros();
 
@@ -242,8 +242,8 @@ void loop() {
       targetPosition = wheelPosition;
       stopped = true;
     }
-    batteryLevel = (double)analogRead(A0)/(12.0/(12.0+47.0))/1023.0*3.3; // The VIN pin is connected to a 47k-12k voltage divider
-    if(batteryLevel < 10.2 && batteryLevel > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
+    batteryVoltage = (double)analogRead(A0)/1023.0*3.3/(12.0/(12.0+47.0)); // The VIN pin is connected to a 47k-12k voltage divider
+    if(batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
       analogWrite(buzzer,128);
     else
       analogWrite(buzzer,0);

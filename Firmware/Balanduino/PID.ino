@@ -13,7 +13,7 @@ void PID(double restAngle, double offset, double turning, double dt) {
   /* Brake */
   else if(steerStop) {
     int32_t positionError = wheelPosition - targetPosition;
-    if(BackToSpot) {
+    if(cfg.backToSpot) {
       if(abs(positionError) > zoneA) // Inside zone A
         restAngle -= (double)positionError/positionScaleA;
       else if(abs(positionError) > zoneB) // Inside zone B
@@ -30,10 +30,10 @@ void PID(double restAngle, double offset, double turning, double dt) {
     }
     restAngle -= (double)wheelVelocity/velocityScaleStop;
     
-    if(restAngle < targetAngle-10) // Limit rest Angle
-      restAngle = targetAngle-10;
-    else if(restAngle > targetAngle+10)
-      restAngle = targetAngle+10;      
+    if(restAngle < cfg.targetAngle-10) // Limit rest Angle
+      restAngle = cfg.targetAngle-10;
+    else if(restAngle > cfg.targetAngle+10)
+      restAngle = cfg.targetAngle+10;      
   }
   
   if(restAngle - lastRestAngle > 1) // Don't change restAngle with more than 1 degree in each loop
@@ -44,11 +44,11 @@ void PID(double restAngle, double offset, double turning, double dt) {
   
   /* Update PID values */
   error = (restAngle - pitch);
-  pTerm = Kp * error;
+  pTerm = cfg.P * error;
   integratedError += error*dt;
   integratedError = constrain(integratedError, -1.0, 1.0); // Limit the integrated error
-  iTerm = (Ki*100.0) * integratedError;
-  dTerm = (Kd/100.0) * (error - lastError)/dt;
+  iTerm = (cfg.I*100.0) * integratedError;
+  dTerm = (cfg.D/100.0) * (error - lastError)/dt;
   lastError = error;
   PIDValue = pTerm + iTerm + dTerm;
   
