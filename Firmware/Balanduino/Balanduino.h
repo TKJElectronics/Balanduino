@@ -177,13 +177,7 @@ double scale(double input, double inputMin, double inputMax, double outputMin, d
 void checkInitializationFlags();
 void setInitializationFlags();
 void readEEPROMValues();
-void updateKp();
-void updateKi();
-void updateKd();
-void updateTargetAngle();
-void updateControlAngleLimit();
-void updateTurningAngleLimit();
-void updateBackToSpot();
+void updateConfig();
 void restoreEEPROMValues();
 
 uint8_t i2cWrite(uint8_t registerAddress, uint8_t data, bool sendStop);
