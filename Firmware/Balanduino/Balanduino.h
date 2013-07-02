@@ -11,6 +11,7 @@ bool sendSettings;
 bool sendInfo;
 bool sendPIDValues;
 bool sendPairConfirmation;
+bool sendKalmanValues;
 
 const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a pwm frequency up to 20kHz
 const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
@@ -81,6 +82,10 @@ typedef struct
   uint8_t backToSpot; // Set whenever the robot should stay in the same spot
   uint8_t controlAngleLimit; // Set the maximum tilting angle of the robot
   uint8_t turningLimit; // Set the maximum turning value
+
+  double Qangle;
+  double Qbias;
+  double Rmeasure;
 } cfg_t;
 
 extern cfg_t cfg;
@@ -175,7 +180,6 @@ void steer(Command command);
 double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax);
 
 void checkInitializationFlags();
-void setInitializationFlags();
 void readEEPROMValues();
 void updateConfig();
 void restoreEEPROMValues();

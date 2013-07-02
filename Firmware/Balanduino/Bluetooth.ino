@@ -53,6 +53,16 @@ void sendBluetoothData() {
       SerialBT.print(batteryVoltage);
       SerialBT.print("V,");
       SerialBT.println((double)millis()/60000.0);
+    } else if (sendKalmanValues) {
+      sendKalmanValues = false;
+      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
+
+      SerialBT.print("K,");
+      SerialBT.print(kalman.getQangle(), 4);
+      SerialBT.print(',');
+      SerialBT.print(kalman.getQbias(), 4);
+      SerialBT.print(',');
+      SerialBT.println(kalman.getRmeasure(), 4);
     } else if (sendData) {
       dataTimer = millis();
       
@@ -96,6 +106,8 @@ void readSPPData() {
           sendSettings = true;
         else if (input[1] == 'I') // Get info
           sendInfo = true;
+        else if (input[1] == 'K') // Get Kalman values
+          sendKalmanValues = true;
       }
       
       else if (input[0] == 'S') { // Set different values     
@@ -113,6 +125,12 @@ void readSPPData() {
           strtok(input, ","); // Ignore 'T'
           cfg.targetAngle = atof(strtok(NULL, ";"));
         }
+        else if (input[1] == 'K') { // Kalman values
+          strtok(input, ","); // Ignore 'K'
+          cfg.Qangle = atof(strtok(NULL, ","));
+          cfg.Qbias = atof(strtok(NULL, ","));
+          cfg.Rmeasure = atof(strtok(NULL, ";"));
+        }
         else if (input[1] == 'A') { // Controlling max angle
           strtok(input, ","); // Ignore 'A'
           cfg.controlAngleLimit = atoi(strtok(NULL, ";"));
@@ -121,7 +139,7 @@ void readSPPData() {
           cfg.turningLimit = atoi(strtok(NULL, ";"));
         }
         else if (input[1] == 'B') { // Set Back To Spot
-          cfg.backToSpot = input[3] - '0'; // Convert from ASCII to number
+          cfg.backToSpot = input[2] - '0'; // Convert from ASCII to number
         }
         updateConfig();
       }
@@ -159,6 +177,7 @@ void readSPPData() {
         else if (input[1] == 'R') {
           restoreEEPROMValues(); // Restore the default PID values and target angle
           sendPIDValues = true;
+          sendKalmanValues = true;
           sendSettings = true;
         }         
       }
