@@ -42,7 +42,7 @@ It it also possible to control the robot and adjust the PID values and others va
 
 Source: <https://github.com/TKJElectronics/BalanduinoAndroidApp>
 
-Or by using the Processing application: <https://github.com/TKJElectronics/BalanduinoProcessingApp>.
+You can also use your Windows, Mac or Linux based computer by using the following Processing application: <https://github.com/TKJElectronics/BalanduinoProcessingApp>.
 
 # Video presentation
 
