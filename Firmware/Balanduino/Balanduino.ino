@@ -130,9 +130,9 @@ void setup() {
   setPWM(rightPWM,0);
   
 #ifdef ENABLE_USB
-  if(Usb.Init() == -1) { // Check if USB Host is working
+  if (Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
-    while(1); // Halt
+    while (1); // Halt
   }
 #endif
 
@@ -142,19 +142,19 @@ void setup() {
   i2cBuffer[1] = 0x00; // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
   i2cBuffer[2] = 0x00; // Set Gyro Full Scale Range to ±250deg/s
   i2cBuffer[3] = 0x00; // Set Accelerometer Full Scale Range to ±2g
-  while(i2cWrite(0x19,i2cBuffer,4,false)); // Write to all four registers at once
-  while(i2cWrite(0x6B,0x09,true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
+  while (i2cWrite(0x19,i2cBuffer,4,false)); // Write to all four registers at once
+  while (i2cWrite(0x6B,0x09,true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
   
-  while(i2cRead(0x75,i2cBuffer,1));
-  if(i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
+  while (i2cRead(0x75,i2cBuffer,1));
+  if (i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
     Serial.print(F("Error reading sensor"));
-    while(1); // Halt
+    while (1); // Halt
   }
 
   delay(100); // Wait for the sensor to get ready
   
   /* Set kalman and gyro starting angle */
-  while(i2cRead(0x3D,i2cBuffer,4));
+  while (i2cRead(0x3D,i2cBuffer,4));
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
   accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
@@ -183,12 +183,12 @@ void setup() {
 
 void loop() {
 #ifdef ENABLE_WII
-  if(Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
+  if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
       Usb.Task();
 #endif
 
   /* Calculate pitch */
-  while(i2cRead(0x3D,i2cBuffer,8));
+  while (i2cRead(0x3D,i2cBuffer,8));
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
   accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   gyroX = ((i2cBuffer[6] << 8) | i2cBuffer[7]);
@@ -199,11 +199,11 @@ void loop() {
   
   gyroRate = (double)gyroX/131.0; // Convert to deg/s
   gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
-  if(gyroAngle < 0 || gyroAngle > 360)
+  if (gyroAngle < 0 || gyroAngle > 360)
     gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
   
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
-  if((accAngle < 90 && pitch > 270) || (accAngle > 270 && pitch < 90)) {
+  if ((accAngle < 90 && pitch > 270) || (accAngle > 270 && pitch < 90)) {
     pitch = accAngle;
     gyroAngle = accAngle;
     kalman.setAngle(accAngle);
@@ -214,14 +214,14 @@ void loop() {
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
   
 #ifdef ENABLE_WII
-  if(Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
+  if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
       Usb.Task();
 #endif
 
   /* Drive motors */
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
   // If it's already balancing it has to be ±45 degrees before it stops trying to balance
-  if((layingDown && (pitch < cfg.targetAngle-10 || pitch > cfg.targetAngle+10)) || (!layingDown && (pitch < cfg.targetAngle-45 || pitch > cfg.targetAngle+45))) {
+  if ((layingDown && (pitch < cfg.targetAngle-10 || pitch > cfg.targetAngle+10)) || (!layingDown && (pitch < cfg.targetAngle-45 || pitch > cfg.targetAngle+45))) {
     layingDown = true; // The robot is in a unsolvable position, so turn off both motors and wait until it's vertical again
     stopAndReset();
   }
@@ -238,12 +238,12 @@ void loop() {
     wheelVelocity = wheelPosition - lastWheelPosition;
     lastWheelPosition = wheelPosition;
     //Serial.print(wheelPosition);Serial.print('\t');Serial.print(targetPosition);Serial.print('\t');Serial.println(wheelVelocity);
-    if(abs(wheelVelocity) <= 40 && !stopped) { // Set new targetPosition if braking
+    if (abs(wheelVelocity) <= 40 && !stopped) { // Set new targetPosition if braking
       targetPosition = wheelPosition;
       stopped = true;
     }
     batteryVoltage = (double)analogRead(A0)/1023.0*3.3/(12.0/(12.0+47.0)); // The VIN pin is connected to a 47k-12k voltage divider
-    if(batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
+    if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
       analogWrite(buzzer,128);
     else
       analogWrite(buzzer,0);

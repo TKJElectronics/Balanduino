@@ -5,36 +5,36 @@ uint8_t i2cWrite(uint8_t registerAddress, uint8_t data, bool sendStop) {
   return i2cWrite(registerAddress,&data,1,sendStop); // Returns 0 on success
 }
 
-uint8_t i2cWrite(uint8_t registerAddress, uint8_t* data, uint8_t length, bool sendStop) {
+uint8_t i2cWrite(uint8_t registerAddress, uint8_t *data, uint8_t length, bool sendStop) {
   Wire.beginTransmission(IMUAddress);
   Wire.write(registerAddress);
   Wire.write(data, length);
   uint8_t rcode = Wire.endTransmission(sendStop); // Returns 0 on success
-  if(rcode) {
+  if (rcode) {
     Serial.print(F("i2cWrite failed: "));
     Serial.println(rcode);
   }
   return rcode;
 }
 
-uint8_t i2cRead(uint8_t registerAddress, uint8_t* data, uint8_t nbytes) {
+uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes) {
   uint32_t timeOutTimer;
   Wire.beginTransmission(IMUAddress);
   Wire.write(registerAddress);
   uint8_t rcode = Wire.endTransmission(false); // Don't release the bus
-  if(rcode) {
+  if (rcode) {
     Serial.print(F("i2cRead failed: "));
     Serial.println(rcode);
     return rcode;
   }
   Wire.requestFrom(IMUAddress, nbytes,(uint8_t)true); // Send a repeated start and then release the bus after reading
-  for(uint8_t i = 0; i < nbytes; i++) {
-    if(Wire.available())
+  for (uint8_t i = 0; i < nbytes; i++) {
+    if (Wire.available())
       data[i] = Wire.read();
     else {
       timeOutTimer = micros();
-      while(((micros() - timeOutTimer) < I2C_TIMEOUT) && !Wire.available());
-      if(Wire.available())
+      while (((micros() - timeOutTimer) < I2C_TIMEOUT) && !Wire.available());
+      if (Wire.available())
         data[i] = Wire.read();
       else {
         Serial.println(F("i2cRead timeout"));

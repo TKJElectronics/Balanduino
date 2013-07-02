@@ -4,7 +4,7 @@
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
 /* Firmware Version Information */
-const char* version = "0.9.0";
+const char *version = "0.9.0";
 
 bool sendData;
 bool sendSettings;
