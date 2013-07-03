@@ -164,6 +164,8 @@ void setup() {
   kalman.setAngle(accAngle); // Set starting angle
   gyroAngle = accAngle;
   
+  pinMode(LED_BUILTIN,OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
+  
   /* Setup pin for buzzer and beep to indicate that it is now ready */
   pinMode(buzzer,OUTPUT);
   
@@ -179,6 +181,7 @@ void setup() {
   encoderTimer = kalmanTimer;
   dataTimer = millis();
   ledTimer = dataTimer;
+  blinkTimer = dataTimer;
 }
 
 void loop() {
@@ -255,5 +258,13 @@ void loop() {
 #endif
 #ifdef ENABLE_SPP
   sendBluetoothData();
+#endif
+
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
+  if ((Btd.watingForConnection && millis() - blinkTimer > 1000) || (!Btd.watingForConnection && millis() - blinkTimer > 100)) {
+    blinkTimer = millis();
+    digitalWrite(LED_BUILTIN, ledState); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
+    ledState = !ledState;
+  }
 #endif
 }

@@ -70,9 +70,10 @@ volatile int32_t rightCounter = 0;
 const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconnected using the jumper
 double batteryVoltage; // Measured battery level
 
+bool ledState; // Last state of the built in LED
+
 // This struct will store all the configuration values
-typedef struct
-{
+typedef struct {
   // PID variables
   double P;
   double I;
@@ -122,6 +123,7 @@ uint32_t pidTimer; // Timer used for the PID loop
 uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
 uint32_t dataTimer; // This is used so it doesn't send data to often
 uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, Wii and Xbox controllers
+uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
 
 /* Used to rumble controllers upon connection */
 bool ps3Rumble; // These are used to check if a controller has connected
