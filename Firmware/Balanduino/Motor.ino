@@ -52,6 +52,7 @@ void stopAndReset() {
   lastError = 0;
   integratedError = 0;
   targetPosition = wheelPosition;
+  lastRestAngle = cfg.targetAngle;
 }
 
 /* Interrupt routine and encoder read functions - I read using the port registers for faster processing */
