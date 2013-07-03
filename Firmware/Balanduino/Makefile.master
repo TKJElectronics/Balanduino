@@ -93,11 +93,9 @@ endif
 
 PROGRAMMER ?= arduino
 MON_SPEED ?= 115200
-GCS ?= -Wl,--gc-sections
+GCS ?= -Wl,--relax,--gc-sections 
 # Optimiser flags.
-OPT_FLAGS ?= -Os -fno-exceptions -ffunction-sections -fdata-sections -MMD
-
-
+OPT_FLAGS ?= -Os -fno-exceptions -ffunction-sections -fdata-sections -fno-inline-small-functions -MMD
 
 
 ### Nothing below here should require editing. ###
@@ -187,8 +185,9 @@ AR = $(ARD_BIN)/avr-ar
 SIZE = $(ARD_BIN)/avr-size
 NM = $(ARD_BIN)/avr-nm
 MKDIR = mkdir -p
-RM = rm -rf
+RM = rm -fr
 MV = mv -f
+FIND ?= find
 
 # Compiler flags.
 INC_FLAGS = \
@@ -196,7 +195,7 @@ INC_FLAGS = \
 
 ARD_FLAGS = -mmcu=$(MCU) -DF_CPU=$(F_CPU) -DARDUINO=$(ARD_REV)
 
-C_CXX_FLAGS = -g -w -Wa,-adhlns=$(BUILD_DIR)/$*.lst $(EXTRA_FLAGS)
+C_CXX_FLAGS = -g -w -Wa,-adhlns=$(BUILD_DIR)/$*.lst $(EXTRA_FLAGS) -DUSING_MAKEFILE=1 -Wall -Wextra -Wformat=2 -Wuninitialized -Wshadow -Wconversion
 
 C_FLAGS = \
     -std=gnu99 -Wstrict-prototypes -Wno-old-style-declaration $(C_CXX_FLAGS)
@@ -272,6 +271,9 @@ all : $(BUILD_DIR) $(IMAGE).hex
 
 clean :
 	$(RM) $(BUILD_DIR)
+	$(RM) *~ *.bak *.BAK *.Bak *.orig
+	$(RM) */*~ */*.bak */*.BAK */*.Bak */*.orig
+	$(RM) */*/*~ */*/*.bak */*/*.BAK */*/*.Bak */*/*.orig
 
 $(BUILD_DIR) :
 	$(MKDIR) $@
