@@ -17,7 +17,6 @@
 //#define ENABLE_ADK
 
 #include "Balanduino.h"
-#include "EEPROMAnything.h"
 #include <Wire.h>
 
 #ifdef ENABLE_ADK
@@ -45,18 +44,15 @@ Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source 
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
 #define ENABLE_USB
-// This will take care of all USB communication
-USB Usb;
+USB Usb; // This will take care of all USB communication
 #endif
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
-// This is the main Bluetooth library, it will take care of all the usb and hci communication with the Bluetooth dongle
-BTD Btd(&Usb); // Uncomment DEBUG in "BTD.cpp" to save space
+BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all the USB and HCI communication with the Bluetooth dongle
 #endif
 
-// You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
 #ifdef ENABLE_XBOX
-XBOXRECV Xbox(&Usb); // Uncomment DEBUG in "XBOXRECV.cpp" to save space
+XBOXRECV Xbox(&Usb); // You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
 #endif
 
 #ifdef ENABLE_ADK
@@ -70,27 +66,26 @@ ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
 #endif
 
 #ifdef ENABLE_SPP
-// The SPP (Serial Port Protocol) emulates a virtual Serial port, which is supported by most computers and mobile phones
-SPP SerialBT(&Btd,"Balanduino","0000"); // Also uncomment DEBUG in "SPP.cpp"
+SPP SerialBT(&Btd,"Balanduino","0000"); // The SPP (Serial Port Protocol) emulates a virtual Serial port, which is supported by most computers and mobile phones
 #endif
+
 #ifdef ENABLE_PS3
-// This is the PS3 library. It supports all the three original controller: the Dualshock 3, Navigation and Move controller
-PS3BT PS3(&Btd); // Also remember to uncomment DEBUG in "PS3BT.cpp" to save space
+PS3BT PS3(&Btd); // The PS3 library supports all three official controllers: the Dualshock 3, Navigation and Move controller
 #endif
+
 #ifdef ENABLE_WII
-// The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
-WII Wii(&Btd); // Also uncomment DEBUG in "Wii.cpp"
-// You have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote or press sync if you are using a Wii U Pro Controller - you only have to do this once
-//WII Wii(&Btd,PAIR);
+WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
+//WII Wii(&Btd,PAIR); // You will have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote
+// or press sync if you are using a Wii U Pro Controller
 // Or you can simply send "CW;" to the robot to start the pairing sequence
-// This can also be done using the Android application
+// This can also be done using the Android or Processing application
 #endif
 
 void setup() {
   /* Initialize UART */
   Serial.begin(57600);
   
-  /* Read the last PID values and target angle */
+  /* Read the PID values, target angle and other saved values in the EEPROM */
   readEEPROMValues();
   checkInitializationFlags();
   
@@ -136,7 +131,7 @@ void setup() {
   }
 #endif
 
-  /* Setup IMU Inputs */
+  /* Setup IMU */
   Wire.begin();
   i2cBuffer[0] = 19; // Set the sample rate to 400Hz - 8kHz/(19+1) = 400Hz
   i2cBuffer[1] = 0x00; // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
@@ -153,7 +148,7 @@ void setup() {
 
   delay(100); // Wait for the sensor to get ready
   
-  /* Set kalman and gyro starting angle */
+  /* Set Kalman and gyro starting angle */
   while (i2cRead(0x3D,i2cBuffer,4));
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
   accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
@@ -200,19 +195,19 @@ void loop() {
   // We then convert it to 0 to 2π and then from radians to degrees
   accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
   
-  gyroRate = (double)gyroX/131.0; // Convert to deg/s
-  gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
-  if (gyroAngle < 0 || gyroAngle > 360)
-    gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
-  
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
   if ((accAngle < 90 && pitch > 270) || (accAngle > 270 && pitch < 90)) {
     pitch = accAngle;
     gyroAngle = accAngle;
     kalman.setAngle(accAngle);
-  } else
+  } else {
+    gyroRate = (double)gyroX/131.0; // Convert to deg/s
+    gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
+    if (gyroAngle < 0 || gyroAngle > 360)
+      gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
+
     pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-kalmanTimer)/1000000.0); // Calculate the angle using a Kalman filter
-  
+  }
   kalmanTimer = micros();
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
   

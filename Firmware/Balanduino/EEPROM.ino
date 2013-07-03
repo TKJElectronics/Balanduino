@@ -1,3 +1,5 @@
+#include "EEPROMAnything.h"
+
 cfg_t cfg;
 
 void checkInitializationFlags() {
