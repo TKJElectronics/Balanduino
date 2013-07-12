@@ -1,5 +1,5 @@
 # Balanduino Arduino code
-#### Developed by Kristian Lauszus and Thomas Jespersen, TKJ Electronics 2013
+#### Developed by Kristian Lauszus, TKJ Electronics 2013
 
 The code is released under the GNU General Public License.
 _________
