@@ -241,39 +241,6 @@ void readUsb() {
     if (!commandSent) // If there hasn't been send a command by now, then send stop
       steer(stop);
   }
-  
-#ifdef ENABLE_PS3
-  if (PS3.PS3Connected) { // Normal PS3 controller
-    if (!ps3Rumble) {
-      ledTimer = millis() - 500; // Wait 500ms before turning rumble on
-      ps3Rumble = true;
-      ps3RumbleEnable = true; // We can't sent command to the PS3 controller that often, so we don't send the command here like the other controllers
-    }
-  } else
-    ps3Rumble = false;
-#endif // ENABLE_PS3
-#ifdef ENABLE_WII
-  if (Wii.wiimoteConnected) { // Both the Wiimote and the Wii U Pro Controller
-    if (!wiiRumble) {
-      ledTimer = millis() - 500; // This will turn the rumble off again after 500ms
-      Wii.setRumbleOn();
-      wiiRumble = true;
-      wiiRumbleEnabled = true;      
-    }
-  } else
-    wiiRumble = false;
-#endif // ENABLE_WII
-#ifdef ENABLE_XBOX
-  if (Xbox.Xbox360Connected[0]) { // Xbox wireless controller
-    if (!xboxRumble) {
-      ledTimer = millis() - 500; // This will turn the rumble off again after 500ms
-      Xbox.setRumbleOn(0x00,0xFF);
-      xboxRumble = true;
-      xboxRumbleEnabled = true;      
-    }
-  } else
-    xboxRumble = false;
-#endif // ENABLE_XBOX
 
 #ifdef ENABLE_PS3
   if (PS3.PS3Connected || PS3.PS3NavigationConnected) {
@@ -282,6 +249,8 @@ void readUsb() {
       ps3OldLed = 0; // Reset value
     }
   }
+  if (!PS3.PS3Connected || !PS3.PS3NavigationConnected)
+    ps3Initialized = false;
 #endif // ENABLE_PS3
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
@@ -290,7 +259,13 @@ void readUsb() {
       wiiOldLed = 0; // Reset value
     }
   }
+  if (!Wii.wiimoteConnected || !Wii.wiiUProControllerConnected)
+    wiiInitialized = false;
 #endif // ENABLE_WII
+#ifdef ENABLE_XBOX
+  if (!Xbox.Xbox360Connected[0])
+    xboxInitialized = false;
+#endif
 #if defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
   if (millis() - ledTimer > 1000) { // Update every 1s
     ledTimer = millis();
@@ -312,22 +287,21 @@ void updateLEDs() {
     } else if (ps3RumbleDisable) {
       ps3RumbleDisable = false;
       PS3.setRumbleOff();
-      ledTimer -= 500; // Run this function again in 500ms
     } else {
       if (PS3.getStatus(Shutdown)) { // Blink all LEDs
         if (ps3OldLed)
-          Led = 0x00;
+          Led = 0x00; // All off
         else
-          Led = 0x0F;
+          Led = 0x0F; // All on
       }
       else if (PS3.getStatus(Dying))
-        Led = 0x01;
+        Led = 0x01; // LED1 on
       else if (PS3.getStatus(Low))
-        Led = 0x03;
+        Led = 0x03; // LED1 and LED2 on
       else if (PS3.getStatus(High))
-        Led = 0x07;
+        Led = 0x07; // LED1, LED2 and LED3 on
       else if (PS3.getStatus(Full))
-        Led = 0x0F;
+        Led = 0x0F; // LED1, LED2, LED3 and LED4 on
       if (Led != ps3OldLed) {
         ps3OldLed = Led;
         PS3.setLedRaw(Led);
@@ -336,6 +310,13 @@ void updateLEDs() {
   } else if (PS3.PS3NavigationConnected) {
     if (PS3.getStatus(Shutdown))
       PS3.setLedToggle(LED1); // Blink LED
+    else {
+      Led = 0x01; // LED on
+      if (Led != ps3OldLed) {
+        ps3OldLed = Led;
+        PS3.setLedRaw(Led);
+      }
+    }
   }
 #endif // ENABLE_PS3
 #ifdef ENABLE_WII
@@ -345,26 +326,25 @@ void updateLEDs() {
       Wii.setRumbleOff();
     }
     uint8_t batteryLevel = Wii.getBatteryLevel();
-    //Serial.print("BatteryLevel: ");Serial.println(batteryLevel);
     if (batteryLevel < 60) { // Blink all LEDs
       if (wiiOldLed)
-        Led = 0x00;
+        Led = 0x00; // All off
       else
-        Led = 0xF0;
+        Led = 0xF0; // All on
     }
     else if (batteryLevel < 110)
-      Led = 0x10;
+      Led = 0x10; // LED1 on
     else if (batteryLevel < 160)
-      Led = 0x30;
+      Led = 0x30; // LED1 and LED2 on
     else if (batteryLevel < 210)
-      Led = 0x70;
+      Led = 0x70; // LED1, LED2 and LED3 on
     else
-      Led = 0xF0;
+      Led = 0xF0; // LED1, LED2, LED3 and LED4 on
     if (Led != wiiOldLed) {
       wiiOldLed = Led;
       Wii.setLedRaw(Led);      
     }
-    Wii.statusRequest(); // This will update battery level
+    Wii.statusRequest(); // This will update the battery level
   }
 #endif // ENABLE_WII
 #ifdef ENABLE_XBOX
@@ -374,7 +354,6 @@ void updateLEDs() {
       Xbox.setRumbleOff();
     }
     uint8_t batteryLevel = Xbox.getBatteryLevel();
-    //Serial.print("BatteryLevel: ");Serial.println(batteryLevel);
     LED xboxLed;
     if (batteryLevel == 0)
       xboxLed = LED1;
@@ -388,6 +367,33 @@ void updateLEDs() {
       xboxOldLed = xboxLed;
       Xbox.setLedOn(xboxLed);
     }
+  }
+#endif // ENABLE_XBOX
+}
+
+void onInit() { // This function is called when a controller is first initialized
+  updateLEDs(); // Turn the LEDs on according to the voltage level
+#ifdef ENABLE_PS3
+  if (PS3.PS3Connected && !ps3Initialized) { // We only check the normal PS3 controller as the Nunchuck doesn't have rumble support
+    ps3Initialized = true;
+    ledTimer = millis() - 500; // Wait 500ms before turning rumble on
+    ps3RumbleEnable = true; // We can't sent commands to the PS3 controller that often, so we don't send the command here like the other controllers
+  }
+#endif // ENABLE_PS3
+#ifdef ENABLE_WII
+  if (Wii.wiimoteConnected && !wiiInitialized) { // Both the Wiimote and the Wii U Pro Controller
+    wiiInitialized = true;
+    ledTimer = millis() - 500; // This will turn the rumble off again after 500ms
+    Wii.setRumbleOn();
+    wiiRumbleEnabled = true;
+  }
+#endif // ENABLE_WII
+#ifdef ENABLE_XBOX
+  if (Xbox.Xbox360Connected[0] && !xboxInitialized) { // Xbox wireless controller
+    xboxInitialized = true;
+    ledTimer = millis() - 500; // This will turn the rumble off again after 500ms
+    Xbox.setRumbleOn(0x00,0xFF);
+    xboxRumbleEnabled = true;
   }
 #endif // ENABLE_XBOX
 }

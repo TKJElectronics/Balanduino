@@ -126,12 +126,8 @@ uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the P
 uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
 
 /* Used to rumble controllers upon connection */
-bool ps3Rumble; // These are used to check if a controller has connected
-bool wiiRumble;
-bool xboxRumble;
-bool ps3RumbleEnable; // These are used to turn rumble off again except for the PS3 controller which is turned on
-bool wiiRumbleEnabled;
-bool xboxRumbleEnabled;
+bool ps3Initialized, wiiInitialized, xboxInitialized; // These are used to check if a controller has been initialized
+bool ps3RumbleEnable, wiiRumbleEnabled, xboxRumbleEnabled; // These are used to turn rumble off again except for the PS3 controller which is turned on
 bool ps3RumbleDisable; // Used to turn rumble off again on the PS3 controller
 
 /* Direction set by the controllers or SPP library */
@@ -178,6 +174,7 @@ void sendBluetoothData();
 void readSPPData();
 void readUsb();
 void updateLEDs();
+void onInit();
 void steer(Command command);
 double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax);
 

@@ -43,7 +43,7 @@ void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0
     OCR1AL = (dutyCycle & 0xFF);
   } else if (pin == rightPWM) {
     OCR1BH = (dutyCycle >> 8);
-    OCR1BL = (dutyCycle & 0xFF);    
+    OCR1BL = (dutyCycle & 0xFF);
   }
 }
 void stopAndReset() {

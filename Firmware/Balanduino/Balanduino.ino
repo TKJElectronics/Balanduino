@@ -2,7 +2,7 @@
  * The code is released under the GNU General Public License.
  * Developed by Kristian Lauszus, TKJ Electronics 2013
  * This is the algorithm for the Balanduino balancing robot.
- * It can be controlled by either an Android app or a Processing application via bluetooth.
+ * It can be controlled by either an Android app or a Processing application via Bluetooth.
  * The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
  * The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
  * It can also be controlled by a PS3, Wii or a Xbox controller
@@ -13,7 +13,7 @@
 #define ENABLE_SPP
 #define ENABLE_PS3
 #define ENABLE_WII
-//#define ENABLE_XBOX
+#define ENABLE_XBOX
 //#define ENABLE_ADK
 
 #include "Balanduino.h"
@@ -129,6 +129,18 @@ void setup() {
     Serial.print(F("OSC did not start"));
     while (1); // Halt
   }
+#endif
+  
+  /* Attach onInit function */
+  // This is used to set the LEDs according to the voltage level and rumble the controller to indicate the new connection.
+#ifdef ENABLE_PS3
+  PS3.attachOnInit(onInit);
+#endif
+#ifdef ENABLE_PS3
+  Wii.attachOnInit(onInit);
+#endif
+#ifdef ENABLE_XBOX
+  Xbox.attachOnInit(onInit);
 #endif
 
   /* Setup IMU */
