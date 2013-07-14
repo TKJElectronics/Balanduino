@@ -136,7 +136,7 @@ void setup() {
 #ifdef ENABLE_PS3
   PS3.attachOnInit(onInit);
 #endif
-#ifdef ENABLE_PS3
+#ifdef ENABLE_WII
   Wii.attachOnInit(onInit);
 #endif
 #ifdef ENABLE_XBOX
@@ -268,7 +268,7 @@ void loop() {
 #endif
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
-  if ((Btd.watingForConnection && millis() - blinkTimer > 1000) || (!Btd.watingForConnection && millis() - blinkTimer > 100)) {
+  if (Btd.isReady() && ((Btd.watingForConnection && millis() - blinkTimer > 1000) || (!Btd.watingForConnection && millis() - blinkTimer > 100))) {
     blinkTimer = millis();
     digitalWrite(LED_BUILTIN, ledState); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
     ledState = !ledState;
