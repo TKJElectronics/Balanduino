@@ -34,7 +34,7 @@ balanduino2.upload.speed=57600
 
 balanduino2.bootloader.tool=avrdude
 balanduino2.bootloader.file=optiboot/optiboot_balanduino644.hex
-balanduino2.bootloader.low_fuses=0xFD
+balanduino2.bootloader.low_fuses=0xFF
 balanduino2.bootloader.high_fuses=0xD6
 balanduino2.bootloader.extended_fuses=0xFD
 balanduino2.bootloader.unlock_bits=0x3F
