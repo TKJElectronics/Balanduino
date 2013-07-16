@@ -302,6 +302,11 @@ void updateLEDs() {
         Led = 0x07; // LED1, LED2 and LED3 on
       else if (PS3.getStatus(Full))
         Led = 0x0F; // LED1, LED2, LED3 and LED4 on
+      else if (PS3.getStatus(Charging))
+        Led = (ps3OldLed == 0x0F ? 0x01 : (ps3OldLed << 1 | 1) & 0x0F); // Indicate chargin using the LEDs
+      else
+        Led = ps3OldLed;
+        
       if (Led != ps3OldLed) {
         ps3OldLed = Led;
         PS3.setLedRaw(Led);
