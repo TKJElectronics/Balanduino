@@ -1,18 +1,19 @@
 #include "EEPROMAnything.h"
 
-cfg_t cfg;
+cfg_t cfg; //  Struct for all the configuration values
 
 void checkInitializationFlags() {
   char initFlags[3];
-  EEPROM_readAnything(initFlagsAddr,initFlags);
-  if (initFlags[0] != 'T' || initFlags[1] != 'K' || initFlags[2] != 'J') {
+  EEPROM_readAnything(initFlagsAddr, initFlags);
+  if (initFlags[0] != eepromVersion[0] || initFlags[1] != eepromVersion[1] || initFlags[2] != eepromVersion[2]) { // Check if the EEPROM version matches the current one
     restoreEEPROMValues();
-    EEPROM_updateAnything(initFlagsAddr,"TKJ"); // After the default values have been restored, set the flags
+    for (uint8_t i = 0; i < strlen(eepromVersion); i++)
+      EEPROM_updateAnything(initFlagsAddr+i, eepromVersion[i]); // After the default values have been restored, set the flags
   }
 }
   
 void readEEPROMValues() {
-  EEPROM_readAnything(configAddr,cfg);
+  EEPROM_readAnything(configAddr, cfg);
 
   kalman.setQangle(cfg.Qangle);
   kalman.setQbias(cfg.Qbias);
@@ -20,7 +21,7 @@ void readEEPROMValues() {
 }
 
 void updateConfig() {
-  EEPROM_updateAnything(configAddr,cfg);
+  EEPROM_updateAnything(configAddr, cfg);
 
   kalman.setQangle(cfg.Qangle);
   kalman.setQbias(cfg.Qbias);

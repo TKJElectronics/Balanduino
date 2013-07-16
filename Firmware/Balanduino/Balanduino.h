@@ -2,9 +2,11 @@
 #define _balanduino_h_
 
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
+#include <string.h> // Needed for strlen
 
 /* Firmware Version Information */
 const char *version = "0.9.0";
+const char *eepromVersion = "001"; // EEPROM version - used to restore the EEPROM values if the configuration values have changed
 
 bool sendData;
 bool sendSettings;
@@ -91,9 +93,9 @@ typedef struct {
 
 extern cfg_t cfg;
 
-/* EEProm Address Definitions */
-const uint8_t initFlagsAddr = 0; // Set the first three bytes to "TKJ"
-const uint8_t configAddr = 3; // Save the configuration starting from this location
+/* EEPROM Address Definitions */
+const uint8_t initFlagsAddr = 0; // Set the first three bytes to the EEPROM version
+const uint8_t configAddr = strlen(eepromVersion); // Save the configuration starting from this location
 
 double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
