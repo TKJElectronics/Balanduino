@@ -249,7 +249,7 @@ void readUsb() {
       ps3OldLed = 0; // Reset value
     }
   }
-  if (!PS3.PS3Connected || !PS3.PS3NavigationConnected)
+  if (!PS3.PS3Connected && !PS3.PS3NavigationConnected)
     ps3Initialized = false;
 #endif // ENABLE_PS3
 #ifdef ENABLE_WII
@@ -259,7 +259,7 @@ void readUsb() {
       wiiOldLed = 0; // Reset value
     }
   }
-  if (!Wii.wiimoteConnected || !Wii.wiiUProControllerConnected)
+  if (!Wii.wiimoteConnected && !Wii.wiiUProControllerConnected)
     wiiInitialized = false;
 #endif // ENABLE_WII
 #ifdef ENABLE_XBOX
@@ -379,7 +379,7 @@ void updateLEDs() {
 void onInit() { // This function is called when a controller is first initialized
   updateLEDs(); // Turn the LEDs on according to the voltage level
 #ifdef ENABLE_PS3
-  if (PS3.PS3Connected && !ps3Initialized) { // We only check the normal PS3 controller as the Nunchuck doesn't have rumble support
+  if (PS3.PS3Connected && !ps3Initialized) { // We only check the normal PS3 controller as the Navigation controller doesn't have rumble support
     ps3Initialized = true;
     ledTimer = millis() - 500; // Wait 500ms before turning rumble on
     ps3RumbleEnable = true; // We can't sent commands to the PS3 controller that often, so we don't send the command here like the other controllers
