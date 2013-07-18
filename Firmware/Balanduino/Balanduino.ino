@@ -268,10 +268,15 @@ void loop() {
 #endif
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
-  if (Btd.isReady() && ((Btd.watingForConnection && millis() - blinkTimer > 1000) || (!Btd.watingForConnection && millis() - blinkTimer > 100))) {
-    blinkTimer = millis();
-    digitalWrite(LED_BUILTIN, ledState); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
+  if (Btd.isReady()) {
+    if ((Btd.watingForConnection && millis() - blinkTimer > 1000) || (!Btd.watingForConnection && millis() - blinkTimer > 100)) {
+      blinkTimer = millis();
+      ledState = !ledState;
+      digitalWrite(LED_BUILTIN, ledState); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
+    }
+  } else if (ledState) { // The LED is on
     ledState = !ledState;
+    digitalWrite(LED_BUILTIN, ledState); // This will turn it off
   }
 #endif
 }
