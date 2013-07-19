@@ -244,7 +244,7 @@ void loop() {
   /* Update encoders */
   if (micros() - encoderTimer >= 100000) { // Update encoder values every 100ms
     encoderTimer = micros();
-    wheelPosition = readLeftEncoder() + readRightEncoder();
+    int32_t wheelPosition = getWheelPosition();
     wheelVelocity = wheelPosition - lastWheelPosition;
     lastWheelPosition = wheelPosition;
     //Serial.print(wheelPosition);Serial.print('\t');Serial.print(targetPosition);Serial.print('\t');Serial.println(wheelVelocity);

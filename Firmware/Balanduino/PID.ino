@@ -12,6 +12,7 @@ void PID(double restAngle, double offset, double turning, double dt) {
   }
   /* Brake */
   else if (steerStop) {
+    int32_t wheelPosition = getWheelPosition();
     int32_t positionError = wheelPosition - targetPosition;
     if (cfg.backToSpot) {
       if (abs(positionError) > zoneA) // Inside zone A

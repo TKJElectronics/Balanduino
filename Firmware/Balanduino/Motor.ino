@@ -51,7 +51,7 @@ void stopAndReset() {
   stopMotor(right);
   lastError = 0;
   integratedError = 0;
-  targetPosition = wheelPosition;
+  targetPosition = getWheelPosition();
   lastRestAngle = cfg.targetAngle;
 }
 
@@ -73,4 +73,7 @@ int32_t readLeftEncoder() { // The encoders decrease when motors are travelling 
 }
 int32_t readRightEncoder() {
   return rightCounter;
+}
+int32_t getWheelPosition() {
+  return leftCounter + rightCounter;
 }
