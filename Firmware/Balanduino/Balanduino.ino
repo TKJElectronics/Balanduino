@@ -17,9 +17,7 @@
 //#define ENABLE_ADK
 
 #include "Balanduino.h"
-#include <Wire.h>
-
-
+#include <Wire.h> // Official Arduino Wire library
 #include <PID_v1.h> // The Arduino PID library by Brett Beauregard
 
 #ifdef ENABLE_ADK

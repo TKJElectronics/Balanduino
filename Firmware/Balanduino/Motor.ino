@@ -44,19 +44,12 @@ void updatePID(double angle, double offset, double turning, double dt) {
     restAngle = lastRestAngle-1;
   lastRestAngle = restAngle;
 
+  /* Update PID value */
+  // The input is 'pitch'
+  // The setpoint is 'restAngle'
+  // The output is stored in 'PIDValue'
   pid.Compute();
-  
-  /* Update PID values */
-  /*error = (restAngle - pitch);
-  pTerm = cfg.P * error;
-  integratedError += error*dt;
-  integratedError = constrain(integratedError, -1.0, 1.0); // Limit the integrated error
-  iTerm = (cfg.I*100.0) * integratedError;
-  dTerm = (cfg.D/100.0) * (error - lastError)/dt;
-  lastError = error;
-  PIDValue = pTerm + iTerm + dTerm;
-  */
-  
+
   /* Steer robot sideways */
   if (steerLeft) {
     turning -= abs((double)wheelVelocity/velocityScaleTurning); // Scale down at high speed
@@ -139,8 +132,6 @@ void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0
 void stopAndReset() {
   stopMotor(left);
   stopMotor(right);
-  //lastError = 0;
-  //integratedError = 0;
   targetPosition = getWheelPosition();
   lastRestAngle = cfg.targetAngle;
 }
