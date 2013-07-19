@@ -329,27 +329,27 @@ void updateLEDs() {
     if (wiiRumbleEnabled) {
       wiiRumbleEnabled = false;
       Wii.setRumbleOff();
-    }
-    uint8_t batteryLevel = Wii.getBatteryLevel();
-    if (batteryLevel < 60) { // Blink all LEDs
-      if (wiiOldLed)
-        Led = 0x00; // All off
+    } else {
+      uint8_t batteryLevel = Wii.getBatteryLevel();
+      if (batteryLevel < 60) { // Blink all LEDs
+        if (wiiOldLed)
+          Led = 0x00; // All off
+        else
+          Led = 0xF0; // All on
+      }
+      else if (batteryLevel < 110)
+        Led = 0x10; // LED1 on
+      else if (batteryLevel < 160)
+        Led = 0x30; // LED1 and LED2 on
+      else if (batteryLevel < 210)
+        Led = 0x70; // LED1, LED2 and LED3 on
       else
-        Led = 0xF0; // All on
+        Led = 0xF0; // LED1, LED2, LED3 and LED4 on
+      if (Led != wiiOldLed) {
+        wiiOldLed = Led;
+        Wii.setLedRaw(Led);
+      }
     }
-    else if (batteryLevel < 110)
-      Led = 0x10; // LED1 on
-    else if (batteryLevel < 160)
-      Led = 0x30; // LED1 and LED2 on
-    else if (batteryLevel < 210)
-      Led = 0x70; // LED1, LED2 and LED3 on
-    else
-      Led = 0xF0; // LED1, LED2, LED3 and LED4 on
-    if (Led != wiiOldLed) {
-      wiiOldLed = Led;
-      Wii.setLedRaw(Led);      
-    }
-    Wii.statusRequest(); // This will update the battery level
   }
 #endif // ENABLE_WII
 #ifdef ENABLE_XBOX
@@ -357,20 +357,22 @@ void updateLEDs() {
     if (xboxRumbleEnabled) {
       xboxRumbleEnabled = false;
       Xbox.setRumbleOff();
-    }
-    uint8_t batteryLevel = Xbox.getBatteryLevel();
-    LED xboxLed;
-    if (batteryLevel == 0)
-      xboxLed = LED1;
-    else if (batteryLevel == 1)
-      xboxLed = LED2;
-    else if (batteryLevel == 2)
-      xboxLed = LED3;
-    else
-      xboxLed = LED4;
-    if (xboxLed != xboxOldLed) {
-      xboxOldLed = xboxLed;
-      Xbox.setLedOn(xboxLed);
+    } else {
+      uint8_t batteryLevel = Xbox.getBatteryLevel();
+      LED xboxLed;
+      if (batteryLevel == 0)
+        xboxLed = LED1;
+      else if (batteryLevel == 1)
+        xboxLed = LED2;
+      else if (batteryLevel == 2)
+        xboxLed = LED3;
+      else
+        xboxLed = LED4;
+
+      if (xboxLed != xboxOldLed) {
+        xboxOldLed = xboxLed;
+        Xbox.setLedOn(xboxLed);
+      }
     }
   }
 #endif // ENABLE_XBOX
