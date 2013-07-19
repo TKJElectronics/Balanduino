@@ -93,13 +93,13 @@ void setup() {
   /* Initialize PID library */
   pid.SetOutputLimits(-100,100); // Set output limits
   pid.SetSampleTime(0); // Sample as fast as possible
-  pid.setResolution(MICROS); // Set the resolution to microseconds
+  pid.SetResolution(MICROS); // Set the resolution to microseconds
   pid.SetMode(AUTOMATIC); // Turn PID on
   
   /* Read the PID values, target angle and other saved values in the EEPROM */
   readEEPROMValues();
   checkInitializationFlags();
-  
+
   /* Setup encoders */
   pinMode(leftEncoder1,INPUT);
   pinMode(leftEncoder2,INPUT);
