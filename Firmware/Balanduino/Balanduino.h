@@ -181,6 +181,7 @@ void leftEncoder();
 void rightEncoder();
 int32_t readLeftEncoder();
 int32_t readRightEncoder();
+int32_t getWheelPosition();
 
 void PID(double restAngle, double offset, double turning, double dt);
 
