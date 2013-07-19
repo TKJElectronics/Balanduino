@@ -3,12 +3,15 @@
 cfg_t cfg; //  Struct for all the configuration values
 
 void checkInitializationFlags() {
-  char initFlags[3];
-  EEPROM_readAnything(initFlagsAddr, initFlags);
-  if (initFlags[0] != eepromVersion[0] || initFlags[1] != eepromVersion[1] || initFlags[2] != eepromVersion[2]) { // Check if the EEPROM version matches the current one
+  char initFlag;
+  for (uint8_t i = 0; i < strlen(eepromVersion); i++) {
+    EEPROM_readAnything(initFlagsAddr+i, initFlag);
+    if (initFlag != eepromVersion[i]) { // Check if the EEPROM version matches the current one
     restoreEEPROMValues();
     for (uint8_t i = 0; i < strlen(eepromVersion); i++)
       EEPROM_updateAnything(initFlagsAddr+i, eepromVersion[i]); // After the default values have been restored, set the flags
+      break;
+    }
   }
 }
   
