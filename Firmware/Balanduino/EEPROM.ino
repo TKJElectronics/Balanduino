@@ -7,9 +7,9 @@ void checkInitializationFlags() {
   for (uint8_t i = 0; i < strlen(eepromVersion); i++) {
     EEPROM_readAnything(initFlagsAddr+i, initFlag);
     if (initFlag != eepromVersion[i]) { // Check if the EEPROM version matches the current one
-    restoreEEPROMValues();
-    for (uint8_t i = 0; i < strlen(eepromVersion); i++)
-      EEPROM_updateAnything(initFlagsAddr+i, eepromVersion[i]); // After the default values have been restored, set the flags
+      restoreEEPROMValues();
+      for (uint8_t i = 0; i < strlen(eepromVersion); i++)
+        EEPROM_updateAnything(initFlagsAddr+i, eepromVersion[i]); // After the default values have been restored, set the flags
       break;
     }
   }
