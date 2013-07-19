@@ -94,7 +94,7 @@ void readSPPData() {
       
       if (input[0] == 'A') { // Abort
         stopAndReset();
-        while (SerialBT.read() != 'C') // Wait until continue is send
+        while (SerialBT.read() != 'C') // Wait until continue is sent
           Usb.Task();
       }
       
@@ -144,7 +144,7 @@ void readSPPData() {
         updateConfig();
       }
 
-      else if (input[0] == 'I') { // IMU trasmitting states
+      else if (input[0] == 'I') { // IMU transmitting states
         if (input[1] == 'B') // Begin sending IMU values
           sendData = true; // Send output to Processing/Android application
         else if (input[1] == 'S') // Stop sending IMU values
@@ -303,7 +303,7 @@ void updateLEDs() {
       else if (PS3.getStatus(Full))
         Led = 0x0F; // LED1, LED2, LED3 and LED4 on
       else if (PS3.getStatus(Charging))
-        Led = (ps3OldLed == 0x0F ? 0x01 : (ps3OldLed << 1 | 1) & 0x0F); // Indicate chargin using the LEDs
+        Led = (ps3OldLed == 0x0F ? 0x01 : (ps3OldLed << 1 | 1) & 0x0F); // Indicate charging using the LEDs
       else
         Led = ps3OldLed;
         
