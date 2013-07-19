@@ -14,7 +14,7 @@
 #define ENABLE_PS3
 #define ENABLE_WII
 #define ENABLE_XBOX
-//#define ENABLE_ADK
+#define ENABLE_ADK
 
 #include "Balanduino.h"
 #include <Wire.h>
@@ -47,14 +47,6 @@ Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source 
 USB Usb; // This will take care of all USB communication
 #endif
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
-BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all the USB and HCI communication with the Bluetooth dongle
-#endif
-
-#ifdef ENABLE_XBOX
-XBOXRECV Xbox(&Usb); // You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
-#endif
-
 #ifdef ENABLE_ADK
 // Implementation for the Android Open Accessory Protocol. Simply connect your phone to get redirected to the Play Store
 ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
@@ -63,6 +55,14 @@ ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
              "0.4", // Version of the Android app
              "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
              "1234"); // Serial Number - this is not used
+#endif
+
+#ifdef ENABLE_XBOX
+XBOXRECV Xbox(&Usb); // You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
+#endif
+
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
+BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all the USB and HCI communication with the Bluetooth dongle
 #endif
 
 #ifdef ENABLE_SPP
@@ -206,7 +206,7 @@ void loop() {
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
   accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
-  
+
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
   if ((accAngle < 90 && pitch > 270) || (accAngle > 270 && pitch < 90)) {
     pitch = accAngle;
@@ -217,7 +217,6 @@ void loop() {
     gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
     if (gyroAngle < 0 || gyroAngle > 360)
       gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
-
     pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-kalmanTimer)/1000000.0); // Calculate the angle using a Kalman filter
   }
   kalmanTimer = micros();
