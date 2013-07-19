@@ -8,12 +8,7 @@
 const char *version = "0.9.0";
 const char *eepromVersion = "001"; // EEPROM version - used to restore the EEPROM values if the configuration values have changed
 
-bool sendData;
-bool sendSettings;
-bool sendInfo;
-bool sendPIDValues;
-bool sendPairConfirmation;
-bool sendKalmanValues;
+bool sendData, sendSettings, sendInfo, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
 const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a pwm frequency up to 20kHz
 const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
@@ -100,16 +95,11 @@ const uint8_t configAddr = strlen(eepromVersion); // Save the configuration star
 double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 /* IMU Data */
-int16_t accY;
-int16_t accZ;
-int16_t gyroX;
-
+int16_t accX, accY, accZ, gyroX;
 uint8_t i2cBuffer[8]; // Buffer for I2C data
 
 // Results
-double accAngle;
-double gyroRate;
-double gyroAngle;
+double accAngle, gyroRate, gyroAngle;
 double pitch;
 
 double lastError; // Store last angle error
@@ -132,12 +122,9 @@ bool ps3Initialized, wiiInitialized, xboxInitialized; // These are used to check
 bool ps3RumbleEnable, wiiRumbleEnabled, xboxRumbleEnabled; // These are used to turn rumble off again except for the PS3 controller which is turned on
 bool ps3RumbleDisable; // Used to turn rumble off again on the PS3 controller
 
-/* Direction set by the controllers or SPP library */
-bool steerForward;
-bool steerBackward;
+/* Direction set by the controllers or the SPP library */
+bool steerForward, steerBackward, steerLeft, steerRight;
 bool steerStop = true; // Stop by default
-bool steerLeft;
-bool steerRight;
 
 bool stopped; // This is used to set a new target position after braking
 
@@ -146,9 +133,7 @@ bool layingDown = true; // Use to indicate if the robot is laying down
 double targetOffset = 0; // Offset for going forward and backward
 double turningOffset = 0; // Offset for turning left and right
 
-// Data send via SPP
-double sppData1 = 0;
-double sppData2 = 0;
+double sppData1, sppData2; // Data send via SPP connection
 
 bool commandSent = false; // This is used so multiple controller can be used at once
 
