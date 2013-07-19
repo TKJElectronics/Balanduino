@@ -21,6 +21,8 @@ void readEEPROMValues() {
   kalman.setQangle(cfg.Qangle);
   kalman.setQbias(cfg.Qbias);
   kalman.setRmeasure(cfg.Rmeasure);
+
+  pid.SetTunings(cfg.P, cfg.I, cfg.D);
 }
 
 void updateConfig() {
@@ -29,17 +31,19 @@ void updateConfig() {
   kalman.setQangle(cfg.Qangle);
   kalman.setQbias(cfg.Qbias);
   kalman.setRmeasure(cfg.Rmeasure);
+
+  pid.SetTunings(cfg.P, cfg.I, cfg.D);
 }
 
 void restoreEEPROMValues() {
-  cfg.P = 10;
-  cfg.I = 2;
-  cfg.D = 3;
+  cfg.P = 12.5;
+  cfg.I = 2.0;
+  cfg.D = 0.04;
 
-  cfg.targetAngle = 180;
+  cfg.targetAngle = 180.0;
   cfg.backToSpot = 1;
   cfg.controlAngleLimit = 8;
-  cfg.turningLimit = 20;
+  cfg.turningLimit = 25;
 
   cfg.Qangle = 0.001;
   cfg.Qbias = 0.003;

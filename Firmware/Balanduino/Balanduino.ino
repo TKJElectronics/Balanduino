@@ -12,12 +12,15 @@
 /* Use this to enable and disable the different controllers */
 #define ENABLE_SPP
 #define ENABLE_PS3
-#define ENABLE_WII
-#define ENABLE_XBOX
-#define ENABLE_ADK
+//#define ENABLE_WII
+//#define ENABLE_XBOX
+//#define ENABLE_ADK
 
 #include "Balanduino.h"
 #include <Wire.h>
+
+
+#include <PID_v1.h> // The Arduino PID library by Brett Beauregard
 
 #ifdef ENABLE_ADK
 #include <adk.h>
@@ -41,6 +44,8 @@
 
 // Create the Kalman library instance
 Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source code
+
+PID pid(&pitch, &PIDValue, &restAngle, 0, 0, 0, DIRECT); // Create the PID instance, since the PID values are stored in the EEPROM we don't know them at compile time
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
 #define ENABLE_USB
@@ -84,6 +89,12 @@ WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck
 void setup() {
   /* Initialize UART */
   Serial.begin(57600);
+
+  /* Initialize PID library */
+  pid.SetOutputLimits(-100,100); // Set output limits
+  pid.SetSampleTime(0); // Sample as fast as possible
+  pid.setResolution(MICROS); // Set the resolution to microseconds
+  pid.SetMode(AUTOMATIC); // Turn PID on
   
   /* Read the PID values, target angle and other saved values in the EEPROM */
   readEEPROMValues();
@@ -232,11 +243,13 @@ void loop() {
   // If it's already balancing it has to be ±45 degrees before it stops trying to balance
   if ((layingDown && (pitch < cfg.targetAngle-10 || pitch > cfg.targetAngle+10)) || (!layingDown && (pitch < cfg.targetAngle-45 || pitch > cfg.targetAngle+45))) {
     layingDown = true; // The robot is in a unsolvable position, so turn off both motors and wait until it's vertical again
+    pid.SetMode(MANUAL); // Turn PID off
     stopAndReset();
   }
   else {
     layingDown = false; // It's no longer laying down
-    PID(cfg.targetAngle,targetOffset,turningOffset,(double)(micros()-pidTimer)/1000000.0);
+    pid.SetMode(AUTOMATIC); // Turn PID on
+    updatePID(cfg.targetAngle,targetOffset,turningOffset,(double)(micros()-pidTimer)/1000000.0);
   }
   pidTimer = micros();
 
