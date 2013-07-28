@@ -8,7 +8,7 @@
  * It can also be controlled by a PS3, Wii or a Xbox controller
  * For details, see: http://balanduino.net/
  */
- 
+
 /* Use this to enable and disable the different controllers */
 #define ENABLE_SPP
 #define ENABLE_PS3
@@ -23,7 +23,7 @@
 #ifdef ENABLE_ADK
 #include <adk.h>
 #endif
- 
+
 // These are all open source libraries written by Kristian Lauszus, TKJ Electronics
 // The USB libraries are located at the following link: https://github.com/felis/USB_Host_Shield_2.0
 #include <Kalman.h> // Kalman filter library - see: http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/
@@ -93,7 +93,7 @@ void setup() {
   pid.SetSampleTime(0); // Sample as fast as possible
   pid.SetResolution(MICROS); // Set the resolution to microseconds
   pid.SetMode(AUTOMATIC); // Turn PID on
-  
+
   /* Read the PID values, target angle and other saved values in the EEPROM */
   readEEPROMValues();
   checkInitializationFlags();
@@ -132,14 +132,14 @@ void setup() {
   TCCR1A = _BV(COM1A1) | _BV(COM1B1);
   setPWM(leftPWM,0); // Turn off pwm on both pins
   setPWM(rightPWM,0);
-  
+
 #ifdef ENABLE_USB
   if (Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
     while (1); // Halt
   }
 #endif
-  
+
   /* Attach onInit function */
   // This is used to set the LEDs according to the voltage level and rumble the controller to indicate the new connection.
 #ifdef ENABLE_PS3
@@ -160,7 +160,7 @@ void setup() {
   i2cBuffer[3] = 0x00; // Set Accelerometer Full Scale Range to ±2g
   while (i2cWrite(0x19,i2cBuffer,4,false)); // Write to all four registers at once
   while (i2cWrite(0x6B,0x09,true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
-  
+
   while (i2cRead(0x75,i2cBuffer,1));
   if (i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
     Serial.print(F("Error reading sensor"));
@@ -168,7 +168,7 @@ void setup() {
   }
 
   delay(100); // Wait for the sensor to get ready
-  
+
   /* Set Kalman and gyro starting angle */
   while (i2cRead(0x3D,i2cBuffer,4));
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
@@ -176,22 +176,22 @@ void setup() {
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
   accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
-  
+
   kalman.setAngle(accAngle); // Set starting angle
   gyroAngle = accAngle;
-  
+
   pinMode(LED_BUILTIN,OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
-  
+
   /* Setup pin for buzzer and beep to indicate that it is now ready */
   pinMode(buzzer,OUTPUT);
-  
+
   cbi(TCCR0B,CS00); // Set precaler to 8
   analogWrite(buzzer,128);
   delay(800); // This is really 100ms
   analogWrite(buzzer,0);
   sbi(TCCR0B,CS00); // Set precaler back to 64
 
-  /* Setup timing */  
+  /* Setup timing */
   kalmanTimer = micros();
   pidTimer = kalmanTimer;
   encoderTimer = kalmanTimer;
@@ -211,7 +211,7 @@ void loop() {
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
   accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   gyroX = ((i2cBuffer[6] << 8) | i2cBuffer[7]);
-  
+
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
   accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
@@ -230,7 +230,7 @@ void loop() {
   }
   kalmanTimer = micros();
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
-  
+
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
       Usb.Task();

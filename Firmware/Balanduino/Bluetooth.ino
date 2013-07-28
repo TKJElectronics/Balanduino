@@ -11,12 +11,12 @@ void sendBluetoothData() {
     if (sendPairConfirmation) {
       sendPairConfirmation = false;
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
-      
+
       SerialBT.println("WC");
     } else if (sendPIDValues) {
       sendPIDValues = false;
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
-      
+
       SerialBT.print("P,");
       SerialBT.print(cfg.P);
       SerialBT.print(',');
@@ -28,7 +28,7 @@ void sendBluetoothData() {
     } else if (sendSettings) {
       sendSettings = false;
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
-      
+
       SerialBT.print("S,");
       SerialBT.print(cfg.backToSpot);
       SerialBT.print(',');
@@ -38,10 +38,10 @@ void sendBluetoothData() {
     } else if (sendInfo) {
       sendInfo = false;
       dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
-      
+
       SerialBT.print("I,");
       SerialBT.print(version);
-      
+
       #if defined(__AVR_ATmega644__)
         SerialBT.print(",ATmega644,");
       #elif defined(__AVR_ATmega1284P__)
@@ -49,7 +49,7 @@ void sendBluetoothData() {
       #else
         SerialBT.print(",Unknown,");
       #endif
-      
+
       SerialBT.print(batteryVoltage);
       SerialBT.print("V,");
       SerialBT.println((double)millis()/60000.0);
@@ -65,7 +65,7 @@ void sendBluetoothData() {
       SerialBT.println(kalman.getRmeasure(), 4);
     } else if (sendData) {
       dataTimer = millis();
-      
+
       SerialBT.print("V,");
       SerialBT.print(accAngle);
       SerialBT.print(',');
@@ -82,7 +82,7 @@ void readSPPData() {
       char input[30];
       uint8_t i = 0;
       while (1) {
-        input[i] = SerialBT.read();   
+        input[i] = SerialBT.read();
         if (input[i] == -1) // Error while reading the string
           return;
         if (input[i] == ';') // Keep reading until it reads a semicolon
@@ -91,13 +91,13 @@ void readSPPData() {
         if (i >= sizeof(input)/sizeof(input[0])) // String is too long
           return;
       }
-      
+
       if (input[0] == 'A') { // Abort
         stopAndReset();
         while (SerialBT.read() != 'C') // Wait until continue is sent
           Usb.Task();
       }
-      
+
       /* For sending PID and IMU values */
       else if (input[0] == 'G') { // The Processing/Android application sends when it needs the PID, settings or info
         if (input[1] == 'P') // Get PID Values
@@ -109,8 +109,8 @@ void readSPPData() {
         else if (input[1] == 'K') // Get Kalman values
           sendKalmanValues = true;
       }
-      
-      else if (input[0] == 'S') { // Set different values     
+
+      else if (input[0] == 'S') { // Set different values
         /* Set PID and target angle */
         if (input[1] == 'P') {
           strtok(input, ","); // Ignore 'P'
@@ -149,7 +149,7 @@ void readSPPData() {
           sendData = true; // Send output to Processing/Android application
         else if (input[1] == 'S') // Stop sending IMU values
           sendData = false; // Stop sending output to Processing/Android application
-      }     
+      }
 
       else if (input[0] == 'C') { // Commands
         if (input[1] == 'S') // Stop
@@ -171,7 +171,7 @@ void readSPPData() {
 #ifdef ENABLE_WII
         else if (input[1] == 'W') { // Pair with a new Wiimote or Wii U Pro Controller
           Wii.pair();
-          sendPairConfirmation = true;  
+          sendPairConfirmation = true;
         }
 #endif // ENABLE_WII
         else if (input[1] == 'R') {
@@ -179,7 +179,7 @@ void readSPPData() {
           sendPIDValues = true;
           sendKalmanValues = true;
           sendSettings = true;
-        }         
+        }
       }
     }
   }
@@ -188,11 +188,11 @@ void readSPPData() {
 
 void readUsb() {
   Usb.Task(); // The SPP data is actually not send until this is called, one could call SerialBT.send() directly as well
-  
+
 #ifdef ENABLE_SPP
   readSPPData();
 #endif // ENABLE_SPP
-  
+
   if (millis() > (receiveControlTimer+receiveControlTimeout)) {
     commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
 #ifdef ENABLE_PS3
@@ -269,7 +269,7 @@ void readUsb() {
 #if defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
   if (millis() - ledTimer > 1000) { // Update every 1s
     ledTimer = millis();
-    updateLEDs();    
+    updateLEDs();
   }
 #endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 }
@@ -280,7 +280,7 @@ void updateLEDs() {
 #ifdef ENABLE_PS3
   if (PS3.PS3Connected) {
     if (ps3RumbleEnable) {
-      ps3RumbleEnable = false;      
+      ps3RumbleEnable = false;
       PS3.setRumbleOn(RumbleLow);
       ps3RumbleDisable = true;
       ledTimer -= 500; // Turn off again in 500ms
@@ -306,7 +306,7 @@ void updateLEDs() {
         Led = (ps3OldLed == 0x0F ? 0x01 : (ps3OldLed << 1 | 1) & 0x0F); // Indicate charging using the LEDs
       else
         Led = ps3OldLed;
-        
+
       if (Led != ps3OldLed) {
         ps3OldLed = Led;
         PS3.setLedRaw(Led);
@@ -409,14 +409,14 @@ void onInit() { // This function is called when a controller is first initialize
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
-  
+
   // Set all to false
   steerForward = false;
   steerBackward = false;
   steerStop = false;
   steerLeft = false;
   steerRight = false;
-  
+
 #ifdef ENABLE_SPP
   if (command == joystick) {
     if (sppData2 > 0) {
@@ -580,7 +580,7 @@ void steer(Command command) {
     }
   }
 #endif // ENABLE_XBOX
-  
+
   if (command == stop) {
     steerStop = true;
     if (lastCommand != stop) { // Set new stop position

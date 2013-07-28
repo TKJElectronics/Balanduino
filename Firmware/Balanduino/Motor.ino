@@ -31,13 +31,13 @@ void updatePID(double angle, double offset, double turning, double dt) {
         targetPosition = wheelPosition;
     }
     restAngle -= (double)wheelVelocity/velocityScaleStop;
-    
+
     if (restAngle < cfg.targetAngle-10) // Limit rest Angle
       restAngle = cfg.targetAngle-10;
     else if (restAngle > cfg.targetAngle+10)
-      restAngle = cfg.targetAngle+10;      
+      restAngle = cfg.targetAngle+10;
   }
-  
+
   if (restAngle - lastRestAngle > 1) // Don't change restAngle with more than 1 degree in each loop
     restAngle = lastRestAngle+1;
   else if (restAngle - lastRestAngle < -1)
@@ -90,30 +90,30 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
     if (direction == forward) {
       cbi(leftPort,leftA);
       sbi(leftPort,leftB);
-    } 
+    }
     else if (direction == backward) {
       sbi(leftPort,leftA);
       cbi(leftPort,leftB);
     }
-  } 
+  }
   else if (motor == right) {
     setPWM(rightPWM,speed); // Right motor PWM
     if (direction == forward) {
       sbi(rightPort,rightA);
       cbi(rightPort,rightB);
-    } 
+    }
     else if (direction == backward) {
       cbi(rightPort,rightA);
       sbi(rightPort,rightB);
     }
   }
 }
-void stopMotor(Command motor) {  
+void stopMotor(Command motor) {
   if (motor == left) {
     setPWM(leftPWM,PWMVALUE); // Set high
     sbi(leftPort,leftA);
     sbi(leftPort,leftB);
-  } 
+  }
   else if (motor == right) {
     setPWM(rightPWM,PWMVALUE); // Set high
     sbi(rightPort,rightA);
@@ -137,7 +137,7 @@ void stopAndReset() {
 }
 
 /* Interrupt routine and encoder read functions - I read using the port registers for faster processing */
-void leftEncoder() { 
+void leftEncoder() {
   if ((bool)(PIND & _BV(PIND2)) == (bool)(PINA & _BV(PINA6)))
     leftCounter--;
   else

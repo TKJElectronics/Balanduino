@@ -14,7 +14,7 @@ void checkInitializationFlags() {
     }
   }
 }
-  
+
 void readEEPROMValues() {
   EEPROM_readAnything(configAddr, cfg);
 
