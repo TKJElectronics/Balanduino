@@ -434,20 +434,20 @@ void steer(Command command) {
       steerLeft = true;
     }
   } else if (command == imu) {
-      if (sppData2 > 0) {
-        targetOffset = scale(sppData2,0,36,0,cfg.controlAngleLimit);
+      if (sppData1 > 0) {
+        targetOffset = scale(sppData1,0,36,0,cfg.controlAngleLimit);
         steerForward = true;
       }
-      else if (sppData2 < 0) {
-        targetOffset = scale(sppData2,0,-36,0,cfg.controlAngleLimit);
+      else if (sppData1 < 0) {
+        targetOffset = scale(sppData1,0,-36,0,cfg.controlAngleLimit);
         steerBackward = true;
       }
-      if (sppData1 > 0) {
-        turningOffset = scale(sppData1,0,45,0,cfg.turningLimit);
+      if (sppData2 < 0) {
+        turningOffset = scale(sppData2,0,-45,0,cfg.turningLimit);
         steerLeft = true;
       }
-      else if (sppData1 < 0) {
-        turningOffset = scale(sppData1,0,-45,0,cfg.turningLimit);
+      else if (sppData2 > 0) {
+        turningOffset = scale(sppData2,0,45,0,cfg.turningLimit);
         steerRight = true;
       }
   }
