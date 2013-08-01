@@ -51,7 +51,7 @@ void sendBluetoothData() {
       #endif
 
       SerialBT.print(batteryVoltage);
-      SerialBT.print("V,");
+      SerialBT.print(",");
       SerialBT.println((double)millis()/60000.0);
     } else if (sendKalmanValues) {
       sendKalmanValues = false;
