@@ -4,14 +4,14 @@ balanduino.name=Balanduino w/ ATmega644A
 
 balanduino.upload.tool=avrdude
 balanduino.upload.protocol=arduino
-balanduino.upload.maximum_size=63488
+balanduino.upload.maximum_size=64512
 balanduino.upload.maximum_data_size=4096
-balanduino.upload.speed=38400
+balanduino.upload.speed=57600
 
 balanduino.bootloader.tool=avrdude
-balanduino.bootloader.file=atmega/ATmegaBOOT_168_atmega644a_8m.hex
-balanduino.bootloader.low_fuses=0xFD
-balanduino.bootloader.high_fuses=0xD4
+balanduino.bootloader.file=optiboot/optiboot_balanduino644.hex
+balanduino.bootloader.low_fuses=0xFF
+balanduino.bootloader.high_fuses=0xD6
 balanduino.bootloader.extended_fuses=0xFD
 balanduino.bootloader.unlock_bits=0x3F
 balanduino.bootloader.lock_bits=0x0F
@@ -21,29 +21,5 @@ balanduino.build.f_cpu=8000000L
 balanduino.build.board=AVR_BALANDUINO
 balanduino.build.core=arduino:arduino
 balanduino.build.variant=standard
-
-##############################################################
-
-balanduino2.name=Balanduino w/ ATmega644A optiboot
-
-balanduino2.upload.tool=avrdude
-balanduino2.upload.protocol=arduino
-balanduino2.upload.maximum_size=64512
-balanduino2.upload.maximum_data_size=4096
-balanduino2.upload.speed=57600
-
-balanduino2.bootloader.tool=avrdude
-balanduino2.bootloader.file=optiboot/optiboot_balanduino644.hex
-balanduino2.bootloader.low_fuses=0xFF
-balanduino2.bootloader.high_fuses=0xD6
-balanduino2.bootloader.extended_fuses=0xFD
-balanduino2.bootloader.unlock_bits=0x3F
-balanduino2.bootloader.lock_bits=0x0F
-
-balanduino2.build.mcu=atmega644
-balanduino2.build.f_cpu=8000000L
-balanduino2.build.board=AVR_BALANDUINO
-balanduino2.build.core=arduino:arduino
-balanduino2.build.variant=standard
 
 ##############################################################
