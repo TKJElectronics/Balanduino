@@ -19,7 +19,7 @@ balanduino.bootloader.lock_bits=0x0F
 balanduino.build.mcu=atmega644
 balanduino.build.f_cpu=8000000L
 balanduino.build.board=AVR_BALANDUINO
-balanduino.build.core=arduino
+balanduino.build.core=arduino:arduino
 balanduino.build.variant=standard
 
 ##############################################################
@@ -43,7 +43,7 @@ balanduino2.bootloader.lock_bits=0x0F
 balanduino2.build.mcu=atmega644
 balanduino2.build.f_cpu=8000000L
 balanduino2.build.board=AVR_BALANDUINO
-balanduino2.build.core=arduino
+balanduino2.build.core=arduino:arduino
 balanduino2.build.variant=standard
 
 ##############################################################
