@@ -7,15 +7,13 @@ LED xboxOldLed;
 
 #ifdef ENABLE_SPP
 void sendBluetoothData() {
-  if (SerialBT.connected && (millis() - dataTimer > 50)) {  // Only send data every 50ms
+  if (SerialBT.connected) {
     if (sendPairConfirmation) {
       sendPairConfirmation = false;
-      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
 
       SerialBT.println("WC");
     } else if (sendPIDValues) {
       sendPIDValues = false;
-      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
 
       SerialBT.print("P,");
       SerialBT.print(cfg.P);
@@ -27,7 +25,6 @@ void sendBluetoothData() {
       SerialBT.println(cfg.targetAngle);
     } else if (sendSettings) {
       sendSettings = false;
-      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
 
       SerialBT.print("S,");
       SerialBT.print(cfg.backToSpot);
@@ -37,7 +34,6 @@ void sendBluetoothData() {
       SerialBT.println(cfg.turningLimit);
     } else if (sendInfo) {
       sendInfo = false;
-      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
 
       SerialBT.print("I,");
       SerialBT.print(version);
@@ -55,7 +51,6 @@ void sendBluetoothData() {
       SerialBT.println((double)millis()/60000.0);
     } else if (sendKalmanValues) {
       sendKalmanValues = false;
-      dataTimer = millis(); // Reset the timer, to prevent it from sending data in the next loop
 
       SerialBT.print("K,");
       SerialBT.print(kalman.getQangle(), 4);
@@ -63,7 +58,7 @@ void sendBluetoothData() {
       SerialBT.print(kalman.getQbias(), 4);
       SerialBT.print(',');
       SerialBT.println(kalman.getRmeasure(), 4);
-    } else if (sendData) {
+    } else if (sendData && (millis() - dataTimer > 50)) { // Only send data every 50ms
       dataTimer = millis();
 
       SerialBT.print("V,");
