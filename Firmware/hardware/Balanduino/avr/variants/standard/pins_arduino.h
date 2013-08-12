@@ -38,8 +38,6 @@ const static uint8_t MOSI = 27;
 const static uint8_t MISO = 28;
 const static uint8_t SCK  = 29;
 
-static const uint8_t SDA = 14;
-static const uint8_t SCL = 13;
 static const uint8_t LED_BUILTIN = 6;
 
 static const uint8_t A0 = 7;
@@ -49,7 +47,10 @@ static const uint8_t A3 = 10;
 static const uint8_t A4 = 11;
 static const uint8_t A5 = 12;
 
-// ATMEL ATMEGA644A / Balanduino
+static const uint8_t SDA = 13;
+static const uint8_t SCL = 14;
+
+// ATMEL ATMEGA1284P / Balanduino
 //
 //                   +---\/---+
 //   M2A (D25) PB0  1|        |40 PA0 (A0 / D7)
@@ -61,7 +62,7 @@ static const uint8_t A5 = 12;
 //  MISO (D28) PB6  7|        |34 PA6 (D30) EN1B
 //   SCK (D29) PB7  8|        |33 PA7 (D31) EN2B
 //             RST  9|        |32 AREF
-//             VCC 10|        |31 GND 
+//             VCC 10|        |31 GND
 //             GND 11|        |30 AVCC
 //           XTAL2 12|        |29 PC7 (D24) M1B
 //           XTAL1 13|        |28 PC6 (D23) M1A
@@ -69,8 +70,8 @@ static const uint8_t A5 = 12;
 //     TX (D1) PD1 15|        |26 PC4 (D21) M1EN
 //  EN1A (D15) PD2 16|        |25 PC3 (D20) SS
 //  EN2A (D16) PD3 17|        |24 PC2 (D19) INT_MAX
-// PWM1B (D17) PD4 18|        |23 PC1 (D14) SDA
-// PWM1A (D18) PD5 19|        |22 PC0 (D13) SCL
+// PWM1B (D17) PD4 18|        |23 PC1 (D13) SDA
+// PWM1A (D18) PD5 19|        |22 PC0 (D14) SCL
 //  PWM2B (D3) PD6 20|        |21 PD7 (D4) PWM2A
 //                   +--------+
 //
@@ -151,8 +152,8 @@ const uint8_t PROGMEM digital_pin_to_port_PGM[] = {
         PA, /* 10 - PA3 */
         PA, /* 11 - PA4 */
         PA, /* 12 - PA5 */
-        PC, /* 13 - PC0 */
-        PC, /* 14 - PC1 */
+        PC, /* 13 - PC1 */
+        PC, /* 14 - PC0 */
 
         /* Internal pins */
         PD, /* 15 - PD2 */
@@ -191,8 +192,8 @@ const uint8_t PROGMEM digital_pin_to_bit_mask_PGM[] = {
         _BV(3), /* 10 - PA3 */
         _BV(4), /* 11 - PA4 */
         _BV(5), /* 12 - PA5 */
-        _BV(0), /* 13 - PC0 */
-        _BV(1), /* 14 - PC1 */
+        _BV(1), /* 13 - PC1 */
+        _BV(0), /* 14 - PC0 */
 
         /* Internal pins */
         _BV(2), /* 15 - PD2 */
@@ -231,8 +232,8 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
         NOT_ON_TIMER, /* 10 - PA3 */
         NOT_ON_TIMER, /* 11 - PA4 */
         NOT_ON_TIMER, /* 12 - PA5 */
-        NOT_ON_TIMER, /* 13 - PC0 */
-        NOT_ON_TIMER, /* 14 - PC1 */
+        NOT_ON_TIMER, /* 13 - PC1 */
+        NOT_ON_TIMER, /* 14 - PC0 */
 
         /* Internal pins */
         NOT_ON_TIMER, /* 15 - PD2 */
