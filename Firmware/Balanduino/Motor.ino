@@ -136,20 +136,20 @@ void stopAndReset() {
   lastRestAngle = cfg.targetAngle;
 }
 
-/* Interrupt routine and encoder read functions - I read using the port registers for faster processing */
+/* Interrupt routine and encoder read functions - we read using the port registers for faster processing */
 void leftEncoder() {
-  if ((bool)(PIND & _BV(PIND2)) == (bool)(PINA & _BV(PINA6)))
+  if ((bool)(PIND & _BV(PIND2)) == (bool)(PINA & _BV(PINA6))) // Compare pin 15 and pin 30
     leftCounter--;
   else
     leftCounter++;
 }
 void rightEncoder() {
-  if ((bool)(PIND & _BV(PIND3)) == (bool)(PINA & _BV(PINA7)))
+  if ((bool)(PIND & _BV(PIND3)) == (bool)(PINA & _BV(PINA7))) // Compare pin 16 and pin 31
     rightCounter++;
   else
     rightCounter--;
 }
-int32_t readLeftEncoder() { // The encoders decrease when motors are travelling forward and increase when travelling backward
+int32_t readLeftEncoder() { // The encoders decrease when motors are traveling forward and increase when traveling backward
   return leftCounter;
 }
 int32_t readRightEncoder() {
