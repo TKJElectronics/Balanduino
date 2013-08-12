@@ -10,6 +10,3 @@
 [submodule "Firmware/libraries/USB_Host_Shield_2.0"]
 	path = Firmware/libraries/USB_Host_Shield_2.0
 	url = https://github.com/felis/USB_Host_Shield_2.0.git
-[submodule "Firmware/libraries/Arduino-PID-Library"]
-	path = Firmware/libraries/Arduino-PID-Library
-	url = https://github.com/Lauszus/Arduino-PID-Library.git

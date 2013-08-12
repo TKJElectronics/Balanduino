@@ -8,7 +8,6 @@ BOARD = balanduino
 MON_SPEED = 57600
 LIB_DIRS = ../libraries/USB_Host_Shield_2.0
 LIB_DIRS += ../libraries/KalmanFilter
-LIB_DIRS += ../libraries/Arduino-PID-Library/PID_v1
 LIB_DIRS += ../hardware/Balanduino/avr/libraries/Wire
 LIB_DIRS += ../hardware/Balanduino/avr/libraries/Wire/utility
 include Makefile.master

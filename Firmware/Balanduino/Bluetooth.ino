@@ -20,7 +20,7 @@ void sendBluetoothData() {
       SerialBT.print(',');
       SerialBT.print(cfg.I);
       SerialBT.print(',');
-      SerialBT.print(cfg.D, 3);
+      SerialBT.print(cfg.D);
       SerialBT.print(',');
       SerialBT.println(cfg.targetAngle);
     } else if (sendSettings) {

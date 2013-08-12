@@ -102,8 +102,12 @@ uint8_t i2cBuffer[8]; // Buffer for I2C data
 double accAngle, gyroRate, gyroAngle;
 double pitch;
 
+double lastError; // Store last angle error
+double integratedError; // Store integrated error
+
+double error;
+double pTerm, iTerm, dTerm;
 double PIDValue, PIDLeft, PIDRight;
-double restAngle;
 
 /* Used for timing */
 uint32_t kalmanTimer; // Timer used for the Kalman filter
