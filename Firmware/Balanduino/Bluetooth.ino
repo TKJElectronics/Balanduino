@@ -12,17 +12,26 @@ void sendBluetoothData() {
       sendPairConfirmation = false;
 
       SerialBT.println("WC");
-    } else if (sendPIDValues) {
-      sendPIDValues = false;
+    } else if (sendMainPIDValues) {
+      sendMainPIDValues = false;
 
       SerialBT.print("P,");
-      SerialBT.print(cfg.P);
+      SerialBT.print(cfg.mainPID.Kp);
       SerialBT.print(',');
-      SerialBT.print(cfg.I);
+      SerialBT.print(cfg.mainPID.Ki);
       SerialBT.print(',');
-      SerialBT.print(cfg.D, 3);
+      SerialBT.print(cfg.mainPID.Kd, 3);
       SerialBT.print(',');
       SerialBT.println(cfg.targetAngle);
+    } else if (sendEncoderPIDValues) {
+      sendEncoderPIDValues = false;
+
+      SerialBT.print("E,");
+      SerialBT.print(cfg.encoderPID.Kp);
+      SerialBT.print(',');
+      SerialBT.print(cfg.encoderPID.Ki);
+      SerialBT.print(',');
+      SerialBT.println(cfg.encoderPID.Kd);
     } else if (sendSettings) {
       sendSettings = false;
 
@@ -83,7 +92,7 @@ void readSPPData() {
         if (input[i] == ';') // Keep reading until it reads a semicolon
           break;
         i++;
-        if (i >= sizeof(input)/sizeof(input[0])) // String is too long
+        if (i >= sizeof(input)) // String is too long
           return;
       }
 
@@ -94,9 +103,11 @@ void readSPPData() {
       }
 
       /* For sending PID and IMU values */
-      else if (input[0] == 'G') { // The Processing/Android application sends when it needs the PID, settings or info
-        if (input[1] == 'P') // Get PID Values
-          sendPIDValues = true;
+      else if (input[0] == 'G') { // Used to get different parameters like the PID values, settings and info
+        if (input[1] == 'P') // Get main PID Values
+          sendMainPIDValues = true;
+        else if (input[1] == 'E') // Get encoder PID values
+          sendEncoderPIDValues = true;
         else if (input[1] == 'S') // Get settings
           sendSettings = true;
         else if (input[1] == 'I') // Get info
@@ -109,13 +120,22 @@ void readSPPData() {
         /* Set PID and target angle */
         if (input[1] == 'P') {
           strtok(input, ","); // Ignore 'P'
-          cfg.P = atof(strtok(NULL, ";"));
+          if (input[2] == '0')
+            cfg.mainPID.Kp = atof(strtok(NULL, ";"));
+          else
+            cfg.encoderPID.Kp = atof(strtok(NULL, ";"));
         } else if (input[1] == 'I') {
           strtok(input, ","); // Ignore 'I'
-          cfg.I = atof(strtok(NULL, ";"));
+          if (input[2] == '0')
+            cfg.mainPID.Ki = atof(strtok(NULL, ";"));
+          else
+            cfg.encoderPID.Ki = atof(strtok(NULL, ";"));
         } else if (input[1] == 'D') {
           strtok(input, ","); // Ignore 'D'
-          cfg.D = atof(strtok(NULL, ";"));
+          if (input[2] == '0')
+            cfg.mainPID.Kd = atof(strtok(NULL, ";"));
+          else
+            cfg.encoderPID.Kd = atof(strtok(NULL, ";"));
         } else if (input[1] == 'T') { // Target Angle
           strtok(input, ","); // Ignore 'T'
           cfg.targetAngle = atof(strtok(NULL, ";"));
@@ -133,9 +153,9 @@ void readSPPData() {
           strtok(input, ","); // Ignore 'U'
           cfg.turningLimit = atoi(strtok(NULL, ";"));
         }
-        else if (input[1] == 'B') { // Set Back To Spot
+        else if (input[1] == 'B') // Set Back To Spot
           cfg.backToSpot = input[2] - '0'; // Convert from ASCII to number
-        }
+
         updateConfig();
       }
 
@@ -171,7 +191,8 @@ void readSPPData() {
 #endif // ENABLE_WII
         else if (input[1] == 'R') {
           restoreEEPROMValues(); // Restore the default PID values and target angle
-          sendPIDValues = true;
+          sendMainPIDValues = true;
+          sendEncoderPIDValues = true;
           sendKalmanValues = true;
           sendSettings = true;
         }
@@ -579,7 +600,7 @@ void steer(Command command) {
   if (command == stop) {
     steerStop = true;
     if (lastCommand != stop) { // Set new stop position
-      targetPosition = getWheelPosition();
+      targetPosition = getWheelsPosition();
       stopped = false;
     }
   }

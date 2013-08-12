@@ -1,19 +1,27 @@
 void updatePID(double angle, double offset, double turning, double dt) {
-  restAngle = angle;
+  //restAngle = angle;
   /* Steer robot */
   if (steerForward) {
     if (wheelVelocity < 0)
       offset += (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed - wheel velocity is negative when driving forward
-    restAngle -= offset;
+    restAngle = angle - offset;
   }
   else if (steerBackward) {
     if (wheelVelocity > 0)
       offset -= (double)wheelVelocity/velocityScaleMove; // Scale down offset at high speed - wheel velocity is positive when driving backward
-    restAngle += offset;
+    restAngle = angle + offset;
   }
   /* Brake */
   else if (steerStop) {
-    int32_t wheelPosition = getWheelPosition();
+    int32_t wheelPosition = getWheelsPosition();
+    // The input is 'wheelPosition'
+    // The setpoint is 'targetPosition'
+    // The output is stored in 'restAngle'
+    encoders_pid.Compute();
+    restAngle += cfg.targetAngle;
+
+    /*
+    int32_t wheelPosition = getWheelsPosition();
     int32_t positionError = wheelPosition - targetPosition;
     if (cfg.backToSpot) {
       if (abs(positionError) > zoneA) // Inside zone A
@@ -36,6 +44,7 @@ void updatePID(double angle, double offset, double turning, double dt) {
       restAngle = cfg.targetAngle-10;
     else if (restAngle > cfg.targetAngle+10)
       restAngle = cfg.targetAngle+10;
+    */
   }
 
   if (restAngle - lastRestAngle > 1) // Don't change restAngle with more than 1 degree in each loop
@@ -48,7 +57,7 @@ void updatePID(double angle, double offset, double turning, double dt) {
   // The input is 'pitch'
   // The setpoint is 'restAngle'
   // The output is stored in 'PIDValue'
-  pid.Compute();
+  main_pid.Compute();
 
   /* Steer robot sideways */
   if (steerLeft) {
@@ -132,7 +141,7 @@ void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0
 void stopAndReset() {
   stopMotor(left);
   stopMotor(right);
-  targetPosition = getWheelPosition();
+  targetPosition = getWheelsPosition();
   lastRestAngle = cfg.targetAngle;
 }
 
@@ -155,6 +164,6 @@ int32_t readLeftEncoder() { // The encoders decrease when motors are traveling f
 int32_t readRightEncoder() {
   return rightCounter;
 }
-int32_t getWheelPosition() {
+int32_t getWheelsPosition() {
   return leftCounter + rightCounter;
 }

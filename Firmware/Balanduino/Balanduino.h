@@ -6,9 +6,9 @@
 
 /* Firmware Version Information */
 const char *version = "0.9.0";
-const char *eepromVersion = "001"; // EEPROM version - used to restore the EEPROM values if the configuration values have changed
+const char *eepromVersion = "002"; // EEPROM version - used to restore the EEPROM values if the configuration values have changed
 
-bool sendData, sendSettings, sendInfo, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
+bool sendData, sendSettings, sendInfo, sendMainPIDValues, sendEncoderPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
 const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a pwm frequency up to 20kHz
 const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
@@ -69,13 +69,18 @@ double batteryVoltage; // Measured battery level
 
 bool ledState; // Last state of the built in LED
 
-// This struct will store all the configuration values
+// PID Values struct
 typedef struct {
-  // PID variables
-  double P;
-  double I;
-  double D;
-  
+  double Kp;
+  double Ki;
+  double Kd;
+} PIDValues;
+
+// This struct will store all the configuration values stored in the EEPROM
+typedef struct {
+  PIDValues mainPID;
+  PIDValues encoderPID;
+
   double targetAngle; // Resting angle of the robot
   uint8_t backToSpot; // Set whenever the robot should stay in the same spot
   uint8_t controlAngleLimit; // Set the maximum tilting angle of the robot
@@ -138,7 +143,8 @@ const uint16_t receiveControlTimeout = 500; // After how long time should it sho
 
 int32_t lastWheelPosition; // Used to calculate the wheel velocity
 int32_t wheelVelocity; // Wheel velocity based on encoder readings
-int32_t targetPosition; // The encoder position the robot should be at
+double targetPosition; // The encoder position the robot should be at
+double wheelPosition;
 
 const uint16_t zoneA = 8000;
 const uint16_t zoneB = 4000;
@@ -177,7 +183,7 @@ void leftEncoder();
 void rightEncoder();
 int32_t readLeftEncoder();
 int32_t readRightEncoder();
-int32_t getWheelPosition();
+int32_t getWheelsPosition();
 
 void updatePID(double restAngle, double offset, double turning, double dt);
 

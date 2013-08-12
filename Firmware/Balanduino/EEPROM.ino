@@ -22,7 +22,8 @@ void readEEPROMValues() {
   kalman.setQbias(cfg.Qbias);
   kalman.setRmeasure(cfg.Rmeasure);
 
-  pid.SetTunings(cfg.P, cfg.I, cfg.D);
+  main_pid.SetTunings(cfg.mainPID.Kp, cfg.mainPID.Ki, cfg.mainPID.Kd);
+  encoders_pid.SetTunings(cfg.encoderPID.Kp, cfg.encoderPID.Ki, cfg.encoderPID.Kd);
 }
 
 void updateConfig() {
@@ -32,13 +33,18 @@ void updateConfig() {
   kalman.setQbias(cfg.Qbias);
   kalman.setRmeasure(cfg.Rmeasure);
 
-  pid.SetTunings(cfg.P, cfg.I, cfg.D);
+  main_pid.SetTunings(cfg.mainPID.Kp, cfg.mainPID.Ki, cfg.mainPID.Kd);
+  encoders_pid.SetTunings(cfg.encoderPID.Kp, cfg.encoderPID.Ki, cfg.encoderPID.Kd);
 }
 
 void restoreEEPROMValues() {
-  cfg.P = 12.5;
-  cfg.I = 2.0;
-  cfg.D = 0.04;
+  cfg.mainPID.Kp = 12.5;
+  cfg.mainPID.Ki = 2.0;
+  cfg.mainPID.Kd = 0.04;
+
+  cfg.encoderPID.Kp = 1;
+  cfg.encoderPID.Ki = 0;
+  cfg.encoderPID.Kd = 0;
 
   cfg.targetAngle = 180.0;
   cfg.backToSpot = 1;
