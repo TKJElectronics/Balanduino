@@ -18,6 +18,7 @@
 
 #include "Balanduino.h"
 #include <Wire.h> // Official Arduino Wire library
+#include <usbhub.h> // Some dongles can have a hub inside
 
 #ifdef ENABLE_ADK
 #include <adk.h>
@@ -62,6 +63,7 @@ XBOXRECV Xbox(&Usb); // You have to connect a Xbox wireless receiver to the Ardu
 #endif
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
+USBHub Hub1(&Usb); // Some dongles have a hub inside
 BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all the USB and HCI communication with the Bluetooth dongle
 #endif
 
