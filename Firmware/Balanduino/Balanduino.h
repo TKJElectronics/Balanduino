@@ -2,11 +2,10 @@
 #define _balanduino_h_
 
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
-#include <string.h> // Needed for strlen
 
 /* Firmware Version Information */
 const char *version = "0.9.0";
-const char *eepromVersion = "001"; // EEPROM version - used to restore the EEPROM values if the configuration values have changed
+const uint8_t eepromVersion = 1; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
 bool sendData, sendSettings, sendInfo, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
@@ -75,7 +74,7 @@ typedef struct {
   double P;
   double I;
   double D;
-  
+
   double targetAngle; // Resting angle of the robot
   uint8_t backToSpot; // Set whenever the robot should stay in the same spot
   uint8_t controlAngleLimit; // Set the maximum tilting angle of the robot
@@ -90,7 +89,7 @@ extern cfg_t cfg;
 
 /* EEPROM Address Definitions */
 const uint8_t initFlagsAddr = 0; // Set the first three bytes to the EEPROM version
-const uint8_t configAddr = strlen(eepromVersion); // Save the configuration starting from this location
+const uint8_t configAddr = 1; // Save the configuration starting from this location
 
 double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
