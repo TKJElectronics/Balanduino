@@ -12,9 +12,9 @@ name=$(echo $(echo $url | rev | cut -d'/' -f 1 | rev) | cut -d'.' -f 1)
 echo "\nClone Project:" $name "\n"
 git clone --recursive $url
 
-echo "\nUpdate submodules\n"
-cd $name
-git submodule foreach --recursive git pull origin master
+#echo "\nUpdate submodules\n"
+#cd $name
+#git submodule foreach --recursive git pull origin master
 
 echo "\nRemove git files"
 find . -name .git | xargs rm -rf
