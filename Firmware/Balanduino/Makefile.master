@@ -95,7 +95,7 @@ PROGRAMMER ?= arduino
 MON_SPEED ?= 115200
 GCS ?= -Wl,--relax,--gc-sections 
 # Optimiser flags.
-OPT_FLAGS ?= -Os -fno-exceptions -ffunction-sections -fdata-sections -fno-inline-small-functions -MMD
+OPT_FLAGS ?= -Os -freorder-blocks -fno-exceptions -ffunction-sections -fdata-sections -MMD
 
 
 ### Nothing below here should require editing. ###
@@ -274,6 +274,7 @@ clean :
 	$(RM) *~ *.bak *.BAK *.Bak *.orig
 	$(RM) */*~ */*.bak */*.BAK */*.Bak */*.orig
 	$(RM) */*/*~ */*/*.bak */*/*.BAK */*/*.Bak */*/*.orig
+	sync
 
 $(BUILD_DIR) :
 	$(MKDIR) $@
