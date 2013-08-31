@@ -13,4 +13,4 @@ LIB_DIRS += ../libraries/KalmanFilter
 LIB_DIRS += ../hardware/Balanduino/avr/libraries/Wire
 LIB_DIRS += ../hardware/Balanduino/avr/libraries/Wire/utility
 
-include Makefile_master/_Makefile.master
+include Arduino_Makefile_master/_Makefile.master
