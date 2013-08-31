@@ -10,3 +10,6 @@
 [submodule "Firmware/libraries/USB_Host_Shield_2.0"]
 	path = Firmware/libraries/USB_Host_Shield_2.0
 	url = https://github.com/felis/USB_Host_Shield_2.0.git
+[submodule "Firmware/Balanduino/Makefile_master"]
+	path = Firmware/Balanduino/Makefile_master
+	url = https://github.com/xxxajk/Arduino_Makefile_master.git
