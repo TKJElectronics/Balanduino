@@ -14,7 +14,7 @@ uint8_t i2cWrite(uint8_t registerAddress, uint8_t *data, uint8_t length, bool se
     Serial.print(F("i2cWrite failed: "));
     Serial.println(rcode);
   }
-  return rcode;
+  return rcode; // See: http://arduino.cc/en/Reference/WireEndTransmission
 }
 
 uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes) {
@@ -25,7 +25,7 @@ uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes) {
   if (rcode) {
     Serial.print(F("i2cRead failed: "));
     Serial.println(rcode);
-    return rcode;
+    return rcode; // See: http://arduino.cc/en/Reference/WireEndTransmission
   }
   Wire.requestFrom(IMUAddress, nbytes,(uint8_t)true); // Send a repeated start and then release the bus after reading
   for (uint8_t i = 0; i < nbytes; i++) {
