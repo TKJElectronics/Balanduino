@@ -64,6 +64,8 @@ volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
 const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconnected using the jumper
+
+#define VBAT A5 // The voltage divider is connected to analog input 5
 double batteryVoltage; // Measured battery level
 
 bool ledState; // Last state of the built in LED

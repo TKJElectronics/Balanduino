@@ -126,7 +126,7 @@ void setup() {
   setPWM(leftPWM,0); // Turn off pwm on both pins
   setPWM(rightPWM,0);
 
-  /* Setup pin for buzzer and beep to indicate that it is now ready */
+  /* Setup buzzer pin */
   pinMode(buzzer,OUTPUT);
 
   delay(500);
@@ -168,7 +168,7 @@ void setup() {
   }
 
   delay(100); // Wait for the sensor to get ready
-  
+
   /* Set Kalman and gyro starting angle */
   while (i2cRead(0x3D,i2cBuffer,4));
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
@@ -182,6 +182,7 @@ void setup() {
 
   pinMode(LED_BUILTIN,OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
 
+  /* Beep to indicate that it is now ready */
   digitalWrite(buzzer, HIGH);
   delay(100);
   digitalWrite(buzzer, LOW);
@@ -255,7 +256,7 @@ void loop() {
       targetPosition = wheelPosition;
       stopped = true;
     }
-    batteryVoltage = ((double)analogRead(VBAT)/1023.0) * 16.225; // The VIN pin is connected to a 47k-12k voltage divider
+    batteryVoltage = (double)analogRead(VBAT)/63.050847458; // The VIN pin is connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
     if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
       digitalWrite(buzzer, HIGH);
     else
