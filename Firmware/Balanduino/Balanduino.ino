@@ -126,9 +126,15 @@ void setup() {
   setPWM(leftPWM,0); // Turn off pwm on both pins
   setPWM(rightPWM,0);
 
+  /* Setup pin for buzzer and beep to indicate that it is now ready */
+  pinMode(buzzer,OUTPUT);
+
+  delay(500);
+
 #ifdef ENABLE_USB
   if (Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
+    digitalWrite(buzzer, HIGH);
     while (1); // Halt
   }
 #endif
@@ -157,11 +163,12 @@ void setup() {
   while (i2cRead(0x75,i2cBuffer,1));
   if (i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
     Serial.print(F("Error reading sensor"));
+    digitalWrite(buzzer, HIGH);
     while (1); // Halt
   }
 
   delay(100); // Wait for the sensor to get ready
-
+  
   /* Set Kalman and gyro starting angle */
   while (i2cRead(0x3D,i2cBuffer,4));
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
@@ -175,14 +182,9 @@ void setup() {
 
   pinMode(LED_BUILTIN,OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
 
-  /* Setup pin for buzzer and beep to indicate that it is now ready */
-  pinMode(buzzer,OUTPUT);
-
-  cbi(TCCR0B,CS00); // Set precaler to 8
-  analogWrite(buzzer,128);
-  delay(800); // This is really 100ms
-  analogWrite(buzzer,0);
-  sbi(TCCR0B,CS00); // Set precaler back to 64
+  digitalWrite(buzzer, HIGH);
+  delay(100);
+  digitalWrite(buzzer, LOW);
 
   /* Setup timing */
   kalmanTimer = micros();
@@ -253,11 +255,11 @@ void loop() {
       targetPosition = wheelPosition;
       stopped = true;
     }
-    batteryVoltage = (double)analogRead(A0)/1023.0*3.3/(12.0/(12.0+47.0)); // The VIN pin is connected to a 47k-12k voltage divider
+    batteryVoltage = ((double)analogRead(VBAT)/1023.0) * 16.225; // The VIN pin is connected to a 47k-12k voltage divider
     if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
-      analogWrite(buzzer,128);
+      digitalWrite(buzzer, HIGH);
     else
-      analogWrite(buzzer,0);
+      digitalWrite(buzzer, LOW);
   }
 
   /* Read the Bluetooth dongle and send PID and IMU values */
