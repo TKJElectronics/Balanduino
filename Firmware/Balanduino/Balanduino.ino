@@ -92,12 +92,12 @@ void setup() {
   checkInitializationFlags();
 
   /* Setup encoders */
-  pinMode(leftEncoder1,INPUT);
-  pinMode(leftEncoder2,INPUT);
-  pinMode(rightEncoder1,INPUT);
-  pinMode(rightEncoder2,INPUT);
-  attachInterrupt(0,leftEncoder,CHANGE);
-  attachInterrupt(1,rightEncoder,CHANGE);
+  pinMode(leftEncoder1, INPUT);
+  pinMode(leftEncoder2, INPUT);
+  pinMode(rightEncoder1, INPUT);
+  pinMode(rightEncoder2, INPUT);
+  attachInterrupt(0, leftEncoder, CHANGE);
+  attachInterrupt(1, rightEncoder, CHANGE);
 
   /* Enable the motor drivers */
   pinMode(leftEnable, OUTPUT);
@@ -106,12 +106,12 @@ void setup() {
   digitalWrite(rightEnable, HIGH);
 
   /* Setup motor pins to output */
-  sbi(pwmPortDirection,leftPWM);
-  sbi(leftPortDirection,leftA);
-  sbi(leftPortDirection,leftB);
-  sbi(pwmPortDirection,rightPWM);
-  sbi(rightPortDirection,rightA);
-  sbi(rightPortDirection,rightB);
+  sbi(pwmPortDirection, leftPWM);
+  sbi(leftPortDirection, leftA);
+  sbi(leftPortDirection, leftB);
+  sbi(pwmPortDirection, rightPWM);
+  sbi(rightPortDirection, rightA);
+  sbi(rightPortDirection, rightB);
 
   /* Set PWM frequency to 20kHz - see the datasheet http://www.atmel.com/Images/doc8272.pdf page 128-135 */
   // Set up PWM, Phase and Frequency Correct on pin 18 (OC1A) & pin 17 (OC1B) with ICR1 as TOP using Timer1
@@ -123,11 +123,11 @@ void setup() {
   // Clear OC1A/OC1B on compare match when up-counting
   // Set OC1A/OC1B on compare match when downcounting
   TCCR1A = _BV(COM1A1) | _BV(COM1B1);
-  setPWM(leftPWM,0); // Turn off pwm on both pins
-  setPWM(rightPWM,0);
+  setPWM(leftPWM, 0); // Turn off PWM on both pins
+  setPWM(rightPWM, 0);
 
   /* Setup buzzer pin */
-  pinMode(buzzer,OUTPUT);
+  pinMode(buzzer, OUTPUT);
 
   delay(500);
 
@@ -157,10 +157,10 @@ void setup() {
   i2cBuffer[1] = 0x00; // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
   i2cBuffer[2] = 0x00; // Set Gyro Full Scale Range to ±250deg/s
   i2cBuffer[3] = 0x00; // Set Accelerometer Full Scale Range to ±2g
-  while (i2cWrite(0x19,i2cBuffer,4,false)); // Write to all four registers at once
-  while (i2cWrite(0x6B,0x09,true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
+  while (i2cWrite(0x19, i2cBuffer, 4, false)); // Write to all four registers at once
+  while (i2cWrite(0x6B, 0x09, true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
 
-  while (i2cRead(0x75,i2cBuffer,1));
+  while (i2cRead(0x75, i2cBuffer, 1));
   if (i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
     Serial.print(F("Error reading sensor"));
     digitalWrite(buzzer, HIGH);
@@ -170,17 +170,17 @@ void setup() {
   delay(100); // Wait for the sensor to get ready
 
   /* Set Kalman and gyro starting angle */
-  while (i2cRead(0x3D,i2cBuffer,4));
+  while (i2cRead(0x3D, i2cBuffer, 4));
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
   accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
+  accAngle = (atan2(accY, accZ)+PI)*RAD_TO_DEG;
 
   kalman.setAngle(accAngle); // Set starting angle
   gyroAngle = accAngle;
 
-  pinMode(LED_BUILTIN,OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
+  pinMode(LED_BUILTIN, OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
 
   /* Beep to indicate that it is now ready */
   digitalWrite(buzzer, HIGH);
@@ -203,14 +203,14 @@ void loop() {
 #endif
 
   /* Calculate pitch */
-  while (i2cRead(0x3D,i2cBuffer,8));
+  while (i2cRead(0x3D, i2cBuffer, 8));
   accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
   accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   gyroX = ((i2cBuffer[6] << 8) | i2cBuffer[7]);
 
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  accAngle = (atan2(accY,accZ)+PI)*RAD_TO_DEG;
+  accAngle = (atan2(accY, accZ)+PI)*RAD_TO_DEG;
 
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
   if ((accAngle < 90 && pitch > 270) || (accAngle > 270 && pitch < 90)) {
@@ -241,7 +241,7 @@ void loop() {
   }
   else {
     layingDown = false; // It's no longer laying down
-    updatePID(cfg.targetAngle,targetOffset,turningOffset,(double)(micros()-pidTimer)/1000000.0);
+    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(micros()-pidTimer)/1000000.0);
   }
   pidTimer = micros();
 
