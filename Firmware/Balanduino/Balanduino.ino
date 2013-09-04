@@ -12,9 +12,9 @@
 /* Use this to enable and disable the different controllers */
 #define ENABLE_SPP
 #define ENABLE_PS3
-//#define ENABLE_WII
-//#define ENABLE_XBOX
-//#define ENABLE_ADK
+#define ENABLE_WII
+#define ENABLE_XBOX
+#define ENABLE_ADK
 
 #include "Balanduino.h"
 #include <Wire.h> // Official Arduino Wire library
