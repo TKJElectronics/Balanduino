@@ -67,6 +67,7 @@ const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconnected us
 
 #define VBAT A5 // The voltage divider is connected to analog input 5
 double batteryVoltage; // Measured battery level
+uint8_t batteryCounter; // Counter used to check if it should check the battery level
 
 bool ledState; // Last state of the built in LED
 

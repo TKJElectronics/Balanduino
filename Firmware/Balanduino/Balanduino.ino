@@ -261,11 +261,16 @@ void loop() {
       targetPosition = wheelPosition;
       stopped = true;
     }
-    batteryVoltage = (double)analogRead(VBAT)/63.050847458; // The VIN pin is connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
-    if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
-      digitalWrite(buzzer, HIGH);
-    else
-      digitalWrite(buzzer, LOW);
+
+    batteryCounter++;
+    if (batteryCounter > 10) { // Measure battery every 1s
+      batteryCounter = 0;
+      batteryVoltage = (double)analogRead(VBAT)/63.050847458; // The VIN pin is connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
+      if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
+        digitalWrite(buzzer, HIGH);
+      else
+        digitalWrite(buzzer, LOW);
+    }
   }
 
   /* Read the Bluetooth dongle and send PID and IMU values */
