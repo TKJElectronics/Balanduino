@@ -322,8 +322,8 @@ void calibrateAcc() {
   else
     cfg.accYzero -= 16384.0;
 
-  updateConfig(); // Set the new value in the EEPROM
-  Serial.println(F("Calibration of accelerometer is done"));
+  updateConfig(); // Store the new values in the EEPROM
+  Serial.println(F("Calibration of the accelerometer is done"));
 }
 
 void calibrateGyro() {
