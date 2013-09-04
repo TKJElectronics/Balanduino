@@ -343,7 +343,7 @@ void calibrateGyro() {
   gyroXzero /= 25;
 }
 
-bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference) { // Used to check that the robot is laying still while calibrating the gyro
+bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference) { // Used to check that the robot is laying still while calibrating
   int16_t min = array[0], max = array[0];
   for (uint8_t i = 1; i < length; i++) {
     if (array[i] < min)
