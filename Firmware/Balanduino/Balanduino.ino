@@ -176,7 +176,7 @@ void setup() {
   accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  accAngle = (atan2(accY, accZ)+PI)*RAD_TO_DEG;
+  accAngle = (atan2((double)accY-cfg.accYzero, (double)accZ-cfg.accZzero)+PI)*RAD_TO_DEG;
 
   kalman.setAngle(accAngle); // Set starting angle
   pitch = accAngle;
@@ -215,7 +215,7 @@ void loop() {
 
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  accAngle = (atan2(accY, accZ)+PI)*RAD_TO_DEG;
+  accAngle = (atan2((double)accY-cfg.accYzero, (double)accZ-cfg.accZzero)+PI)*RAD_TO_DEG;
 
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
   if ((accAngle < 90 && pitch > 270) || (accAngle > 270 && pitch < 90)) {
@@ -288,6 +288,44 @@ void loop() {
     digitalWrite(LED_BUILTIN, ledState); // This will turn it off
   }
 #endif
+  if (Serial.available()) {
+    if (Serial.read() == 'C')
+      calibrateAcc();
+  }
+}
+
+void calibrateAcc() {
+  Serial.println(F("Please put the robot perfectly horizontal and then send 'C' again to start the calibration routine"));
+  while (Serial.read() != 'C');
+
+  int16_t accYbuffer[25], accZbuffer[25];
+  for (uint8_t i = 0; i < 25; i++) {
+    while (i2cRead(0x3D, i2cBuffer, 4));
+    accYbuffer[i] = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
+    accZbuffer[i] = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
+    delay(10);
+  }
+  if (!checkMinMax(accYbuffer, 25, 1000) || !checkMinMax(accZbuffer, 25, 1000)) {
+    Serial.print(F("Accelerometer calibration error"));
+    digitalWrite(buzzer, HIGH);
+    while (1); // Halt
+  }
+  for (uint8_t i = 0; i < 25; i++) {
+    cfg.accYzero += accYbuffer[i];
+    cfg.accZzero += accZbuffer[i];
+  }
+  cfg.accYzero /= 25;
+  cfg.accZzero /= 25;
+
+  if (cfg.accYzero < 0) // Check which side is laying down
+    cfg.accYzero += 16384.0; // 16384.0 is equal to 1g while the full scale range is ±2g
+  else
+    cfg.accYzero -= 16384.0;
+
+  updateConfig(); // Set the new value in the EEPROM
+  Serial.println(F("Calibration of accelerometer is done"));
+}
+
 void calibrateGyro() {
   int16_t gyroXbuffer[25];
   for (uint8_t i = 0; i < 25; i++) {

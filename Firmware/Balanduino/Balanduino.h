@@ -4,8 +4,8 @@
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
 /* Firmware Version Information */
-const char *version = "0.9.0";
-const uint8_t eepromVersion = 1; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
+const char *version = "1.0.0";
+const uint8_t eepromVersion = 2; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
 bool sendData, sendSettings, sendInfo, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
@@ -72,19 +72,13 @@ bool ledState; // Last state of the built in LED
 
 // This struct will store all the configuration values
 typedef struct {
-  // PID variables
-  double P;
-  double I;
-  double D;
-
+  double P, I, D; // PID variables
   double targetAngle; // Resting angle of the robot
   uint8_t backToSpot; // Set whenever the robot should stay in the same spot
   uint8_t controlAngleLimit; // Set the maximum tilting angle of the robot
   uint8_t turningLimit; // Set the maximum turning value
-
-  double Qangle;
-  double Qbias;
-  double Rmeasure;
+  double Qangle, Qbias, Rmeasure; // Kalman filter values
+  double accYzero, accZzero; // Accelerometer zero values
 } cfg_t;
 
 extern cfg_t cfg;
@@ -158,6 +152,7 @@ const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
 
 // Function prototypes
+void calibrateAcc();
 void calibrateGyro();
 bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference);
 
