@@ -183,20 +183,7 @@ void setup() {
   gyroAngle = accAngle;
 
   /* Find gyro zero value */
-  int16_t gyroXbuffer[25];
-  for (uint8_t i = 0; i < 25; i++) {
-    while (i2cRead(0x43, i2cBuffer, 2));
-    gyroXbuffer[i] = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
-    delay(10);
-  }
-  if (!checkMinMax(gyroXbuffer, 25, 200)) {
-    Serial.print(F("Gyro calibration error"));
-    digitalWrite(buzzer, HIGH);
-    while (1); // Halt
-  }
-  for (uint8_t i = 0; i < 25; i++)
-    gyroXzero += gyroXbuffer[i];
-  gyroXzero /= 25;
+  calibrateGyro();
 
   pinMode(LED_BUILTIN, OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
 
@@ -236,7 +223,7 @@ void loop() {
     pitch = accAngle;
     gyroAngle = accAngle;
   } else {
-    gyroRate = (double)(gyroX-gyroXzero)/131.0; // Convert to deg/s
+    gyroRate = ((double)gyroX-gyroXzero)/131.0; // Convert to deg/s
     gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
     if (gyroAngle < 0 || gyroAngle > 360)
       gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
@@ -301,6 +288,21 @@ void loop() {
     digitalWrite(LED_BUILTIN, ledState); // This will turn it off
   }
 #endif
+void calibrateGyro() {
+  int16_t gyroXbuffer[25];
+  for (uint8_t i = 0; i < 25; i++) {
+    while (i2cRead(0x43, i2cBuffer, 2));
+    gyroXbuffer[i] = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
+    delay(10);
+  }
+  if (!checkMinMax(gyroXbuffer, 25, 200)) {
+    Serial.print(F("Gyro calibration error"));
+    digitalWrite(buzzer, HIGH);
+    while (1); // Halt
+  }
+  for (uint8_t i = 0; i < 25; i++)
+    gyroXzero += gyroXbuffer[i];
+  gyroXzero /= 25;
 }
 
 bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference) { // Used to check that the robot is laying still while calibrating the gyro

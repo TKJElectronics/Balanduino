@@ -96,7 +96,8 @@ const uint8_t configAddr = 1; // Save the configuration starting from this locat
 double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 /* IMU Data */
-int16_t accX, accY, accZ, gyroX, gyroXzero;
+int16_t accY, accZ, gyroX;
+double gyroXzero;
 uint8_t i2cBuffer[8]; // Buffer for I2C data
 
 // Results
@@ -157,6 +158,7 @@ const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
 
 // Function prototypes
+void calibrateGyro();
 bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference);
 
 void sendBluetoothData();
