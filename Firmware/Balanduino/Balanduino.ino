@@ -85,7 +85,7 @@ WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck
 
 void setup() {
   /* Initialize UART */
-  Serial.begin(57600);
+  Serial.begin(115200);
 
   /* Read the PID values, target angle and other saved values in the EEPROM */
   if (!checkInitializationFlags())
