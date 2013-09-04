@@ -88,8 +88,8 @@ void setup() {
   Serial.begin(57600);
 
   /* Read the PID values, target angle and other saved values in the EEPROM */
-  readEEPROMValues();
-  checkInitializationFlags();
+  if (!checkInitializationFlags())
+    readEEPROMValues(); // Only read the EEPROM values if they have not been restored
 
   /* Setup encoders */
   pinMode(leftEncoder1, INPUT);
