@@ -19,7 +19,7 @@ The final structure should look like this:
 		* EEPROMAnything.h
 		* I2C.ino
 		* Motor.ino
-		* PID.ino	
+		* Tools.ino
 	* hardware/
 		* Balanduino/
 			* avr/
