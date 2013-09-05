@@ -16,8 +16,7 @@ void readSPPData() {
           return;
         if (dataInput[i] == ';') // Keep reading until it reads a semicolon
           break;
-        i++;
-        if (i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
+        if (++i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
           return;
       }
       bluetoothData = true;

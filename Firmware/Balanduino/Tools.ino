@@ -19,14 +19,14 @@ void checkSerialData() {
 
     dataInput[0] = input;
     uint8_t i = 1;
+    delay(1); // Wait for rest of data
     while (1) {
       dataInput[i] = Serial.read();
       if (dataInput[i] == -1) // Error while reading the string
         return;
       if (dataInput[i] == ';') // Keep reading until it reads a semicolon
         break;
-      i++;
-      if (i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
+      if (++i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
         return;
     }
     bluetoothData = false;
@@ -35,9 +35,32 @@ void checkSerialData() {
 }
 
 void printMenu() {
-  Serial.println(F("Menu:"));
-  Serial.println(F("c = Calibration Menu"));
-  Serial.println(F("TODO: Fill out this menu"));
+  Serial.println(F("\r\n========================================== Menu ==========================================\r\n"));
+  Serial.println(F("c\t\t\t\tEnter calibration menu\r\n"));
+
+  Serial.println(F("GP;\t\t\t\tGet PID values"));
+  Serial.println(F("GK;\t\t\t\tGet Kalman filter values"));
+  Serial.println(F("GS;\t\t\t\tGet settings values"));
+  Serial.println(F("GI;\t\t\t\tGet info values\r\n"));
+
+  Serial.println(F("SP,Kp;\t\t\t\tUsed to set the Kp value"));
+  Serial.println(F("SI,Ki;\t\t\t\tUsed to set the Ki value"));
+  Serial.println(F("SD,Kd;\t\t\t\tUsed to set the Kd value"));
+  Serial.println(F("ST,targetAngle;\t\t\tUsed to set the target angle"));
+  Serial.println(F("SK,Qangle,Qbias,Rmeasure;\tUsed to set the Kalman filter values"));
+  Serial.println(F("SA,angle;\t\t\tUsed to set the maximum controlling angle"));
+  Serial.println(F("SU,value;\t\t\tUsed to set the maximum turning vale"));
+  Serial.println(F("SB,value;\t\t\tUsed to set the back to spot value (true = 1, false = 0)\r\n"));
+
+  Serial.println(F("IB;\t\t\t\tStart sending IMU values"));
+  Serial.println(F("IS;\t\t\t\tStop sending IMU values\r\n"));
+
+  Serial.println(F("CS;\t\t\t\tSend stop command"));
+  Serial.println(F("CJ,x,y;\t\t\t\tSteer robot using x,y-coordinates"));
+  Serial.println(F("CM,pitch,roll;\t\t\tSteer robot using pitch and roll"));
+  Serial.println(F("CW;\t\t\t\tStart paring sequence with Wiimote"));
+  Serial.println(F("CR;\t\t\t\tRestore default EEPROM values"));
+  Serial.println(F("\r\n==========================================================================================\r\n"));
 }
 
 void calibrateAcc() {
@@ -168,7 +191,7 @@ void setValues(char *input) {
       sendSettings = true;
     else if (input[1] == 'I') // Get info
       sendInfo = true;
-    else if (input[1] == 'K') // Get Kalman values
+    else if (input[1] == 'K') // Get Kalman filter values
       sendKalmanValues = true;
   }
 
@@ -196,12 +219,12 @@ void setValues(char *input) {
     else if (input[1] == 'A') { // Controlling max angle
       strtok(input, ","); // Ignore 'A'
       cfg.controlAngleLimit = atoi(strtok(NULL, ";"));
-    } else if (input[1] == 'U') { // Turning max angle
+    } else if (input[1] == 'U') { // Turning max value
       strtok(input, ","); // Ignore 'U'
       cfg.turningLimit = atoi(strtok(NULL, ";"));
     }
     else if (input[1] == 'B') // Set Back To Spot
-        cfg.backToSpot = input[2] - '0'; // Convert from ASCII to number
+      cfg.backToSpot = input[2] - '0'; // Convert from ASCII to number
 
     updateConfig();
   }
@@ -237,7 +260,7 @@ void setValues(char *input) {
     }
 #endif // ENABLE_WII
     else if (input[1] == 'R') {
-      restoreEEPROMValues(); // Restore the default PID values and target angle
+      restoreEEPROMValues(); // Restore the default EEPROM values
       sendPIDValues = true;
       sendKalmanValues = true;
       sendSettings = true;
