@@ -43,5 +43,8 @@ void restoreEEPROMValues() {
   cfg.Qbias = 0.003;
   cfg.Rmeasure = 0.03;
 
+  cfg.accYzero = 0;
+  cfg.accZzero = 0;
+
   updateConfig();
 }
