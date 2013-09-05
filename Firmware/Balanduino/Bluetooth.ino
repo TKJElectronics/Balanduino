@@ -6,176 +6,22 @@ LED xboxOldLed;
 #endif
 
 #ifdef ENABLE_SPP
-void sendBluetoothData() {
-  if (SerialBT.connected) {
-    if (sendPairConfirmation) {
-      sendPairConfirmation = false;
-
-      SerialBT.println("WC");
-    } else if (sendPIDValues) {
-      sendPIDValues = false;
-
-      SerialBT.print("P,");
-      SerialBT.print(cfg.P);
-      SerialBT.print(',');
-      SerialBT.print(cfg.I);
-      SerialBT.print(',');
-      SerialBT.print(cfg.D);
-      SerialBT.print(',');
-      SerialBT.println(cfg.targetAngle);
-    } else if (sendSettings) {
-      sendSettings = false;
-
-      SerialBT.print("S,");
-      SerialBT.print(cfg.backToSpot);
-      SerialBT.print(',');
-      SerialBT.print(cfg.controlAngleLimit);
-      SerialBT.print(',');
-      SerialBT.println(cfg.turningLimit);
-    } else if (sendInfo) {
-      sendInfo = false;
-
-      SerialBT.print("I,");
-      SerialBT.print(version);
-
-      #if defined(__AVR_ATmega644__)
-        SerialBT.print(",ATmega644,");
-      #elif defined(__AVR_ATmega1284P__)
-        SerialBT.print(",ATmega1284P,");
-      #else
-        SerialBT.print(",Unknown,");
-      #endif
-
-      SerialBT.print(batteryVoltage);
-      SerialBT.print(",");
-      SerialBT.println((double)millis()/60000.0);
-    } else if (sendKalmanValues) {
-      sendKalmanValues = false;
-
-      SerialBT.print("K,");
-      SerialBT.print(kalman.getQangle(), 4);
-      SerialBT.print(',');
-      SerialBT.print(kalman.getQbias(), 4);
-      SerialBT.print(',');
-      SerialBT.println(kalman.getRmeasure(), 4);
-    } else if (sendData && (millis() - dataTimer > 50)) { // Only send data every 50ms
-      dataTimer = millis();
-
-      SerialBT.print("V,");
-      SerialBT.print(accAngle);
-      SerialBT.print(',');
-      SerialBT.print(gyroAngle);
-      SerialBT.print(',');
-      SerialBT.println(pitch);
-    }
-  }
-}
-
 void readSPPData() {
   if (SerialBT.connected) { // The SPP connection won't return data as fast as the controllers, so we will handle it separately
     if (SerialBT.available()) {
-      char input[30];
       uint8_t i = 0;
       while (1) {
-        input[i] = SerialBT.read();
-        if (input[i] == -1) // Error while reading the string
+        dataInput[i] = SerialBT.read();
+        if (dataInput[i] == -1) // Error while reading the string
           return;
-        if (input[i] == ';') // Keep reading until it reads a semicolon
+        if (dataInput[i] == ';') // Keep reading until it reads a semicolon
           break;
         i++;
-        if (i >= sizeof(input)/sizeof(input[0])) // String is too long
+        if (i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
           return;
       }
-
-      if (input[0] == 'A') { // Abort
-        stopAndReset();
-        while (SerialBT.read() != 'C') // Wait until continue is sent
-          Usb.Task();
-      }
-
-      /* For sending PID and IMU values */
-      else if (input[0] == 'G') { // The Processing/Android application sends when it needs the PID, settings or info
-        if (input[1] == 'P') // Get PID Values
-          sendPIDValues = true;
-        else if (input[1] == 'S') // Get settings
-          sendSettings = true;
-        else if (input[1] == 'I') // Get info
-          sendInfo = true;
-        else if (input[1] == 'K') // Get Kalman values
-          sendKalmanValues = true;
-      }
-
-      else if (input[0] == 'S') { // Set different values
-        /* Set PID and target angle */
-        if (input[1] == 'P') {
-          strtok(input, ","); // Ignore 'P'
-          cfg.P = atof(strtok(NULL, ";"));
-        } else if (input[1] == 'I') {
-          strtok(input, ","); // Ignore 'I'
-          cfg.I = atof(strtok(NULL, ";"));
-        } else if (input[1] == 'D') {
-          strtok(input, ","); // Ignore 'D'
-          cfg.D = atof(strtok(NULL, ";"));
-        } else if (input[1] == 'T') { // Target Angle
-          strtok(input, ","); // Ignore 'T'
-          cfg.targetAngle = atof(strtok(NULL, ";"));
-        }
-        else if (input[1] == 'K') { // Kalman values
-          strtok(input, ","); // Ignore 'K'
-          cfg.Qangle = atof(strtok(NULL, ","));
-          cfg.Qbias = atof(strtok(NULL, ","));
-          cfg.Rmeasure = atof(strtok(NULL, ";"));
-        }
-        else if (input[1] == 'A') { // Controlling max angle
-          strtok(input, ","); // Ignore 'A'
-          cfg.controlAngleLimit = atoi(strtok(NULL, ";"));
-        } else if (input[1] == 'U') { // Turning max angle
-          strtok(input, ","); // Ignore 'U'
-          cfg.turningLimit = atoi(strtok(NULL, ";"));
-        }
-        else if (input[1] == 'B') { // Set Back To Spot
-          cfg.backToSpot = input[2] - '0'; // Convert from ASCII to number
-        }
-        updateConfig();
-      }
-
-      else if (input[0] == 'I') { // IMU transmitting states
-        if (input[1] == 'B') // Begin sending IMU values
-          sendData = true; // Send output to Processing/Android application
-        else if (input[1] == 'S') // Stop sending IMU values
-          sendData = false; // Stop sending output to Processing/Android application
-      }
-
-      else if (input[0] == 'C') { // Commands
-        if (input[1] == 'S') // Stop
-          steer(stop);
-        else if (input[1] == 'J') { // Joystick
-          receiveControlTimer = millis();
-          strtok(input, ","); // Ignore 'J'
-          sppData1 = atof(strtok(NULL, ",")); // x-axis
-          sppData2 = atof(strtok(NULL, ";")); // y-axis
-          steer(joystick);
-        }
-        else if (input[1] == 'M') { // IMU
-          receiveControlTimer = millis();
-          strtok(input, ","); // Ignore 'M'
-          sppData1 = atof(strtok(NULL, ",")); // Pitch
-          sppData2 = atof(strtok(NULL, ";")); // Roll
-          steer(imu);
-        }
-#ifdef ENABLE_WII
-        else if (input[1] == 'W') { // Pair with a new Wiimote or Wii U Pro Controller
-          Wii.pair();
-          sendPairConfirmation = true;
-        }
-#endif // ENABLE_WII
-        else if (input[1] == 'R') {
-          restoreEEPROMValues(); // Restore the default PID values and target angle
-          sendPIDValues = true;
-          sendKalmanValues = true;
-          sendSettings = true;
-        }
-      }
+      bluetoothData = true;
+      setValues(dataInput);
     }
   }
 }
@@ -401,7 +247,9 @@ void onInit() { // This function is called when a controller is first initialize
 }
 #endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
+#endif // ENABLE_USB
+
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
 
@@ -597,6 +445,4 @@ double scale(double input, double inputMin, double inputMax, double outputMin, d
     output = outputMin;
   return output;
 }
-#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
-
-#endif // ENABLE_USB
+#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)

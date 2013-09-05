@@ -130,6 +130,8 @@ bool layingDown = true; // Use to indicate if the robot is laying down
 double targetOffset = 0; // Offset for going forward and backward
 double turningOffset = 0; // Offset for turning left and right
 
+char dataInput[30]; // Incoming data buffer
+bool bluetoothData; // True if data received is from the Bluetooth connection
 double sppData1, sppData2; // Data send via SPP connection
 
 bool commandSent = false; // This is used so multiple controller can be used at once
@@ -153,11 +155,6 @@ const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
 
 // Function prototypes
-void calibrateAcc();
-void calibrateGyro();
-bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference);
-
-void sendBluetoothData();
 void readSPPData();
 void readUsb();
 void updateLEDs();
@@ -174,6 +171,7 @@ uint8_t i2cWrite(uint8_t registerAddress, uint8_t data, bool sendStop);
 uint8_t i2cWrite(uint8_t registerAddress, uint8_t *data, uint8_t length, bool sendStop);
 uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes);
 
+void updatePID(double restAngle, double offset, double turning, double dt);
 void moveMotor(Command motor, Command direction, double speedRaw);
 void stopMotor(Command motor);
 void setPWM(uint8_t pin, uint16_t dutyCycle);
@@ -184,6 +182,12 @@ int32_t readLeftEncoder();
 int32_t readRightEncoder();
 int32_t getWheelPosition();
 
-void updatePID(double restAngle, double offset, double turning, double dt);
+void checkSerialData();
+void printMenu();
+void calibrateAcc();
+void printValues();
+void setValues(char *input);
+void calibrateGyro();
+bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference);
 
 #endif

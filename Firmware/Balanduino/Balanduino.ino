@@ -15,6 +15,7 @@
 #define ENABLE_WII
 #define ENABLE_XBOX
 #define ENABLE_ADK
+#define ENABLE_TOOLS
 
 #include "Balanduino.h"
 #include <Wire.h> // Official Arduino Wire library
@@ -277,8 +278,11 @@ void loop() {
 #ifdef ENABLE_USB
   readUsb();
 #endif
-#ifdef ENABLE_SPP
-  sendBluetoothData();
+#ifdef ENABLE_TOOLS
+  checkSerialData();
+#endif
+#if defined(ENABLE_TOOLS) || defined(ENABLE_SPP)
+  printValues();
 #endif
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
@@ -293,68 +297,4 @@ void loop() {
     digitalWrite(LED_BUILTIN, ledState); // This will turn it off
   }
 #endif
-  if (Serial.available()) {
-    if (Serial.read() == 'C')
-      calibrateAcc();
-  }
-}
-
-void calibrateAcc() {
-  Serial.println(F("Please put the robot perfectly horizontal and then send 'C' again to start the calibration routine"));
-  while (Serial.read() != 'C');
-
-  int16_t accYbuffer[25], accZbuffer[25];
-  for (uint8_t i = 0; i < 25; i++) {
-    while (i2cRead(0x3D, i2cBuffer, 4));
-    accYbuffer[i] = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
-    accZbuffer[i] = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
-    delay(10);
-  }
-  if (!checkMinMax(accYbuffer, 25, 1000) || !checkMinMax(accZbuffer, 25, 1000)) {
-    Serial.print(F("Accelerometer calibration error"));
-    digitalWrite(buzzer, HIGH);
-    while (1); // Halt
-  }
-  for (uint8_t i = 0; i < 25; i++) {
-    cfg.accYzero += accYbuffer[i];
-    cfg.accZzero += accZbuffer[i];
-  }
-  cfg.accYzero /= 25;
-  cfg.accZzero /= 25;
-
-  if (cfg.accYzero < 0) // Check which side is laying down
-    cfg.accYzero += 16384.0; // 16384.0 is equal to 1g while the full scale range is ±2g
-  else
-    cfg.accYzero -= 16384.0;
-
-  updateConfig(); // Store the new values in the EEPROM
-  Serial.println(F("Calibration of the accelerometer is done"));
-}
-
-void calibrateGyro() {
-  int16_t gyroXbuffer[25];
-  for (uint8_t i = 0; i < 25; i++) {
-    while (i2cRead(0x43, i2cBuffer, 2));
-    gyroXbuffer[i] = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
-    delay(10);
-  }
-  if (!checkMinMax(gyroXbuffer, 25, 200)) {
-    Serial.print(F("Gyro calibration error"));
-    digitalWrite(buzzer, HIGH);
-    while (1); // Halt
-  }
-  for (uint8_t i = 0; i < 25; i++)
-    gyroXzero += gyroXbuffer[i];
-  gyroXzero /= 25;
-}
-
-bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference) { // Used to check that the robot is laying still while calibrating
-  int16_t min = array[0], max = array[0];
-  for (uint8_t i = 1; i < length; i++) {
-    if (array[i] < min)
-      min = array[i];
-    else if (array[i] > max)
-      max = array[i];
-  }
-  return max - min < maxDifference;
 }
