@@ -14,7 +14,7 @@ See the [Hardware Readme](Firmware/hardware/README.md) for more information.
 
 # Hardware
 
-The Balanduino hardware consist of an ATmega644A running at 8MHz.
+The Balanduino hardware consist of an ATmega1284P running at 10MHz.
 
 A MPU-6050 3-axis accelerometer and gyroscope.
 The accelerometer and gyroscope readings are combined using a Kalman filter library. See my blog post: <http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/> and source <https://github.com/TKJElectronics/KalmanFilter> for more information.

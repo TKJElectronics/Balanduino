@@ -13,3 +13,6 @@
 [submodule "Firmware/libraries/Arduino-PID-Library"]
 	path = Firmware/libraries/Arduino-PID-Library
 	url = https://github.com/Lauszus/Arduino-PID-Library.git
+[submodule "Firmware/Balanduino/Arduino_Makefile_master"]
+	path = Firmware/Balanduino/Arduino_Makefile_master
+	url = https://github.com/xxxajk/Arduino_Makefile_master.git

@@ -6,197 +6,21 @@ LED xboxOldLed;
 #endif
 
 #ifdef ENABLE_SPP
-void sendBluetoothData() {
-  if (SerialBT.connected) {
-    if (sendPairConfirmation) {
-      sendPairConfirmation = false;
-
-      SerialBT.println("WC");
-    } else if (sendMainPIDValues) {
-      sendMainPIDValues = false;
-
-      SerialBT.print("P,");
-      SerialBT.print(cfg.mainPID.Kp);
-      SerialBT.print(',');
-      SerialBT.print(cfg.mainPID.Ki);
-      SerialBT.print(',');
-      SerialBT.print(cfg.mainPID.Kd, 3);
-      SerialBT.print(',');
-      SerialBT.println(cfg.targetAngle);
-    } else if (sendEncoderPIDValues) {
-      sendEncoderPIDValues = false;
-
-      SerialBT.print("E,");
-      SerialBT.print(cfg.encoderPID.Kp);
-      SerialBT.print(',');
-      SerialBT.print(cfg.encoderPID.Ki);
-      SerialBT.print(',');
-      SerialBT.println(cfg.encoderPID.Kd);
-    } else if (sendSettings) {
-      sendSettings = false;
-
-      SerialBT.print("S,");
-      SerialBT.print(cfg.backToSpot);
-      SerialBT.print(',');
-      SerialBT.print(cfg.controlAngleLimit);
-      SerialBT.print(',');
-      SerialBT.println(cfg.turningLimit);
-    } else if (sendInfo) {
-      sendInfo = false;
-
-      SerialBT.print("I,");
-      SerialBT.print(version);
-
-      #if defined(__AVR_ATmega644__)
-        SerialBT.print(",ATmega644,");
-      #elif defined(__AVR_ATmega1284P__)
-        SerialBT.print(",ATmega1284P,");
-      #else
-        SerialBT.print(",Unknown,");
-      #endif
-
-      SerialBT.print(batteryVoltage);
-      SerialBT.print(",");
-      SerialBT.println((double)millis()/60000.0);
-    } else if (sendKalmanValues) {
-      sendKalmanValues = false;
-
-      SerialBT.print("K,");
-      SerialBT.print(kalman.getQangle(), 4);
-      SerialBT.print(',');
-      SerialBT.print(kalman.getQbias(), 4);
-      SerialBT.print(',');
-      SerialBT.println(kalman.getRmeasure(), 4);
-    } else if (sendData && (millis() - dataTimer > 50)) { // Only send data every 50ms
-      dataTimer = millis();
-
-      SerialBT.print("V,");
-      SerialBT.print(accAngle);
-      SerialBT.print(',');
-      SerialBT.print(gyroAngle);
-      SerialBT.print(',');
-      SerialBT.println(pitch);
-    }
-  }
-}
-
 void readSPPData() {
   if (SerialBT.connected) { // The SPP connection won't return data as fast as the controllers, so we will handle it separately
     if (SerialBT.available()) {
-      char input[30];
       uint8_t i = 0;
       while (1) {
-        input[i] = SerialBT.read();
-        if (input[i] == -1) // Error while reading the string
+        dataInput[i] = SerialBT.read();
+        if (dataInput[i] == -1) // Error while reading the string
           return;
-        if (input[i] == ';') // Keep reading until it reads a semicolon
+        if (dataInput[i] == ';') // Keep reading until it reads a semicolon
           break;
-        i++;
-        if (i >= sizeof(input)) // String is too long
+        if (++i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
           return;
       }
-
-      if (input[0] == 'A') { // Abort
-        stopAndReset();
-        while (SerialBT.read() != 'C') // Wait until continue is sent
-          Usb.Task();
-      }
-
-      /* For sending PID and IMU values */
-      else if (input[0] == 'G') { // Used to get different parameters like the PID values, settings and info
-        if (input[1] == 'P') // Get main PID Values
-          sendMainPIDValues = true;
-        else if (input[1] == 'E') // Get encoder PID values
-          sendEncoderPIDValues = true;
-        else if (input[1] == 'S') // Get settings
-          sendSettings = true;
-        else if (input[1] == 'I') // Get info
-          sendInfo = true;
-        else if (input[1] == 'K') // Get Kalman values
-          sendKalmanValues = true;
-      }
-
-      else if (input[0] == 'S') { // Set different values
-        /* Set PID and target angle */
-        if (input[1] == 'P') {
-          strtok(input, ","); // Ignore 'P'
-          if (input[2] == '0')
-            cfg.mainPID.Kp = atof(strtok(NULL, ";"));
-          else
-            cfg.encoderPID.Kp = atof(strtok(NULL, ";"));
-        } else if (input[1] == 'I') {
-          strtok(input, ","); // Ignore 'I'
-          if (input[2] == '0')
-            cfg.mainPID.Ki = atof(strtok(NULL, ";"));
-          else
-            cfg.encoderPID.Ki = atof(strtok(NULL, ";"));
-        } else if (input[1] == 'D') {
-          strtok(input, ","); // Ignore 'D'
-          if (input[2] == '0')
-            cfg.mainPID.Kd = atof(strtok(NULL, ";"));
-          else
-            cfg.encoderPID.Kd = atof(strtok(NULL, ";"));
-        } else if (input[1] == 'T') { // Target Angle
-          strtok(input, ","); // Ignore 'T'
-          cfg.targetAngle = atof(strtok(NULL, ";"));
-        }
-        else if (input[1] == 'K') { // Kalman values
-          strtok(input, ","); // Ignore 'K'
-          cfg.Qangle = atof(strtok(NULL, ","));
-          cfg.Qbias = atof(strtok(NULL, ","));
-          cfg.Rmeasure = atof(strtok(NULL, ";"));
-        }
-        else if (input[1] == 'A') { // Controlling max angle
-          strtok(input, ","); // Ignore 'A'
-          cfg.controlAngleLimit = atoi(strtok(NULL, ";"));
-        } else if (input[1] == 'U') { // Turning max angle
-          strtok(input, ","); // Ignore 'U'
-          cfg.turningLimit = atoi(strtok(NULL, ";"));
-        }
-        else if (input[1] == 'B') // Set Back To Spot
-          cfg.backToSpot = input[2] - '0'; // Convert from ASCII to number
-
-        updateConfig();
-      }
-
-      else if (input[0] == 'I') { // IMU transmitting states
-        if (input[1] == 'B') // Begin sending IMU values
-          sendData = true; // Send output to Processing/Android application
-        else if (input[1] == 'S') // Stop sending IMU values
-          sendData = false; // Stop sending output to Processing/Android application
-      }
-
-      else if (input[0] == 'C') { // Commands
-        if (input[1] == 'S') // Stop
-          steer(stop);
-        else if (input[1] == 'J') { // Joystick
-          receiveControlTimer = millis();
-          strtok(input, ","); // Ignore 'J'
-          sppData1 = atof(strtok(NULL, ",")); // x-axis
-          sppData2 = atof(strtok(NULL, ";")); // y-axis
-          steer(joystick);
-        }
-        else if (input[1] == 'M') { // IMU
-          receiveControlTimer = millis();
-          strtok(input, ","); // Ignore 'M'
-          sppData1 = atof(strtok(NULL, ",")); // Pitch
-          sppData2 = atof(strtok(NULL, ";")); // Roll
-          steer(imu);
-        }
-#ifdef ENABLE_WII
-        else if (input[1] == 'W') { // Pair with a new Wiimote or Wii U Pro Controller
-          Wii.pair();
-          sendPairConfirmation = true;
-        }
-#endif // ENABLE_WII
-        else if (input[1] == 'R') {
-          restoreEEPROMValues(); // Restore the default PID values and target angle
-          sendMainPIDValues = true;
-          sendEncoderPIDValues = true;
-          sendKalmanValues = true;
-          sendSettings = true;
-        }
-      }
+      bluetoothData = true;
+      setValues(dataInput);
     }
   }
 }
@@ -422,7 +246,9 @@ void onInit() { // This function is called when a controller is first initialize
 }
 #endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
+#endif // ENABLE_USB
+
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
 
@@ -433,89 +259,89 @@ void steer(Command command) {
   steerLeft = false;
   steerRight = false;
 
-#ifdef ENABLE_SPP
+#if defined(ENABLE_SPP) || defined(ENABLE_TOOLS)
   if (command == joystick) {
     if (sppData2 > 0) {
-      targetOffset = scale(sppData2,0,1,0,cfg.controlAngleLimit);
+      targetOffset = scale(sppData2, 0, 1, 0, cfg.controlAngleLimit);
       steerForward = true;
     } else if (sppData2 < 0) {
-      targetOffset = scale(sppData2,0,-1,0,cfg.controlAngleLimit);
+      targetOffset = scale(sppData2, 0, -1, 0, cfg.controlAngleLimit);
       steerBackward = true;
     }
     if (sppData1 > 0) {
-      turningOffset = scale(sppData1,0,1,0,cfg.turningLimit);
+      turningOffset = scale(sppData1, 0, 1, 0, cfg.turningLimit);
       steerRight = true;
     } else if (sppData1 < 0) {
-      turningOffset = scale(sppData1,0,-1,0,cfg.turningLimit);
+      turningOffset = scale(sppData1, 0, -1, 0, cfg.turningLimit);
       steerLeft = true;
     }
   } else if (command == imu) {
       if (sppData1 > 0) {
-        targetOffset = scale(sppData1,0,36,0,cfg.controlAngleLimit);
+        targetOffset = scale(sppData1, 0, 36, 0, cfg.controlAngleLimit);
         steerForward = true;
       }
       else if (sppData1 < 0) {
-        targetOffset = scale(sppData1,0,-36,0,cfg.controlAngleLimit);
+        targetOffset = scale(sppData1, 0, -36, 0, cfg.controlAngleLimit);
         steerBackward = true;
       }
       if (sppData2 < 0) {
-        turningOffset = scale(sppData2,0,-45,0,cfg.turningLimit);
+        turningOffset = scale(sppData2, 0, -45, 0, cfg.turningLimit);
         steerLeft = true;
       }
       else if (sppData2 > 0) {
-        turningOffset = scale(sppData2,0,45,0,cfg.turningLimit);
+        turningOffset = scale(sppData2, 0, 45, 0, cfg.turningLimit);
         steerRight = true;
       }
   }
-#endif // ENABLE_SPP
+#endif // ENABLE_SPP or ENABLE_TOOLS
 #ifdef ENABLE_PS3
   if (command == updatePS3) {
     if (PS3.PS3Connected) {
       if (PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),232,0,0,cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
         steerForward = true;
       } else if (PS3.getAnalogHat(LeftHatY) > 137 && PS3.getAnalogHat(RightHatY) > 137) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY),276,510,0,cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
         steerBackward = true;
       }
       if (((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) {
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
         steerLeft = true;
       } else if (((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) {
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)),0,255,0,cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
         steerRight = true;
       }
       else if (PS3.getButtonPress(CROSS)) {
         if (PS3.getAngle(Pitch) > 180) {
-          targetOffset = scale(PS3.getAngle(Pitch),180,216,0,cfg.controlAngleLimit);
+          targetOffset = scale(PS3.getAngle(Pitch), 180, 216, 0, cfg.controlAngleLimit);
           steerForward = true;
         }
         else if (PS3.getAngle(Pitch) < 180) {
-          targetOffset = scale(PS3.getAngle(Pitch),180,144,0,cfg.controlAngleLimit);
+          targetOffset = scale(PS3.getAngle(Pitch), 180, 144, 0, cfg.controlAngleLimit);
           steerBackward = true;
         }
         if (PS3.getAngle(Roll) > 180) {
-          turningOffset = scale(PS3.getAngle(Roll),180,225,0,cfg.turningLimit);
+          turningOffset = scale(PS3.getAngle(Roll), 180, 225, 0, cfg.turningLimit);
           steerRight = true;
         }
         else if (PS3.getAngle(Roll) < 180) {
-          turningOffset = scale(PS3.getAngle(Roll),180,135,0,cfg.turningLimit);
+          turningOffset = scale(PS3.getAngle(Roll), 180, 135, 0, cfg.turningLimit);
           steerLeft = true;
         }
       }
     } else { // It must be a Navigation controller then
       if (PS3.getAnalogHat(LeftHatY) < 117) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY),116,0,0,cfg.controlAngleLimit); // Scale from 116-0 to 0-controlAngleLimit
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY), 116, 0, 0, cfg.controlAngleLimit); // Scale from 116-0 to 0-controlAngleLimit
         steerForward = true;
       } else if (PS3.getAnalogHat(LeftHatY) > 137) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY),138,255,0,cfg.controlAngleLimit); // Scale from 138-255 to 0-controlAngleLimit
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY), 138, 255, 0, cfg.controlAngleLimit); // Scale from 138-255 to 0-controlAngleLimit
         steerBackward = true;
       }
       if (PS3.getAnalogHat(LeftHatX) < 55) {
-        turningOffset = scale(PS3.getAnalogHat(LeftHatX),54,0,0,cfg.turningLimit); // Scale from 54-0 to 0-turningLimit
+        turningOffset = scale(PS3.getAnalogHat(LeftHatX), 54, 0, 0, cfg.turningLimit); // Scale from 54-0 to 0-turningLimit
         steerLeft = true;
       } else if (PS3.getAnalogHat(LeftHatX) > 200) {
-        turningOffset = scale(PS3.getAnalogHat(LeftHatX),201,255,0,cfg.turningLimit); // Scale from 201-255 to 0-turningLimit
+        turningOffset = scale(PS3.getAnalogHat(LeftHatX), 201, 255, 0, cfg.turningLimit); // Scale from 201-255 to 0-turningLimit
         steerRight = true;
       }
     }
@@ -526,53 +352,53 @@ void steer(Command command) {
     if (!Wii.wiiUProControllerConnected) {
       if (Wii.getButtonPress(B)) {
         if (Wii.getPitch() > 180) {
-          targetOffset = scale(Wii.getPitch(),180,216,0,cfg.controlAngleLimit);
+          targetOffset = scale(Wii.getPitch(), 180, 216, 0, cfg.controlAngleLimit);
           steerForward = true;
         }
         else if (Wii.getPitch() < 180) {
-          targetOffset = scale(Wii.getPitch(),180,144,0,cfg.controlAngleLimit);
+          targetOffset = scale(Wii.getPitch(), 180, 144, 0, cfg.controlAngleLimit);
           steerBackward = true;
         }
         if (Wii.getRoll() > 180) {
-          turningOffset = scale(Wii.getRoll(),180,225,0,cfg.turningLimit);
+          turningOffset = scale(Wii.getRoll(), 180, 225, 0, cfg.turningLimit);
           steerRight = true;
         }
         else if (Wii.getRoll() < 180) {
-          turningOffset = scale(Wii.getRoll(),180,135,0,cfg.turningLimit);
+          turningOffset = scale(Wii.getRoll(), 180, 135, 0, cfg.turningLimit);
           steerLeft = true;
         }
       }
       else { // Read the Navigation controller
         if (Wii.getAnalogHat(HatY) > 137) {
-          targetOffset = scale(Wii.getAnalogHat(HatY),138,230,0,cfg.controlAngleLimit);
+          targetOffset = scale(Wii.getAnalogHat(HatY), 138, 230, 0, cfg.controlAngleLimit);
           steerForward = true;
         }
         else if (Wii.getAnalogHat(HatY) < 117) {
-          targetOffset = scale(Wii.getAnalogHat(HatY),116,25,0,cfg.controlAngleLimit);
+          targetOffset = scale(Wii.getAnalogHat(HatY), 116, 25, 0, cfg.controlAngleLimit);
           steerBackward = true;
         }
         if (Wii.getAnalogHat(HatX) > 137) {
-          turningOffset = scale(Wii.getAnalogHat(HatX),138,230,0,cfg.turningLimit);
+          turningOffset = scale(Wii.getAnalogHat(HatX), 138, 230, 0, cfg.turningLimit);
           steerRight = true;
         }
         else if (Wii.getAnalogHat(HatX) < 117) {
-          turningOffset = scale(Wii.getAnalogHat(HatX),116,25,0,cfg.turningLimit);
+          turningOffset = scale(Wii.getAnalogHat(HatX), 116, 25, 0, cfg.turningLimit);
           steerLeft = true;
         }
       }
     } else { // It must be a Wii U Pro Controller then
       if (Wii.getAnalogHat(LeftHatY) > 2200 && Wii.getAnalogHat(RightHatY) > 2200) {
-        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY),4402,6400,0,cfg.controlAngleLimit); // Scale from 4402-6400 to 0-controlAngleLimit
+        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY), 4402, 6400, 0, cfg.controlAngleLimit); // Scale from 4402-6400 to 0-controlAngleLimit
         steerForward = true;
       } else if (Wii.getAnalogHat(LeftHatY) < 1800 && Wii.getAnalogHat(RightHatY) < 1800) {
-        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY),3598,1600,0,cfg.controlAngleLimit); // Scale from 3598-1600 to 0-controlAngleLimit
+        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY), 3598, 1600, 0, cfg.controlAngleLimit); // Scale from 3598-1600 to 0-controlAngleLimit
         steerBackward = true;
       }
       if (((int16_t)Wii.getAnalogHat(RightHatY) - (int16_t)Wii.getAnalogHat(LeftHatY)) > 200) {
-        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,cfg.turningLimit); // Scale from 0-2400 to 0-turningLimit
+        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)), 0, 2400, 0, cfg.turningLimit); // Scale from 0-2400 to 0-turningLimit
         steerLeft = true;
       } else if (((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)) > 200) {
-        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)),0,2400,0,cfg.turningLimit); // Scale from 0-2400 to 0-turningLimit
+        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)), 0, 2400, 0, cfg.turningLimit); // Scale from 0-2400 to 0-turningLimit
         steerRight = true;
       }
     }
@@ -581,17 +407,17 @@ void steer(Command command) {
 #ifdef ENABLE_XBOX
   if (command == updateXbox) {
     if (Xbox.getAnalogHat(LeftHatY) > 7500 && Xbox.getAnalogHat(RightHatY) > 7500) {
-      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY)+(int32_t)Xbox.getAnalogHat(RightHatY),15002,65534,0,cfg.controlAngleLimit); // Scale from 15002-65534 to 0-controlAngleLimit
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY)+(int32_t)Xbox.getAnalogHat(RightHatY), 15002, 65534, 0, cfg.controlAngleLimit); // Scale from 15002-65534 to 0-controlAngleLimit
       steerForward = true;
     } else if (Xbox.getAnalogHat(LeftHatY) < -7500 && Xbox.getAnalogHat(RightHatY) < -7500) {
-      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY)+(int32_t)Xbox.getAnalogHat(RightHatY),-15002,-65536,0,cfg.controlAngleLimit); // Scale from -15002-(-65536) to 0-controlAngleLimit
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY)+(int32_t)Xbox.getAnalogHat(RightHatY), -15002, -65536, 0, cfg.controlAngleLimit); // Scale from -15002-(-65536) to 0-controlAngleLimit
       steerBackward = true;
     }
     if (((int32_t)Xbox.getAnalogHat(RightHatY) - (int32_t)Xbox.getAnalogHat(LeftHatY)) > 7500) {
-      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)),0,65535,0,cfg.turningLimit); // Scale from 0-65535 to 0-turningLimit
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)), 0, 65535, 0, cfg.turningLimit); // Scale from 0-65535 to 0-turningLimit
       steerLeft = true;
     } else if (((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)) > 7500) {
-      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)),0,65535,0,cfg.turningLimit); // Scale from 0-65535 to 0-turningLimit
+      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)), 0, 65535, 0, cfg.turningLimit); // Scale from 0-65535 to 0-turningLimit
       steerRight = true;
     }
   }
@@ -618,6 +444,4 @@ double scale(double input, double inputMin, double inputMax, double outputMin, d
     output = outputMin;
   return output;
 }
-#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
-
-#endif // ENABLE_USB
+#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)

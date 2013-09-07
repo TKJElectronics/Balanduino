@@ -2,15 +2,14 @@
 #define _balanduino_h_
 
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
-#include <string.h> // Needed for strlen
 
 /* Firmware Version Information */
-const char *version = "0.9.0";
-const char *eepromVersion = "002"; // EEPROM version - used to restore the EEPROM values if the configuration values have changed
+const char *version = "1.0.0";
+const uint8_t eepromVersion = 1; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
 bool sendData, sendSettings, sendInfo, sendMainPIDValues, sendEncoderPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
-const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a pwm frequency up to 20kHz
+const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a PWM frequency up to 20kHz
 const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
 
 /* Used to make commands more readable */
@@ -65,7 +64,10 @@ volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
 const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconnected using the jumper
+
+#define VBAT A5 // The voltage divider is connected to analog input 5
 double batteryVoltage; // Measured battery level
+uint8_t batteryCounter; // Counter used to check if it should check the battery level
 
 bool ledState; // Last state of the built in LED
 
@@ -85,22 +87,22 @@ typedef struct {
   uint8_t backToSpot; // Set whenever the robot should stay in the same spot
   uint8_t controlAngleLimit; // Set the maximum tilting angle of the robot
   uint8_t turningLimit; // Set the maximum turning value
-
-  double Qangle;
-  double Qbias;
-  double Rmeasure;
+  double Qangle, Qbias, Rmeasure; // Kalman filter values
+  double accYzero, accZzero; // Accelerometer zero values
+  double leftMotorScaler, rightMotorScaler;
 } cfg_t;
 
 extern cfg_t cfg;
 
 /* EEPROM Address Definitions */
 const uint8_t initFlagsAddr = 0; // Set the first three bytes to the EEPROM version
-const uint8_t configAddr = strlen(eepromVersion); // Save the configuration starting from this location
+const uint8_t configAddr = 1; // Save the configuration starting from this location
 
 double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 /* IMU Data */
-int16_t accX, accY, accZ, gyroX;
+int16_t accY, accZ, gyroX;
+double gyroXzero;
 uint8_t i2cBuffer[8]; // Buffer for I2C data
 
 // Results
@@ -134,6 +136,8 @@ bool layingDown = true; // Use to indicate if the robot is laying down
 double targetOffset = 0; // Offset for going forward and backward
 double turningOffset = 0; // Offset for turning left and right
 
+char dataInput[30]; // Incoming data buffer
+bool bluetoothData; // True if data received is from the Bluetooth connection
 double sppData1, sppData2; // Data send via SPP connection
 
 bool commandSent = false; // This is used so multiple controller can be used at once
@@ -158,7 +162,6 @@ const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
 
 // Function prototypes
-void sendBluetoothData();
 void readSPPData();
 void readUsb();
 void updateLEDs();
@@ -166,15 +169,16 @@ void onInit();
 void steer(Command command);
 double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax);
 
-void checkInitializationFlags();
+bool checkInitializationFlags();
 void readEEPROMValues();
 void updateConfig();
 void restoreEEPROMValues();
 
 uint8_t i2cWrite(uint8_t registerAddress, uint8_t data, bool sendStop);
-uint8_t i2cWrite(uint8_t registerAddress, uint8_t* data, uint8_t length, bool sendStop);
-uint8_t i2cRead(uint8_t registerAddress, uint8_t* data, uint8_t nbytes);
+uint8_t i2cWrite(uint8_t registerAddress, uint8_t *data, uint8_t length, bool sendStop);
+uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes);
 
+void updatePID(double restAngle, double offset, double turning, double dt);
 void moveMotor(Command motor, Command direction, double speedRaw);
 void stopMotor(Command motor);
 void setPWM(uint8_t pin, uint16_t dutyCycle);
@@ -185,6 +189,14 @@ int32_t readLeftEncoder();
 int32_t readRightEncoder();
 int32_t getWheelsPosition();
 
-void updatePID(double restAngle, double offset, double turning, double dt);
+void checkSerialData();
+void printMenu();
+void calibrateMotor();
+void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, double rightScaler);
+void calibrateAcc();
+void printValues();
+void setValues(char *input);
+void calibrateGyro();
+bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference);
 
 #endif

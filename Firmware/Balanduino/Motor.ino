@@ -79,6 +79,9 @@ void updatePID(double angle, double offset, double turning, double dt) {
     PIDRight = PIDValue;
   }
 
+  PIDLeft *= cfg.leftMotorScaler; // Compensate for difference in some of the motors
+  PIDRight *= cfg.rightMotorScaler;
+
   /* Set PWM Values */
   if (PIDLeft >= 0)
     moveMotor(left, forward, PIDLeft);
@@ -95,38 +98,38 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
     speedRaw = 100.0;
   uint16_t speed = speedRaw*((double)PWMVALUE)/100.0; // Scale from 0-100 to 0-PWMVALUE
   if (motor == left) {
-    setPWM(leftPWM,speed); // Left motor PWM
+    setPWM(leftPWM, speed); // Left motor PWM
     if (direction == forward) {
-      cbi(leftPort,leftA);
-      sbi(leftPort,leftB);
+      cbi(leftPort, leftA);
+      sbi(leftPort, leftB);
     }
     else if (direction == backward) {
-      sbi(leftPort,leftA);
-      cbi(leftPort,leftB);
+      sbi(leftPort, leftA);
+      cbi(leftPort, leftB);
     }
   }
   else if (motor == right) {
-    setPWM(rightPWM,speed); // Right motor PWM
+    setPWM(rightPWM, speed); // Right motor PWM
     if (direction == forward) {
-      sbi(rightPort,rightA);
-      cbi(rightPort,rightB);
+      sbi(rightPort, rightA);
+      cbi(rightPort, rightB);
     }
     else if (direction == backward) {
-      cbi(rightPort,rightA);
-      sbi(rightPort,rightB);
+      cbi(rightPort, rightA);
+      sbi(rightPort, rightB);
     }
   }
 }
 void stopMotor(Command motor) {
   if (motor == left) {
-    setPWM(leftPWM,PWMVALUE); // Set high
-    sbi(leftPort,leftA);
-    sbi(leftPort,leftB);
+    setPWM(leftPWM, PWMVALUE); // Set high
+    sbi(leftPort, leftA);
+    sbi(leftPort, leftB);
   }
   else if (motor == right) {
-    setPWM(rightPWM,PWMVALUE); // Set high
-    sbi(rightPort,rightA);
-    sbi(rightPort,rightB);
+    setPWM(rightPWM, PWMVALUE); // Set high
+    sbi(rightPort, rightA);
+    sbi(rightPort, rightB);
   }
 }
 void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR
