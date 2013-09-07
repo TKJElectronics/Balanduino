@@ -11,23 +11,22 @@ void checkSerialData() {
         calibrateAcc();
       else if (input == 'm') // Motor calibration
         calibrateMotor();
-      return; // Skip the rest of this function
+    } else {
+      dataInput[0] = input;
+      uint8_t i = 1;
+      delay(1); // Wait for rest of data
+      while (1) {
+        dataInput[i] = Serial.read();
+        if (dataInput[i] == -1) // Error while reading the string
+          return;
+        if (dataInput[i] == ';') // Keep reading until it reads a semicolon
+          break;
+        if (++i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
+          return;
+      }
+      bluetoothData = false;
+      setValues(dataInput);
     }
-
-    dataInput[0] = input;
-    uint8_t i = 1;
-    delay(1); // Wait for rest of data
-    while (1) {
-      dataInput[i] = Serial.read();
-      if (dataInput[i] == -1) // Error while reading the string
-        return;
-      if (dataInput[i] == ';') // Keep reading until it reads a semicolon
-        break;
-      if (++i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
-        return;
-    }
-    bluetoothData = false;
-    setValues(dataInput);
   }
 }
 
