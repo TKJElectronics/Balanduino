@@ -2,19 +2,16 @@
 void checkSerialData() {
   if (Serial.available()) {
     char input = Serial.read();
-    if (input == 'm') {
+    if (input == 'm')
       printMenu();
-      while (!Serial.available()); // Wait for data
+    else if (input == 'c') { // Calibration
+      delay(1); // Wait a bit
       input = Serial.read();
-      if (input == 'c') { // Calibration
-        Serial.println(F("Send 'a' to calibrate the accelerometer\r\nSend 'm' to calibrate the motor"));
-        while (!Serial.available()); // Wait for data
-        input = Serial.read();
-        if (input == 'a') // Accelerometer calibration
-          calibrateAcc();
-        //else if (input == 'm') // Motor calibration
-        return; // Skip the rest of this function
-      }
+      if (input == 'a') // Accelerometer calibration
+        calibrateAcc();
+      else if (input == 'm') // Motor calibration
+        calibrateMotor();
+      return; // Skip the rest of this function
     }
 
     dataInput[0] = input;
@@ -36,7 +33,8 @@ void checkSerialData() {
 
 void printMenu() {
   Serial.println(F("\r\n========================================== Menu ==========================================\r\n"));
-  Serial.println(F("c\t\t\t\tEnter calibration menu\r\n"));
+  Serial.println(F("ca\t\t\t\tSend to calibrate the accelerometer"));
+  Serial.println(F("cm\t\t\t\tSend to calibrate the motors\r\n"));
 
   Serial.println(F("GP;\t\t\t\tGet PID values"));
   Serial.println(F("GK;\t\t\t\tGet Kalman filter values"));
@@ -64,8 +62,8 @@ void printMenu() {
 }
 
 void calibrateAcc() {
-  Serial.println(F("Please put the robot perfectly horizontal and then send 'a' again to start the calibration routine"));
-  while (Serial.read() != 'a');
+  Serial.println(F("Please put the robot perfectly horizontal and then send any character to start the calibration routine"));
+  while (Serial.read() == -1);
 
   int16_t accYbuffer[25], accZbuffer[25];
   for (uint8_t i = 0; i < 25; i++) {
@@ -95,80 +93,168 @@ void calibrateAcc() {
   Serial.println(F("Calibration of the accelerometer is done"));
 }
 
+void calibrateMotor() {
+  Serial.println(F("Put the robot so the wheels can move freely and then send any character to start the motor calibration routine"));
+  while (Serial.read() == -1);
+
+  Serial.println(F("Estimating minimum starting value. When the first two values do not change anymore, then send any character to continue\r\n"));
+  delay(2000);
+  double leftSpeed = 10, rightSpeed = 10;
+  testMotorSpeed(&leftSpeed, &rightSpeed, 1, 1);
+
+  Serial.print(F("\r\nThe speed values are (L/R): "));
+  Serial.print(leftSpeed);
+  Serial.print(F(","));
+  Serial.println(rightSpeed);
+
+  if (leftSpeed > rightSpeed) { // This means that the left motor needed a higher PWM signal before it rotated at the same speed
+    cfg.leftMotorScaler = 1;
+    cfg.rightMotorScaler = rightSpeed/leftSpeed; // Therefore we will scale the right motor a bit down, so they match
+  } else { // And the same goes for the right motor
+    cfg.leftMotorScaler = leftSpeed/rightSpeed;
+    cfg.rightMotorScaler = 1;
+  }
+
+  Serial.print(F("The motor scalars are now (L/R): "));
+  Serial.print(cfg.leftMotorScaler);
+  Serial.print(F(","));
+  Serial.println(cfg.rightMotorScaler);
+
+  Serial.println(F("Now the motors will spin up again. Now the speed values should be almost equal. Send any character to exit\r\n"));
+  delay(2000);
+  leftSpeed = rightSpeed = 10; // Reset speed values
+  testMotorSpeed(&leftSpeed, &rightSpeed, cfg.leftMotorScaler, cfg.rightMotorScaler);
+
+  double maxSpeed = max(leftSpeed, rightSpeed);
+  double minSpeed = min(leftSpeed, rightSpeed);
+
+  Serial.print(F("The difference is now: "));
+  Serial.print((maxSpeed-minSpeed)/maxSpeed*100);
+  Serial.println("%");
+
+  updateConfig(); // Store the new values in the EEPROM
+  Serial.println(F("Calibration of the motors is done"));
+}
+
+void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, double rightScaler) {
+  int32_t lastLeftPosition = readLeftEncoder(), lastRightPosition = readRightEncoder();
+
+  Serial.println(F("Velocity (L), Velocity (R), Speed value (L), Speed value (R)"));
+  while (Serial.read() == -1) {
+    moveMotor(left, forward, (*leftSpeed)*leftScaler);
+    moveMotor(right, forward, (*rightSpeed)*rightScaler);
+
+    int32_t leftPosition = readLeftEncoder();
+    int32_t leftVelocity = leftPosition - lastLeftPosition;
+    lastLeftPosition = leftPosition;
+
+    int32_t rightPosition = readRightEncoder();
+    int32_t rightVelocity = rightPosition - lastRightPosition;
+    lastRightPosition = rightPosition;
+
+    Serial.print(leftVelocity);
+    Serial.print(F(","));
+    Serial.print(rightVelocity);
+    Serial.print(F(","));
+    Serial.print(*leftSpeed);
+    Serial.print(F(","));
+    Serial.println(*rightSpeed);
+
+    if (abs(leftVelocity) < 200)
+      (*leftSpeed) += 0.1;
+    else if (abs(leftVelocity) > 203)
+      (*leftSpeed) -= 0.1;
+
+    if (abs(rightVelocity) < 200)
+      (*rightSpeed) += 0.1;
+    else if (abs(rightVelocity) > 203)
+      (*rightSpeed) -= 0.1;
+
+    delay(100);
+  }
+  for (double i = *leftSpeed; i > 0; i--) { // Stop motors gently
+    moveMotor(left, forward, i);
+    moveMotor(right, forward, i);
+    delay(50);
+  }
+  stopMotor(left);
+  stopMotor(right);
+}
+
 #endif // ENABLE_TOOLS
 
 #if defined(ENABLE_TOOLS) || defined(ENABLE_SPP)
 void printValues() {
-  Print *pipe; // This allows the robot to use either the hardware UART or the Bluetooth SPP connection dynamically
+  Print *out; // This allows the robot to use either the hardware UART or the Bluetooth SPP connection dynamically
 
 #ifdef ENABLE_SPP
   if (SerialBT.connected && bluetoothData)
-    pipe = &SerialBT;
+    out = &SerialBT; // Print using the Bluetooth SPP interface
   else
-    pipe = &Serial;
+    out = &Serial; // Print using the standard UART port
 #else
-  pipe = &Serial;
+  out = &Serial; // Print using the standard UART port
 #endif
 
   if (sendPairConfirmation) {
     sendPairConfirmation = false;
 
-    pipe->println(F("WC"));
+    out->println(F("WC"));
   } else if (sendPIDValues) {
     sendPIDValues = false;
 
-    pipe->print(F("P,"));
-    pipe->print(cfg.P);
-    pipe->print(F(","));
-    pipe->print(cfg.I);
-    pipe->print(F(","));
-    pipe->print(cfg.D);
-    pipe->print(F(","));
-    pipe->println(cfg.targetAngle);
+    out->print(F("P,"));
+    out->print(cfg.P);
+    out->print(F(","));
+    out->print(cfg.I);
+    out->print(F(","));
+    out->print(cfg.D);
+    out->print(F(","));
+    out->println(cfg.targetAngle);
   } else if (sendSettings) {
     sendSettings = false;
 
-    pipe->print(F("S,"));
-    pipe->print(cfg.backToSpot);
-    pipe->print(F(","));
-    pipe->print(cfg.controlAngleLimit);
-    pipe->print(F(","));
-    pipe->println(cfg.turningLimit);
+    out->print(F("S,"));
+    out->print(cfg.backToSpot);
+    out->print(F(","));
+    out->print(cfg.controlAngleLimit);
+    out->print(F(","));
+    out->println(cfg.turningLimit);
   } else if (sendInfo) {
     sendInfo = false;
 
-    pipe->print(F("I,"));
-    pipe->print(version);
+    out->print(F("I,"));
+    out->print(version);
 
     #if defined(__AVR_ATmega644__)
-      pipe->print(F(",ATmega644,"));
+      out->print(F(",ATmega644,"));
     #elif defined(__AVR_ATmega1284P__)
-      pipe->print(F(",ATmega1284P,"));
+      out->print(F(",ATmega1284P,"));
     #else
-      pipe->print(F(",Unknown,"));
+      out->print(F(",Unknown,"));
     #endif
 
-    pipe->print(batteryVoltage);
-    pipe->print(F(","));
-    pipe->println((double)millis()/60000.0);
+    out->print(batteryVoltage);
+    out->print(F(","));
+    out->println((double)millis()/60000.0);
   } else if (sendKalmanValues) {
     sendKalmanValues = false;
 
-    pipe->print(F("K,"));
-    pipe->print(kalman.getQangle(), 4);
-    pipe->print(F(","));
-    pipe->print(kalman.getQbias(), 4);
-    pipe->print(F(","));
-    pipe->println(kalman.getRmeasure(), 4);
+    out->print(F("K,"));
+    out->print(kalman.getQangle(), 4);
+    out->print(F(","));
+    out->print(kalman.getQbias(), 4);
+    out->print(F(","));
+    out->println(kalman.getRmeasure(), 4);
   } else if (sendData && (millis() - dataTimer > 50)) { // Only send data every 50ms
     dataTimer = millis();
 
-    pipe->print(F("V,"));
-    pipe->print(accAngle);
-    pipe->print(F(","));
-    pipe->print(gyroAngle);
-    pipe->print(F(","));
-    pipe->println(pitch);
+    out->print(F("V,"));
+    out->print(accAngle);
+    out->print(F(","));
+    out->print(gyroAngle);
+    out->print(F(","));
+    out->println(pitch);
   }
 }
 
@@ -184,7 +270,7 @@ void setValues(char *input) {
   }
 
   /* For sending PID and IMU values */
-  else if (input[0] == 'G') { // The Processing/Android application sends when it needs the PID, settings or info
+  else if (input[0] == 'G') { // The different application sends when it needs the PID, settings or info
     if (input[1] == 'P') // Get PID Values
       sendPIDValues = true;
     else if (input[1] == 'S') // Get settings

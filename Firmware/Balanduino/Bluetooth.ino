@@ -259,7 +259,7 @@ void steer(Command command) {
   steerLeft = false;
   steerRight = false;
 
-#ifdef ENABLE_SPP
+#if defined(ENABLE_SPP) || defined(ENABLE_TOOLS)
   if (command == joystick) {
     if (sppData2 > 0) {
       targetOffset = scale(sppData2, 0, 1, 0, cfg.controlAngleLimit);
@@ -293,7 +293,7 @@ void steer(Command command) {
         steerRight = true;
       }
   }
-#endif // ENABLE_SPP
+#endif // ENABLE_SPP or ENABLE_TOOLS
 #ifdef ENABLE_PS3
   if (command == updatePS3) {
     if (PS3.PS3Connected) {

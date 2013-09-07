@@ -5,7 +5,7 @@
 
 /* Firmware Version Information */
 const char *version = "1.0.0";
-const uint8_t eepromVersion = 2; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
+const uint8_t eepromVersion = 1; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
 bool sendData, sendSettings, sendInfo, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
@@ -80,6 +80,7 @@ typedef struct {
   uint8_t turningLimit; // Set the maximum turning value
   double Qangle, Qbias, Rmeasure; // Kalman filter values
   double accYzero, accZzero; // Accelerometer zero values
+  double leftMotorScaler, rightMotorScaler;
 } cfg_t;
 
 extern cfg_t cfg;
@@ -184,6 +185,8 @@ int32_t getWheelPosition();
 
 void checkSerialData();
 void printMenu();
+void calibrateMotor();
+void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, double rightScaler);
 void calibrateAcc();
 void printValues();
 void setValues(char *input);
