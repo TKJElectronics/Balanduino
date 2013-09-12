@@ -197,9 +197,10 @@ void setup() {
   kalmanTimer = micros();
   pidTimer = kalmanTimer;
   encoderTimer = kalmanTimer;
-  dataTimer = millis();
-  ledTimer = dataTimer;
-  blinkTimer = dataTimer;
+  imuTimer = millis();
+  reportTimer = imuTimer;
+  ledTimer = imuTimer;
+  blinkTimer = imuTimer;
 }
 
 void loop() {

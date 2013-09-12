@@ -7,7 +7,7 @@
 const char *version = "1.0.0";
 const uint8_t eepromVersion = 1; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
-bool sendData, sendSettings, sendInfo, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
+bool sendIMUValues, sendSettings, sendInfo, sendStatusReport, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
 const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a PWM frequency up to 20kHz
 const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
@@ -111,7 +111,8 @@ double PIDValue, PIDLeft, PIDRight;
 uint32_t kalmanTimer; // Timer used for the Kalman filter
 uint32_t pidTimer; // Timer used for the PID loop
 uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
-uint32_t dataTimer; // This is used so it doesn't send data to often
+uint32_t imuTimer; // This is used to set a delay between sending IMU values
+uint32_t reportTimer; // This is used to set a delay between sending report values
 uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, Wii and Xbox controllers
 uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
 

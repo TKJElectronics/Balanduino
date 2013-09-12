@@ -1,17 +1,11 @@
 #ifdef ENABLE_TOOLS
+
 void checkSerialData() {
   if (Serial.available()) {
     char input = Serial.read();
     if (input == 'm')
       printMenu();
-    else if (input == 'c') { // Calibration
-      delay(1); // Wait a bit
-      input = Serial.read();
-      if (input == 'a') // Accelerometer calibration
-        calibrateAcc();
-      else if (input == 'm') // Motor calibration
-        calibrateMotor();
-    } else {
+    else {
       dataInput[0] = input;
       uint8_t i = 1;
       delay(1); // Wait for rest of data
@@ -32,8 +26,11 @@ void checkSerialData() {
 
 void printMenu() {
   Serial.println(F("\r\n========================================== Menu ==========================================\r\n"));
-  Serial.println(F("ca\t\t\t\tSend to calibrate the accelerometer"));
-  Serial.println(F("cm\t\t\t\tSend to calibrate the motors\r\n"));
+
+  Serial.println(F("A;\t\t\t\tSend to abort. Send 'C' again to continue\r\n"));
+
+  Serial.println(F("AC;\t\t\t\tSend to calibrate the accelerometer"));
+  Serial.println(F("MC;\t\t\t\tSend to calibrate the motors\r\n"));
 
   Serial.println(F("GP;\t\t\t\tGet PID values"));
   Serial.println(F("GK;\t\t\t\tGet Kalman filter values"));
@@ -46,11 +43,13 @@ void printMenu() {
   Serial.println(F("ST,targetAngle;\t\t\tUsed to set the target angle"));
   Serial.println(F("SK,Qangle,Qbias,Rmeasure;\tUsed to set the Kalman filter values"));
   Serial.println(F("SA,angle;\t\t\tUsed to set the maximum controlling angle"));
-  Serial.println(F("SU,value;\t\t\tUsed to set the maximum turning vale"));
+  Serial.println(F("SU,value;\t\t\tUsed to set the maximum turning value"));
   Serial.println(F("SB,value;\t\t\tUsed to set the back to spot value (true = 1, false = 0)\r\n"));
 
   Serial.println(F("IB;\t\t\t\tStart sending IMU values"));
-  Serial.println(F("IS;\t\t\t\tStop sending IMU values\r\n"));
+  Serial.println(F("IS;\t\t\t\tStop sending IMU values"));
+  Serial.println(F("RB;\t\t\t\tStart sending report values"));
+  Serial.println(F("RS;\t\t\t\tStop sending report values\r\n"));
 
   Serial.println(F("CS;\t\t\t\tSend stop command"));
   Serial.println(F("CJ,x,y;\t\t\t\tSteer robot using x,y-coordinates"));
@@ -224,18 +223,16 @@ void printValues() {
 
     out->print(F("I,"));
     out->print(version);
+    out->print(F(","));
+    out->print(eepromVersion);
 
     #if defined(__AVR_ATmega644__)
-      out->print(F(",ATmega644,"));
+      out->println(F(",ATmega644"));
     #elif defined(__AVR_ATmega1284P__)
-      out->print(F(",ATmega1284P,"));
+      out->println(F(",ATmega1284P"));
     #else
-      out->print(F(",Unknown,"));
+      out->println(F(",Unknown"));
     #endif
-
-    out->print(batteryVoltage);
-    out->print(F(","));
-    out->println((double)millis()/60000.0);
   } else if (sendKalmanValues) {
     sendKalmanValues = false;
 
@@ -245,8 +242,8 @@ void printValues() {
     out->print(kalman.getQbias(), 4);
     out->print(F(","));
     out->println(kalman.getRmeasure(), 4);
-  } else if (sendData && (millis() - dataTimer > 50)) { // Only send data every 50ms
-    dataTimer = millis();
+  } else if (sendIMUValues && millis() - imuTimer > 50) { // Only send data every 50ms
+    imuTimer = millis();
 
     out->print(F("V,"));
     out->print(accAngle);
@@ -254,11 +251,18 @@ void printValues() {
     out->print(gyroAngle);
     out->print(F(","));
     out->println(pitch);
+  } else if (sendStatusReport && millis() - reportTimer > 500) { // Send data every 500ms
+    reportTimer = millis();
+
+    out->print(F("R,"));
+    out->print(batteryVoltage);
+    out->print(F(","));
+    out->println((double)reportTimer/60000.0);
   }
 }
 
 void setValues(char *input) {
-  if (input[0] == 'A') { // Abort
+  if (input[0] == 'A' && input[1] == ';') { // Abort
     stopAndReset();
 #ifdef ENABLE_SPP
     while (Serial.read() != 'C' && SerialBT.read() != 'C') // Wait until continue is sent
@@ -267,6 +271,11 @@ void setValues(char *input) {
     while (Serial.read() != 'C');
 #endif
   }
+
+  else if (input[0] == 'A' && input[1] == 'C') // Accelerometer calibration
+    calibrateAcc();
+  else if (input[0] == 'M' && input[1] == 'C') // Motor calibration
+    calibrateMotor();
 
   /* For sending PID and IMU values */
   else if (input[0] == 'G') { // The different application sends when it needs the PID, settings or info
@@ -316,9 +325,16 @@ void setValues(char *input) {
 
   else if (input[0] == 'I') { // IMU transmitting states
     if (input[1] == 'B') // Begin sending IMU values
-      sendData = true; // Send output to Processing/Android application
+      sendIMUValues = true; // Start sending output to application
     else if (input[1] == 'S') // Stop sending IMU values
-      sendData = false; // Stop sending output to Processing/Android application
+      sendIMUValues = false; // Stop sending output to application
+  }
+
+  else if (input[0] == 'R') { // Report states
+    if (input[1] == 'B') // Begin sending report values
+      sendStatusReport = true; // Start sending output to application
+    else if (input[1] == 'S') // Stop sending report values
+      sendStatusReport = false; // Stop sending output to application
   }
 
   else if (input[0] == 'C') { // Commands
