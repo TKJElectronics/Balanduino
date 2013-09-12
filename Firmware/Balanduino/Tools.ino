@@ -361,7 +361,7 @@ void calibrateGyro() {
     gyroXbuffer[i] = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
     delay(10);
   }
-  if (!checkMinMax(gyroXbuffer, 25, 200)) {
+  if (!checkMinMax(gyroXbuffer, 25, 2000)) {
     Serial.print(F("Gyro calibration error"));
     digitalWrite(buzzer, HIGH);
     while (1); // Halt
