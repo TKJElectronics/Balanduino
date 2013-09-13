@@ -60,7 +60,7 @@ void printMenu() {
 }
 
 void calibrateAcc() {
-  Serial.println(F("Please put the robot perfectly horizontal and then send any character to start the calibration routine"));
+  Serial.println(F("Please put the robot perfectly horizontal on its side and then send any character to start the calibration routine"));
   while (Serial.read() == -1);
 
   int16_t accYbuffer[25], accZbuffer[25];
@@ -86,6 +86,11 @@ void calibrateAcc() {
     cfg.accYzero += 16384.0; // 16384.0 is equal to 1g while the full scale range is ±2g
   else
     cfg.accYzero -= 16384.0;
+
+  Serial.print(F("New zero values (g's): ")); // Print the new values in g's
+  Serial.print(cfg.accYzero/16384.0);
+  Serial.print(F(","));
+  Serial.println(cfg.accZzero/16384.0);
 
   updateConfig(); // Store the new values in the EEPROM
   Serial.println(F("Calibration of the accelerometer is done"));

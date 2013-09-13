@@ -9,13 +9,13 @@
  * For details, see: http://balanduino.net/
  */
 
-/* Use this to enable and disable the different controllers */
+/* Use this to enable and disable the different options */
+#define ENABLE_TOOLS
 #define ENABLE_SPP
 #define ENABLE_PS3
 #define ENABLE_WII
 #define ENABLE_XBOX
 #define ENABLE_ADK
-#define ENABLE_TOOLS
 
 #include "Balanduino.h"
 #include <Wire.h> // Official Arduino Wire library
