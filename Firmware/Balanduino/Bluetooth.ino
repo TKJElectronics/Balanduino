@@ -29,6 +29,11 @@ void readSPPData() {
 void readUsb() {
   Usb.Task(); // The SPP data is actually not send until this is called, one could call SerialBT.send() directly as well
 
+  if (Usb.getUsbTaskState() == USB_STATE_ERROR && layingDown) { // Check if the USB state machine is in an error state, but also make sure the robot is laying down
+    Serial.println(F("USB fail"));
+    Usb.setUsbTaskState(USB_DETACHED_SUBSTATE_INITIALIZE); // Reset state machine
+  }
+
 #ifdef ENABLE_SPP
   readSPPData();
 #endif // ENABLE_SPP

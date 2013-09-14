@@ -130,8 +130,6 @@ void setup() {
   /* Setup buzzer pin */
   pinMode(buzzer, OUTPUT);
 
-  delay(500);
-
 #ifdef ENABLE_USB
   if (Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
