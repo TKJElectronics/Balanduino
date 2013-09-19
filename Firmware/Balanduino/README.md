@@ -35,4 +35,6 @@ The final structure should look like this:
 
 Advanced users can also use the included [Makefile](Makefile) if they prefer.
 
+[Balanduino.hex](Balanduino.hex) contains the latest compiled code.
+
 For more information send us an email at <mail@tkjelectronics.com>.
