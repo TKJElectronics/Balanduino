@@ -192,6 +192,6 @@ void calibrateAcc();
 void printValues();
 void setValues(char *input);
 void calibrateGyro();
-bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference);
+bool checkMinMax(int16_t *array, uint8_t length, int16_t maxDifference);
 
 #endif
