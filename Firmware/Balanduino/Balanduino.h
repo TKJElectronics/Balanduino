@@ -65,7 +65,6 @@ volatile int32_t rightCounter = 0;
 
 const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconnected using the jumper
 
-#define VBAT A5 // The voltage divider is connected to analog input 5
 double batteryVoltage; // Measured battery level
 uint8_t batteryCounter; // Counter used to check if it should check the battery level
 

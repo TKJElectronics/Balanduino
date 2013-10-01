@@ -28,6 +28,7 @@
 // These are all open source libraries written by Kristian Lauszus, TKJ Electronics
 // The USB libraries are located at the following link: https://github.com/felis/USB_Host_Shield_2.0
 #include <Kalman.h> // Kalman filter library - see: http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/
+
 #ifdef ENABLE_XBOX
 #include <XBOXRECV.h>
 #endif
@@ -265,7 +266,7 @@ void loop() {
     batteryCounter++;
     if (batteryCounter > 10) { // Measure battery every 1s
       batteryCounter = 0;
-      batteryVoltage = (double)analogRead(VBAT)/63.050847458; // The VIN pin is connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
+      batteryVoltage = (double)analogRead(VBAT)/63.050847458; // VBAT is connected to analog input 5 which is not broken out. This is then connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
       if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
         digitalWrite(buzzer, HIGH);
       else
