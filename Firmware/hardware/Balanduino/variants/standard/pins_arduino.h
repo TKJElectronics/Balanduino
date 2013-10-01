@@ -111,7 +111,7 @@ static const uint8_t SCL = 14;
                                     ( (((p) >= 15) && ((p) <= 18)) ? ((p) - 13) : \
                                     0 ) ) ) ) ) ) ) ) ) ) )
 
-#define digitalPinToInterrupt(p) ((p) == 11 ? 0 : ((p) == 12 ? 1 : ((p) == 2 ? 2 : -1)))
+#define digitalPinToInterrupt(p) ((p) == 15 ? 0 : ((p) == 16 ? 1 : ((p) == 2 ? 2 : NOT_AN_INTERRUPT)))
 
 #ifdef ARDUINO_MAIN
 // these arrays map port names (e.g. port B) to the
