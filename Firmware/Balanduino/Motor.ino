@@ -147,13 +147,13 @@ void stopAndReset() {
 
 /* Interrupt routine and encoder read functions - we read using the port registers for faster processing */
 void leftEncoder() {
-  if ((bool)(PIND & _BV(PIND2)) == (bool)(PINA & _BV(PINA6))) // Compare pin 15 and pin 30
+  if ((bool)(leftEncoder1Port & leftEncoder1Mask) == (bool)(leftEncoder2Port & leftEncoder2Mask)) // Compare pin 15 and pin 30
     leftCounter--;
   else
     leftCounter++;
 }
 void rightEncoder() {
-  if ((bool)(PIND & _BV(PIND3)) == (bool)(PINA & _BV(PINA7))) // Compare pin 16 and pin 31
+  if ((bool)(rightEncoder1Port & rightEncoder1Mask) == (bool)(rightEncoder2Port & rightEncoder2Mask)) // Compare pin 16 and pin 31
     rightCounter++;
   else
     rightCounter--;

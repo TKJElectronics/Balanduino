@@ -55,10 +55,20 @@ const uint8_t leftEnable = 21;
 const uint8_t rightEnable = 22;
 
 /* Encoders */
-const uint8_t leftEncoder1 = 15;
-const uint8_t leftEncoder2 = 30;
-const uint8_t rightEncoder1 = 16;
-const uint8_t rightEncoder2 = 31;
+const uint8_t leftEncoder1 = 15; // PD2
+const uint8_t leftEncoder2 = 30; // PA6
+const uint8_t rightEncoder1 = 16; // PD3
+const uint8_t rightEncoder2 = 31; // PA7
+
+#define leftEncoder1Port PIND
+#define leftEncoder1Mask _BV(PIND2)
+#define leftEncoder2Port PINA
+#define leftEncoder2Mask _BV(PINA6)
+
+#define rightEncoder1Port PIND
+#define rightEncoder1Mask _BV(PIND3)
+#define rightEncoder2Port PINA
+#define rightEncoder2Mask _BV(PINA7)
 
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
