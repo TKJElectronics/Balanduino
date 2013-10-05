@@ -18,19 +18,6 @@ balanduino.build.board=AVR_BALANDUINO
 balanduino.build.core=arduino:arduino
 balanduino.build.variant=standard
 
-## ATmega644A
-
-balanduino.menu.cpu.atmega644a=ATmega644A
-
-balanduino.menu.cpu.atmega644a.upload.maximum_size=64512
-balanduino.menu.cpu.atmega644a.upload.maximum_data_size=4096
-balanduino.menu.cpu.atmega644a.upload.speed=57600
-
-balanduino.menu.cpu.atmega644a.bootloader.file=optiboot/optiboot_balanduino644.hex
-
-balanduino.menu.cpu.atmega644a.build.mcu=atmega644
-balanduino.menu.cpu.atmega644a.build.f_cpu=8000000L
-
 ## ATmega1284P
 
 balanduino.menu.cpu.atmega1284p=ATmega1284P
@@ -43,5 +30,18 @@ balanduino.menu.cpu.atmega1284p.bootloader.file=optiboot/optiboot_balanduino.hex
 
 balanduino.menu.cpu.atmega1284p.build.mcu=atmega1284p
 balanduino.menu.cpu.atmega1284p.build.f_cpu=10000000L
+
+## ATmega644A
+
+balanduino.menu.cpu.atmega644a=ATmega644A
+
+balanduino.menu.cpu.atmega644a.upload.maximum_size=64512
+balanduino.menu.cpu.atmega644a.upload.maximum_data_size=4096
+balanduino.menu.cpu.atmega644a.upload.speed=57600
+
+balanduino.menu.cpu.atmega644a.bootloader.file=optiboot/optiboot_balanduino644.hex
+
+balanduino.menu.cpu.atmega644a.build.mcu=atmega644
+balanduino.menu.cpu.atmega644a.build.f_cpu=8000000L
 
 ##############################################################
