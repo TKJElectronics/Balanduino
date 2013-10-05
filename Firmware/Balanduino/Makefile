@@ -9,6 +9,7 @@ ARD_HOME = /Applications/Arduino1.0.5.app/Contents/Resources/Java
 # Leave these alone
 THIRD_PARTY_HARDWARE = ../hardware/Balanduino
 BOARD = balanduino
+EXTRA_FLAGS += -D ARDUINO_AVR_BALANDUINO
 MON_SPEED = 115200
 
 LIB_DIRS += ../libraries/USB_Host_Shield_2.0
