@@ -128,13 +128,10 @@ void stopMotor(Command motor) {
   }
 }
 void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR
-  if (pin == leftPWM) {
-    OCR1AH = (dutyCycle >> 8);
-    OCR1AL = (dutyCycle & 0xFF);
-  } else if (pin == rightPWM) {
-    OCR1BH = (dutyCycle >> 8);
-    OCR1BL = (dutyCycle & 0xFF);
-  }
+  if (pin == leftPWM)
+    OCR1A = dutyCycle;
+  else if (pin == rightPWM)
+    OCR1B = dutyCycle;
 }
 void stopAndReset() {
   stopMotor(left);
