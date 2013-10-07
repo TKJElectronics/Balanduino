@@ -139,7 +139,7 @@ void setup() {
 #endif
 
   /* Attach onInit function */
-  // This is used to set the LEDs according to the voltage level and rumble the controller to indicate the new connection.
+  // This is used to set the LEDs according to the voltage level and vibrate the controller to indicate the new connection
 #ifdef ENABLE_PS3
   PS3.attachOnInit(onInit);
 #endif
