@@ -3,6 +3,8 @@ menu.cpu=Processor
 ##############################################################
 
 balanduino.name=Balanduino
+balanduino.vid.0=0x0403
+balanduino.pid.0=0x6015
 
 balanduino.upload.tool=avrdude
 balanduino.upload.protocol=arduino
