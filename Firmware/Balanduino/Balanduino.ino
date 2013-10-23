@@ -217,6 +217,7 @@ void loop() {
   // We then convert it to 0 to 2π and then from radians to degrees
   accAngle = (atan2((double)accY-cfg.accYzero, (double)accZ-cfg.accZzero)+PI)*RAD_TO_DEG;
 
+  uint32_t timer = micros();
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
   if ((accAngle < 90 && pitch > 270) || (accAngle > 270 && pitch < 90)) {
     kalman.setAngle(accAngle);
@@ -224,12 +225,13 @@ void loop() {
     gyroAngle = accAngle;
   } else {
     gyroRate = ((double)gyroX-gyroXzero)/131.0; // Convert to deg/s
-    gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
+    double dt = (double)(timer-kalmanTimer)/1000000.0;
+    gyroAngle += gyroRate*dt; // Gyro angle is only used for debugging
     if (gyroAngle < 0 || gyroAngle > 360)
       gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
-    pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-kalmanTimer)/1000000.0); // Calculate the angle using a Kalman filter
+    pitch = kalman.getAngle(accAngle, gyroRate, dt); // Calculate the angle using a Kalman filter
   }
-  kalmanTimer = micros();
+  kalmanTimer = timer;
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
 #ifdef ENABLE_WII
@@ -238,21 +240,22 @@ void loop() {
 #endif
 
   /* Drive motors */
+  timer = micros();
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
   // If it's already balancing it has to be ±45 degrees before it stops trying to balance
   if ((layingDown && (pitch < cfg.targetAngle-10 || pitch > cfg.targetAngle+10)) || (!layingDown && (pitch < cfg.targetAngle-45 || pitch > cfg.targetAngle+45))) {
     layingDown = true; // The robot is in a unsolvable position, so turn off both motors and wait until it's vertical again
     stopAndReset();
-  }
-  else {
+  } else {
     layingDown = false; // It's no longer laying down
-    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(micros()-pidTimer)/1000000.0);
+    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(timer-pidTimer)/1000000.0);
   }
-  pidTimer = micros();
+  pidTimer = timer;
 
   /* Update encoders */
-  if (micros() - encoderTimer >= 100000) { // Update encoder values every 100ms
-    encoderTimer = micros();
+  timer = micros();
+  if (timer - encoderTimer >= 100000) { // Update encoder values every 100ms
+    encoderTimer = timer;
     int32_t wheelPosition = getWheelPosition();
     wheelVelocity = wheelPosition - lastWheelPosition;
     lastWheelPosition = wheelPosition;
@@ -286,8 +289,9 @@ void loop() {
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
   if (Btd.isReady()) {
-    if ((Btd.watingForConnection && millis() - blinkTimer > 1000) || (!Btd.watingForConnection && millis() - blinkTimer > 100)) {
-      blinkTimer = millis();
+    timer = millis();
+    if ((Btd.watingForConnection && timer - blinkTimer > 1000) || (!Btd.watingForConnection && timer - blinkTimer > 100)) {
+      blinkTimer = timer;
       ledState = !ledState;
       digitalWrite(LED_BUILTIN, ledState); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
     }
