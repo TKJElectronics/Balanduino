@@ -7,7 +7,7 @@ bool checkInitializationFlags() {
   EEPROM_readAnything(initFlagsAddr, initFlag);
   if (initFlag != eepromVersion) { // Check if the EEPROM version matches the current one
     restoreEEPROMValues();
-    EEPROM_updateAnything(initFlagsAddr, eepromVersion); // After the default values have been restored, set the flags
+    EEPROM_updateAnything(initFlagsAddr, eepromVersion); // After the default values have been restored, set the flag
     return true; // Indicate that the values have been restored
   }
   return false;
