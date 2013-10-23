@@ -70,7 +70,7 @@ BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all t
 #endif
 
 #ifdef ENABLE_SPP
-SPP SerialBT(&Btd,"Balanduino","0000"); // The SPP (Serial Port Protocol) emulates a virtual Serial port, which is supported by most computers and mobile phones
+SPP SerialBT(&Btd, "Balanduino", "0000"); // The SPP (Serial Port Protocol) emulates a virtual Serial port, which is supported by most computers and mobile phones
 #endif
 
 #ifdef ENABLE_PS3
