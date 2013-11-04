@@ -38,7 +38,7 @@ const static uint8_t MOSI = 27;
 const static uint8_t MISO = 28;
 const static uint8_t SCK  = 29;
 
-static const uint8_t LED_BUILTIN = 6;
+#define LED_BUILTIN 6
 
 static const uint8_t A0 = 7;
 static const uint8_t A1 = 8;
