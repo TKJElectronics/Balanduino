@@ -1,5 +1,5 @@
 # You should only have to change these values
-PORT = /dev/tty.usbserial-DN0031EV
+PORT = /dev/tty.usbserial-DNWYFIDM
 
 # You should set the path to your Arduino application if it is not the default one
 # The default for Linux and Solaris is:
