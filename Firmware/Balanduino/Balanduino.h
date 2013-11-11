@@ -127,8 +127,8 @@ uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster u
 
 /* Used to rumble controllers upon connection */
 bool ps3Initialized, wiiInitialized, xboxInitialized; // These are used to check if a controller has been initialized
-bool ps3RumbleEnable, wiiRumbleEnabled, xboxRumbleEnabled; // These are used to turn rumble off again except for the PS3 controller which is turned on
-bool ps3RumbleDisable; // Used to turn rumble off again on the PS3 controller
+bool ps3RumbleEnable, wiiRumbleEnabled; // These are used to turn rumble off again on the Wiimote and to turn on rumble on the PS3 controller
+bool ps3RumbleDisable, xboxRumbleDisable; // Used to turn rumble off again on the PS3 and Xbox controller
 
 /* Direction set by the controllers or the SPP library */
 bool steerForward, steerBackward, steerLeft, steerRight;
