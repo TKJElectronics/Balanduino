@@ -195,7 +195,7 @@ void leftEncoder();
 void rightEncoder();
 int32_t readLeftEncoder();
 int32_t readRightEncoder();
-int32_t getWheelPosition();
+int32_t getWheelsPosition();
 
 void checkSerialData();
 void printMenu();

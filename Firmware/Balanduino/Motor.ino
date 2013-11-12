@@ -13,7 +13,7 @@ void updatePID(double angle, double offset, double turning, double dt) {
   }
   /* Brake */
   else if (steerStop) {
-    int32_t wheelPosition = getWheelPosition();
+    int32_t wheelPosition = getWheelsPosition();
     int32_t positionError = wheelPosition - targetPosition;
     if (cfg.backToSpot) {
       if (abs(positionError) > zoneA) // Inside zone A
@@ -138,7 +138,7 @@ void stopAndReset() {
   stopMotor(right);
   lastError = 0;
   integratedError = 0;
-  targetPosition = getWheelPosition();
+  targetPosition = getWheelsPosition();
   lastRestAngle = cfg.targetAngle;
 }
 
@@ -161,6 +161,6 @@ int32_t readLeftEncoder() { // The encoders decrease when motors are traveling f
 int32_t readRightEncoder() {
   return rightCounter;
 }
-int32_t getWheelPosition() {
+int32_t getWheelsPosition() {
   return leftCounter + rightCounter;
 }
