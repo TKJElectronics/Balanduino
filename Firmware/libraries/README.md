@@ -28,10 +28,11 @@ The final structure should look like this:
 	* hardware/
 		* Balanduino/
 			* avr/
-			* bootloaders/
-			* cores/
-			* variants/
-			* boards.txt
+				* bootloaders/
+				* libraries/
+				* variants/
+				* boards.txt
+				* platform.txt
 	* libraries/
 		* USB\_Host\_Shield\_20/
 		* KalmanFilter/
