@@ -1,17 +1,26 @@
-# You should only have to change these two values
-PORT = /dev/tty.usbserial-DN0031EV
-ARD_REV = 105
-ARD_HOME = /Applications/Arduino1.0.5.app/Contents/Resources/Java
+# You should only have to change these values
+PORT = /dev/tty.usbserial-DNWYFIDM
+
+# You should set the path to your Arduino application if it is not the default one
+# The default for Linux and Solaris is:
+#ARD_HOME = /opt/Arduino
+# The default for Mac is:
+#ARD_HOME = /Applications/Arduino.app
+
+# Uncomment to activate serial debugging
+#EXTRA_FLAGS += -D DEBUG_USB_HOST
 
 # Leave these alone
-THIRD_PARTY_HARDWARE = ../hardware/Balanduino
+THIRD_PARTY_HARDWARE = ../hardware/Balanduino/avr
 BOARD = balanduino
+BOARD_SUB = balanduino.menu.cpu.atmega1284p
 MON_SPEED = 115200
 
-LIB_DIRS = ../libraries/USB_Host_Shield_2.0
+LIB_DIRS += ../libraries/USB_Host_Shield_2.0
 LIB_DIRS += ../libraries/KalmanFilter
 LIB_DIRS += ../libraries/Arduino-PID-Library/PID_v1
-LIB_DIRS += $(ARD_HOME)/libraries/Wire
-LIB_DIRS += $(ARD_HOME)/libraries/Wire/utility
+LIB_DIRS += $(ARD_HOME)/libraries/Wire/src
+LIB_DIRS += $(ARD_HOME)/libraries/Wire/arch/avr
+LIB_DIRS += $(ARD_HOME)/libraries/Wire/arch/avr/utility
 
 include Arduino_Makefile_master/_Makefile.master

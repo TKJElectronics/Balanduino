@@ -38,14 +38,14 @@ const static uint8_t MOSI = 27;
 const static uint8_t MISO = 28;
 const static uint8_t SCK  = 29;
 
-static const uint8_t LED_BUILTIN = 6;
+#define LED_BUILTIN 6
 
 static const uint8_t A0 = 7;
 static const uint8_t A1 = 8;
 static const uint8_t A2 = 9;
 static const uint8_t A3 = 10;
 static const uint8_t A4 = 11;
-static const uint8_t A5 = 12; // Not broken out - used for battery voltage measurement
+static const uint8_t VBAT = 12; // Not broken out - used for battery voltage measurement
 
 static const uint8_t SDA = 13;
 static const uint8_t SCL = 14;
@@ -58,7 +58,7 @@ static const uint8_t SCL = 14;
 //   INT2 (D2) PB2  3|        |38 PA2 (A2 / D9)
 // BUZZER (D5) PB3  4|        |37 PA3 (A3 / D10)
 //    LED (D6) PB4  5|        |36 PA4 (A4 / D11)
-//  MOSI (D27) PB5  6|        |35 PA5 (A5 / D12)
+//  MOSI (D27) PB5  6|        |35 PA5 (A5 / D12) VBAT
 //  MISO (D28) PB6  7|        |34 PA6 (D30) EN1B
 //   SCK (D29) PB7  8|        |33 PA7 (D31) EN2B
 //             RST  9|        |32 AREF
@@ -68,8 +68,8 @@ static const uint8_t SCL = 14;
 //           XTAL1 13|        |28 PC6 (D23) M1A
 //     RX (D0) PD0 14|        |27 PC5 (D22) M2EN
 //     TX (D1) PD1 15|        |26 PC4 (D21) M1EN
-//  EN1A (D15) PD2 16|        |25 PC3 (D20) SS
-//  EN2A (D16) PD3 17|        |24 PC2 (D19) INT_MAX
+//  EN1A (D15) PD2 16|        |25 PC3 (D20) MAX_SS
+//  EN2A (D16) PD3 17|        |24 PC2 (D19) MAX_INT
 // PWM1B (D17) PD4 18|        |23 PC1 (D13) SDA
 // PWM1A (D18) PD5 19|        |22 PC0 (D14) SCL
 //  PWM2B (D3) PD6 20|        |21 PD7 (D4) PWM2A
@@ -110,6 +110,8 @@ static const uint8_t SCL = 14;
                                     ( (((p) >= 3) && ((p) <= 4)) ? ((p) + 3) : \
                                     ( (((p) >= 15) && ((p) <= 18)) ? ((p) - 13) : \
                                     0 ) ) ) ) ) ) ) ) ) ) )
+
+#define digitalPinToInterrupt(p) ((p) == 15 ? 0 : ((p) == 16 ? 1 : ((p) == 2 ? 2 : NOT_AN_INTERRUPT)))
 
 #ifdef ARDUINO_MAIN
 // these arrays map port names (e.g. port B) to the
@@ -258,4 +260,24 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
         NOT_ON_TIMER  /* 31 - PA7 */
 };
 #endif
+
+// These serial port names are intended to allow libraries and architecture-neutral
+// sketches to automatically default to the correct port name for a particular type
+// of use.  For example, a GPS module would normally connect to SERIAL_PORT_HARDWARE_OPEN,
+// the first hardware serial port whose RX/TX pins are not dedicated to another use.
+//
+// SERIAL_PORT_MONITOR        Port which normally prints to the Arduino Serial Monitor
+//
+// SERIAL_PORT_USBVIRTUAL     Port which is USB virtual serial
+//
+// SERIAL_PORT_LINUXBRIDGE    Port which connects to a Linux system via Bridge library
+//
+// SERIAL_PORT_HARDWARE       Hardware serial port, physical RX & TX pins.
+//
+// SERIAL_PORT_HARDWARE_OPEN  Hardware serial ports which are open for use.  Their RX & TX
+//                            pins are NOT connected to anything by default.
+
+#define SERIAL_PORT_MONITOR   Serial
+#define SERIAL_PORT_HARDWARE  Serial
+
 #endif

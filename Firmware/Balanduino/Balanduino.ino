@@ -9,13 +9,13 @@
  * For details, see: http://balanduino.net/
  */
 
-/* Use this to enable and disable the different controllers */
+/* Use this to enable and disable the different options */
+#define ENABLE_TOOLS
 #define ENABLE_SPP
 #define ENABLE_PS3
 #define ENABLE_WII
 #define ENABLE_XBOX
 #define ENABLE_ADK
-#define ENABLE_TOOLS
 
 #include "Balanduino.h"
 #include <Wire.h> // Official Arduino Wire library
@@ -29,6 +29,7 @@
 // These are all open source libraries written by Kristian Lauszus, TKJ Electronics
 // The USB libraries are located at the following link: https://github.com/felis/USB_Host_Shield_2.0
 #include <Kalman.h> // Kalman filter library - see: http://blog.tkjelectronics.dk/2012/09/a-practical-approach-to-kalman-filter-and-how-to-implement-it/
+
 #ifdef ENABLE_XBOX
 #include <XBOXRECV.h>
 #endif
@@ -59,7 +60,7 @@ USB Usb; // This will take care of all USB communication
 ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
              "Balanduino", // Model Name
              "Android App for Balanduino", // Description - user visible string
-             "0.4", // Version of the Android app
+             "0.5.0", // Version of the Android app
              "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
              "1234"); // Serial Number - this is not used
 #endif
@@ -69,12 +70,12 @@ XBOXRECV Xbox(&Usb); // You have to connect a Xbox wireless receiver to the Ardu
 #endif
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
-USBHub Hub1(&Usb); // Some dongles have a hub inside
+USBHub Hub(&Usb); // Some dongles have a hub inside
 BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all the USB and HCI communication with the Bluetooth dongle
 #endif
 
 #ifdef ENABLE_SPP
-SPP SerialBT(&Btd,"Balanduino","0000"); // The SPP (Serial Port Protocol) emulates a virtual Serial port, which is supported by most computers and mobile phones
+SPP SerialBT(&Btd, "Balanduino", "0000"); // The SPP (Serial Port Protocol) emulates a virtual Serial port, which is supported by most computers and mobile phones
 #endif
 
 #ifdef ENABLE_PS3
@@ -133,8 +134,7 @@ void setup() {
   /* Set PWM frequency to 20kHz - see the datasheet http://www.atmel.com/Images/doc8272.pdf page 128-135 */
   // Set up PWM, Phase and Frequency Correct on pin 18 (OC1A) & pin 17 (OC1B) with ICR1 as TOP using Timer1
   TCCR1B = _BV(WGM13) | _BV(CS10); // Set PWM Phase and Frequency Correct with ICR1 as TOP and no prescaling
-  ICR1H = (PWMVALUE >> 8); // ICR1 is the TOP value - this is set so the frequency is equal to 20kHz
-  ICR1L = (PWMVALUE & 0xFF);
+  ICR1 = PWMVALUE; // ICR1 is the TOP value - this is set so the frequency is equal to 20kHz
 
   /* Enable PWM on pin 18 (OC1A) & pin 17 (OC1B) */
   // Clear OC1A/OC1B on compare match when up-counting
@@ -146,8 +146,6 @@ void setup() {
   /* Setup buzzer pin */
   pinMode(buzzer, OUTPUT);
 
-  delay(500);
-
 #ifdef ENABLE_USB
   if (Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
@@ -157,7 +155,7 @@ void setup() {
 #endif
 
   /* Attach onInit function */
-  // This is used to set the LEDs according to the voltage level and rumble the controller to indicate the new connection.
+  // This is used to set the LEDs according to the voltage level and vibrate the controller to indicate the new connection
 #ifdef ENABLE_PS3
   PS3.attachOnInit(onInit);
 #endif
@@ -213,9 +211,10 @@ void setup() {
   kalmanTimer = micros();
   pidTimer = kalmanTimer;
   encoderTimer = kalmanTimer;
-  dataTimer = millis();
-  ledTimer = dataTimer;
-  blinkTimer = dataTimer;
+  imuTimer = millis();
+  reportTimer = imuTimer;
+  ledTimer = imuTimer;
+  blinkTimer = imuTimer;
 }
 
 void loop() {
@@ -234,6 +233,7 @@ void loop() {
   // We then convert it to 0 to 2π and then from radians to degrees
   accAngle = (atan2((double)accY-cfg.accYzero, (double)accZ-cfg.accZzero)+PI)*RAD_TO_DEG;
 
+  uint32_t timer = micros();
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
   if ((accAngle < 90 && pitch > 270) || (accAngle > 270 && pitch < 90)) {
     kalman.setAngle(accAngle);
@@ -241,12 +241,13 @@ void loop() {
     gyroAngle = accAngle;
   } else {
     gyroRate = ((double)gyroX-gyroXzero)/131.0; // Convert to deg/s
-    gyroAngle += gyroRate*((double)(micros()-kalmanTimer)/1000000.0); // Gyro angle is only used for debugging
+    double dt = (double)(timer-kalmanTimer)/1000000.0;
+    gyroAngle += gyroRate*dt; // Gyro angle is only used for debugging
     if (gyroAngle < 0 || gyroAngle > 360)
       gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
-    pitch = kalman.getAngle(accAngle, gyroRate, (double)(micros()-kalmanTimer)/1000000.0); // Calculate the angle using a Kalman filter
+    pitch = kalman.getAngle(accAngle, gyroRate, dt); // Calculate the angle using a Kalman filter
   }
-  kalmanTimer = micros();
+  kalmanTimer = timer;
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
 #ifdef ENABLE_WII
@@ -255,6 +256,7 @@ void loop() {
 #endif
 
   /* Drive motors */
+  timer = micros();
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
   // If it's already balancing it has to be ±45 degrees before it stops trying to balance
   if ((layingDown && (pitch < cfg.targetAngle-10 || pitch > cfg.targetAngle+10)) || (!layingDown && (pitch < cfg.targetAngle-45 || pitch > cfg.targetAngle+45))) {
@@ -262,19 +264,19 @@ void loop() {
     encoders_pid.SetMode(MANUAL); // Turn PID off
     main_pid.SetMode(MANUAL); // Turn PID off
     stopAndReset();
-  }
-  else {
+  } else {
     layingDown = false; // It's no longer laying down
     encoders_pid.SetMode(AUTOMATIC); // Turn PID on
     main_pid.SetMode(AUTOMATIC); // Turn PID on
-    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(micros()-pidTimer)/1000000.0);
+    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(timer-pidTimer)/1000000.0);
   }
-  pidTimer = micros();
+  pidTimer = timer;
 
   /* Update encoders */
-  if (micros() - encoderTimer >= 100000) { // Update encoder values every 100ms
-    encoderTimer = micros();
-    int32_t wheelPosition = getWheelsPosition();
+  timer = micros();
+  if (timer - encoderTimer >= 100000) { // Update encoder values every 100ms
+    encoderTimer = timer;
+    int32_t wheelPosition = getWheelPosition();
     wheelVelocity = wheelPosition - lastWheelPosition;
     lastWheelPosition = wheelPosition;
     //Serial.print(wheelPosition);Serial.print('\t');Serial.print(targetPosition);Serial.print('\t');Serial.println(wheelVelocity);
@@ -286,7 +288,7 @@ void loop() {
     batteryCounter++;
     if (batteryCounter > 10) { // Measure battery every 1s
       batteryCounter = 0;
-      batteryVoltage = (double)analogRead(VBAT)/63.050847458; // The VIN pin is connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
+      batteryVoltage = (double)analogRead(VBAT)/63.050847458; // VBAT is connected to analog input 5 which is not broken out. This is then connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
       if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
         digitalWrite(buzzer, HIGH);
       else
@@ -307,8 +309,9 @@ void loop() {
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
   if (Btd.isReady()) {
-    if ((Btd.watingForConnection && millis() - blinkTimer > 1000) || (!Btd.watingForConnection && millis() - blinkTimer > 100)) {
-      blinkTimer = millis();
+    timer = millis();
+    if ((Btd.watingForConnection && timer - blinkTimer > 1000) || (!Btd.watingForConnection && timer - blinkTimer > 100)) {
+      blinkTimer = timer;
       ledState = !ledState;
       digitalWrite(LED_BUILTIN, ledState); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
     }

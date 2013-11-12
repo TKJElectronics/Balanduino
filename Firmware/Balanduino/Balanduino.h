@@ -1,13 +1,17 @@
 #ifndef _balanduino_h_
 #define _balanduino_h_
 
+#if ARDUINO < 154 // Make sure the newest version of the Arduino IDE is used
+#error "Please update the Arduino IDE to the newest version: http://arduino.cc/en/Main/Software"
+#endif
+
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
 /* Firmware Version Information */
 const char *version = "1.0.0";
 const uint8_t eepromVersion = 1; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
-bool sendData, sendSettings, sendInfo, sendMainPIDValues, sendEncoderPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
+bool sendIMUValues, sendSettings, sendInfo, sendStatusReport, sendMainPIDValues, sendEncoderPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
 const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a PWM frequency up to 20kHz
 const uint16_t PWMVALUE = F_CPU/PWM_FREQUENCY/2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
@@ -55,17 +59,26 @@ const uint8_t leftEnable = 21;
 const uint8_t rightEnable = 22;
 
 /* Encoders */
-const uint8_t leftEncoder1 = 15;
-const uint8_t leftEncoder2 = 30;
-const uint8_t rightEncoder1 = 16;
-const uint8_t rightEncoder2 = 31;
+const uint8_t leftEncoder1 = 15; // PD2
+const uint8_t leftEncoder2 = 30; // PA6
+const uint8_t rightEncoder1 = 16; // PD3
+const uint8_t rightEncoder2 = 31; // PA7
+
+#define leftEncoder1Port PIND
+#define leftEncoder1Mask _BV(PIND2)
+#define leftEncoder2Port PINA
+#define leftEncoder2Mask _BV(PINA6)
+
+#define rightEncoder1Port PIND
+#define rightEncoder1Mask _BV(PIND3)
+#define rightEncoder2Port PINA
+#define rightEncoder2Mask _BV(PINA7)
 
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
 const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconnected using the jumper
 
-#define VBAT A5 // The voltage divider is connected to analog input 5
 double batteryVoltage; // Measured battery level
 uint8_t batteryCounter; // Counter used to check if it should check the battery level
 
@@ -116,14 +129,15 @@ double restAngle;
 uint32_t kalmanTimer; // Timer used for the Kalman filter
 uint32_t pidTimer; // Timer used for the PID loop
 uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
-uint32_t dataTimer; // This is used so it doesn't send data to often
+uint32_t imuTimer; // This is used to set a delay between sending IMU values
+uint32_t reportTimer; // This is used to set a delay between sending report values
 uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, Wii and Xbox controllers
 uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
 
 /* Used to rumble controllers upon connection */
 bool ps3Initialized, wiiInitialized, xboxInitialized; // These are used to check if a controller has been initialized
-bool ps3RumbleEnable, wiiRumbleEnabled, xboxRumbleEnabled; // These are used to turn rumble off again except for the PS3 controller which is turned on
-bool ps3RumbleDisable; // Used to turn rumble off again on the PS3 controller
+bool ps3RumbleEnable, wiiRumbleEnabled; // These are used to turn rumble off again on the Wiimote and to turn on rumble on the PS3 controller
+bool ps3RumbleDisable, xboxRumbleDisable; // Used to turn rumble off again on the PS3 and Xbox controller
 
 /* Direction set by the controllers or the SPP library */
 bool steerForward, steerBackward, steerLeft, steerRight;
@@ -197,6 +211,6 @@ void calibrateAcc();
 void printValues();
 void setValues(char *input);
 void calibrateGyro();
-bool checkMinMax(int16_t *array, uint8_t length, uint16_t maxDifference);
+bool checkMinMax(int16_t *array, uint8_t length, int16_t maxDifference);
 
 #endif

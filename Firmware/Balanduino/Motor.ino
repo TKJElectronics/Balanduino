@@ -133,13 +133,10 @@ void stopMotor(Command motor) {
   }
 }
 void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR
-  if (pin == leftPWM) {
-    OCR1AH = (dutyCycle >> 8);
-    OCR1AL = (dutyCycle & 0xFF);
-  } else if (pin == rightPWM) {
-    OCR1BH = (dutyCycle >> 8);
-    OCR1BL = (dutyCycle & 0xFF);
-  }
+  if (pin == leftPWM)
+    OCR1A = dutyCycle;
+  else if (pin == rightPWM)
+    OCR1B = dutyCycle;
 }
 void stopAndReset() {
   stopMotor(left);
@@ -150,13 +147,13 @@ void stopAndReset() {
 
 /* Interrupt routine and encoder read functions - we read using the port registers for faster processing */
 void leftEncoder() {
-  if ((bool)(PIND & _BV(PIND2)) == (bool)(PINA & _BV(PINA6))) // Compare pin 15 and pin 30
+  if ((bool)(leftEncoder1Port & leftEncoder1Mask) == (bool)(leftEncoder2Port & leftEncoder2Mask)) // Compare pin 15 and pin 30
     leftCounter--;
   else
     leftCounter++;
 }
 void rightEncoder() {
-  if ((bool)(PIND & _BV(PIND3)) == (bool)(PINA & _BV(PINA7))) // Compare pin 16 and pin 31
+  if ((bool)(rightEncoder1Port & rightEncoder1Mask) == (bool)(rightEncoder2Port & rightEncoder2Mask)) // Compare pin 16 and pin 31
     rightCounter++;
   else
     rightCounter--;
