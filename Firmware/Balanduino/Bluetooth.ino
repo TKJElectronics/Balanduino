@@ -16,7 +16,7 @@ void readSPPData() {
           return;
         if (dataInput[i] == ';') // Keep reading until it reads a semicolon
           break;
-        if (++i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
+        if (++i >= sizeof(dataInput) / sizeof(dataInput[0])) // String is too long
           return;
       }
       bluetoothData = true;
@@ -38,7 +38,7 @@ void readUsb() {
   readSPPData();
 #endif // ENABLE_SPP
 
-  if (millis() > (receiveControlTimer+receiveControlTimeout)) {
+  if (millis() > (receiveControlTimer + receiveControlTimeout)) {
     commandSent = false; // We use this to detect when there has already been sent a command by one of the controllers
 #ifdef ENABLE_PS3
     if (PS3.PS3Connected) {
@@ -289,32 +289,32 @@ void steer(Command command) {
       steerLeft = true;
     }
   } else if (command == imu) {
-      if (sppData1 > 0) {
-        targetOffset = scale(sppData1, 0, 36, 0, cfg.controlAngleLimit);
-        steerForward = true;
-      }
-      else if (sppData1 < 0) {
-        targetOffset = scale(sppData1, 0, -36, 0, cfg.controlAngleLimit);
-        steerBackward = true;
-      }
-      if (sppData2 < 0) {
-        turningOffset = scale(sppData2, 0, -45, 0, cfg.turningLimit);
-        steerLeft = true;
-      }
-      else if (sppData2 > 0) {
-        turningOffset = scale(sppData2, 0, 45, 0, cfg.turningLimit);
-        steerRight = true;
-      }
+    if (sppData1 > 0) {
+      targetOffset = scale(sppData1, 0, 36, 0, cfg.controlAngleLimit);
+      steerForward = true;
+    }
+    else if (sppData1 < 0) {
+      targetOffset = scale(sppData1, 0, -36, 0, cfg.controlAngleLimit);
+      steerBackward = true;
+    }
+    if (sppData2 < 0) {
+      turningOffset = scale(sppData2, 0, -45, 0, cfg.turningLimit);
+      steerLeft = true;
+    }
+    else if (sppData2 > 0) {
+      turningOffset = scale(sppData2, 0, 45, 0, cfg.turningLimit);
+      steerRight = true;
+    }
   }
 #endif // ENABLE_SPP or ENABLE_TOOLS
 #ifdef ENABLE_PS3
   if (command == updatePS3) {
     if (PS3.PS3Connected) {
       if (PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
         steerForward = true;
       } else if (PS3.getAnalogHat(LeftHatY) > 137 && PS3.getAnalogHat(RightHatY) > 137) {
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY)+PS3.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
+        targetOffset = scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
         steerBackward = true;
       }
       if (((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) {
@@ -401,10 +401,10 @@ void steer(Command command) {
       }
     } else { // It must be a Wii U Pro Controller then
       if (Wii.getAnalogHat(LeftHatY) > 2200 && Wii.getAnalogHat(RightHatY) > 2200) {
-        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY), 4402, 6400, 0, cfg.controlAngleLimit); // Scale from 4402-6400 to 0-controlAngleLimit
+        targetOffset = scale(Wii.getAnalogHat(LeftHatY) + Wii.getAnalogHat(RightHatY), 4402, 6400, 0, cfg.controlAngleLimit); // Scale from 4402-6400 to 0-controlAngleLimit
         steerForward = true;
       } else if (Wii.getAnalogHat(LeftHatY) < 1800 && Wii.getAnalogHat(RightHatY) < 1800) {
-        targetOffset = scale(Wii.getAnalogHat(LeftHatY)+Wii.getAnalogHat(RightHatY), 3598, 1600, 0, cfg.controlAngleLimit); // Scale from 3598-1600 to 0-controlAngleLimit
+        targetOffset = scale(Wii.getAnalogHat(LeftHatY) + Wii.getAnalogHat(RightHatY), 3598, 1600, 0, cfg.controlAngleLimit); // Scale from 3598-1600 to 0-controlAngleLimit
         steerBackward = true;
       }
       if (((int16_t)Wii.getAnalogHat(RightHatY) - (int16_t)Wii.getAnalogHat(LeftHatY)) > 200) {
@@ -420,10 +420,10 @@ void steer(Command command) {
 #ifdef ENABLE_XBOX
   if (command == updateXbox) {
     if (Xbox.getAnalogHat(LeftHatY) > 7500 && Xbox.getAnalogHat(RightHatY) > 7500) {
-      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY)+(int32_t)Xbox.getAnalogHat(RightHatY), 15002, 65534, 0, cfg.controlAngleLimit); // Scale from 15002-65534 to 0-controlAngleLimit
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY) + (int32_t)Xbox.getAnalogHat(RightHatY), 15002, 65534, 0, cfg.controlAngleLimit); // Scale from 15002-65534 to 0-controlAngleLimit
       steerForward = true;
     } else if (Xbox.getAnalogHat(LeftHatY) < -7500 && Xbox.getAnalogHat(RightHatY) < -7500) {
-      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY)+(int32_t)Xbox.getAnalogHat(RightHatY), -15002, -65536, 0, cfg.controlAngleLimit); // Scale from -15002-(-65536) to 0-controlAngleLimit
+      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY) + (int32_t)Xbox.getAnalogHat(RightHatY), -15002, -65536, 0, cfg.controlAngleLimit); // Scale from -15002-(-65536) to 0-controlAngleLimit
       steerBackward = true;
     }
     if (((int32_t)Xbox.getAnalogHat(RightHatY) - (int32_t)Xbox.getAnalogHat(LeftHatY)) > 7500) {
@@ -448,9 +448,9 @@ void steer(Command command) {
 double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax) { // Like map() just returns a double
   double output;
   if (inputMin < inputMax)
-    output = (input-inputMin)/((inputMax-inputMin)/(outputMax-outputMin));
+    output = (input - inputMin) / ((inputMax - inputMin) / (outputMax - outputMin));
   else
-    output = (inputMin-input)/((inputMin-inputMax)/(outputMax-outputMin));
+    output = (inputMin - input) / ((inputMin - inputMax) / (outputMax - outputMin));
   if (output > outputMax)
     output = outputMax;
   else if (output < outputMin)

@@ -15,7 +15,7 @@ void checkSerialData() {
           return;
         if (dataInput[i] == ';') // Keep reading until it reads a semicolon
           break;
-        if (++i >= sizeof(dataInput)/sizeof(dataInput[0])) // String is too long
+        if (++i >= sizeof(dataInput) / sizeof(dataInput[0])) // String is too long
           return;
       }
       bluetoothData = false;
@@ -89,9 +89,9 @@ void calibrateAcc() {
     cfg.accYzero -= 16384.0;
 
   Serial.print(F("New zero values (g's): ")); // Print the new values in g's
-  Serial.print(cfg.accYzero/16384.0);
+  Serial.print(cfg.accYzero / 16384.0);
   Serial.print(F(","));
-  Serial.println(cfg.accZzero/16384.0);
+  Serial.println(cfg.accZzero / 16384.0);
 
   updateConfig(); // Store the new values in the EEPROM
   Serial.println(F("Calibration of the accelerometer is done"));
@@ -113,9 +113,9 @@ void calibrateMotor() {
 
   if (leftSpeed > rightSpeed) { // This means that the left motor needed a higher PWM signal before it rotated at the same speed
     cfg.leftMotorScaler = 1;
-    cfg.rightMotorScaler = rightSpeed/leftSpeed; // Therefore we will scale the right motor a bit down, so they match
+    cfg.rightMotorScaler = rightSpeed / leftSpeed; // Therefore we will scale the right motor a bit down, so they match
   } else { // And the same goes for the right motor
-    cfg.leftMotorScaler = leftSpeed/rightSpeed;
+    cfg.leftMotorScaler = leftSpeed / rightSpeed;
     cfg.rightMotorScaler = 1;
   }
 
@@ -133,7 +133,7 @@ void calibrateMotor() {
   double minSpeed = min(leftSpeed, rightSpeed);
 
   Serial.print(F("The difference is now: "));
-  Serial.print((maxSpeed-minSpeed)/maxSpeed*100);
+  Serial.print((maxSpeed - minSpeed) / maxSpeed * 100);
   Serial.println("%");
 
   updateConfig(); // Store the new values in the EEPROM
@@ -241,13 +241,13 @@ void printValues() {
     out->print(F(","));
     out->print(eepromVersion);
 
-    #if defined(__AVR_ATmega644__)
-      out->println(F(",ATmega644"));
-    #elif defined(__AVR_ATmega1284P__)
-      out->println(F(",ATmega1284P"));
-    #else
-      out->println(F(",Unknown"));
-    #endif
+#if defined(__AVR_ATmega644__)
+    out->println(F(",ATmega644"));
+#elif defined(__AVR_ATmega1284P__)
+    out->println(F(",ATmega1284P"));
+#else
+    out->println(F(",Unknown"));
+#endif
   } else if (sendKalmanValues) {
     sendKalmanValues = false;
 
@@ -272,7 +272,7 @@ void printValues() {
     out->print(F("R,"));
     out->print(batteryVoltage);
     out->print(F(","));
-    out->println((double)reportTimer/60000.0);
+    out->println((double)reportTimer / 60000.0);
   }
 }
 
