@@ -13,8 +13,6 @@ PORT = /dev/tty.usbserial-DNWYFIDM
 # Leave these alone
 THIRD_PARTY_HARDWARE = ../hardware/Balanduino/avr
 BOARD = balanduino
-BOARD_SUB = balanduino.menu.cpu.atmega1284p
-MON_SPEED = 115200
 
 LIB_DIRS += ../libraries/USB_Host_Shield_2.0
 LIB_DIRS += ../libraries/KalmanFilter
