@@ -52,12 +52,12 @@ USB Usb; // This will take care of all USB communication
 
 #ifdef ENABLE_ADK
 // Implementation for the Android Open Accessory Protocol. Simply connect your phone to get redirected to the Play Store
-ADK adk(&Usb,"TKJ Electronics", // Manufacturer Name
-             "Balanduino", // Model Name
-             "Android App for Balanduino", // Description - user visible string
-             "0.5.0", // Version of the Android app
-             "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
-             "1234"); // Serial Number - this is not used
+ADK adk(&Usb, "TKJ Electronics", // Manufacturer Name
+              "Balanduino", // Model Name
+              "Android App for Balanduino", // Description - user visible string
+              "0.5.0", // Version of the Android app
+              "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
+              "1234"); // Serial Number - this is not used
 #endif
 
 #ifdef ENABLE_XBOX
@@ -175,7 +175,7 @@ void setup() {
   accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  accAngle = (atan2((double)accY-cfg.accYzero, (double)accZ-cfg.accZzero)+PI)*RAD_TO_DEG;
+  accAngle = (atan2((double)accY - cfg.accYzero, (double)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
 
   kalman.setAngle(accAngle); // Set starting angle
   pitch = accAngle;
@@ -204,7 +204,7 @@ void setup() {
 void loop() {
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
-      Usb.Task();
+    Usb.Task();
 #endif
 
   /* Calculate pitch */
@@ -215,7 +215,7 @@ void loop() {
 
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  accAngle = (atan2((double)accY-cfg.accYzero, (double)accZ-cfg.accZzero)+PI)*RAD_TO_DEG;
+  accAngle = (atan2((double)accY - cfg.accYzero, (double)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
 
   uint32_t timer = micros();
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
@@ -224,9 +224,9 @@ void loop() {
     pitch = accAngle;
     gyroAngle = accAngle;
   } else {
-    gyroRate = ((double)gyroX-gyroXzero)/131.0; // Convert to deg/s
-    double dt = (double)(timer-kalmanTimer)/1000000.0;
-    gyroAngle += gyroRate*dt; // Gyro angle is only used for debugging
+    gyroRate = ((double)gyroX - gyroXzero) / 131.0; // Convert to deg/s
+    double dt = (double)(timer - kalmanTimer) / 1000000.0;
+    gyroAngle += gyroRate * dt; // Gyro angle is only used for debugging
     if (gyroAngle < 0 || gyroAngle > 360)
       gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
     pitch = kalman.getAngle(accAngle, gyroRate, dt); // Calculate the angle using a Kalman filter
@@ -236,19 +236,19 @@ void loop() {
 
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
-      Usb.Task();
+    Usb.Task();
 #endif
 
   /* Drive motors */
   timer = micros();
   // If the robot is laying down, it has to be put in a vertical position before it starts balancing
   // If it's already balancing it has to be ±45 degrees before it stops trying to balance
-  if ((layingDown && (pitch < cfg.targetAngle-10 || pitch > cfg.targetAngle+10)) || (!layingDown && (pitch < cfg.targetAngle-45 || pitch > cfg.targetAngle+45))) {
+  if ((layingDown && (pitch < cfg.targetAngle - 10 || pitch > cfg.targetAngle + 10)) || (!layingDown && (pitch < cfg.targetAngle - 45 || pitch > cfg.targetAngle + 45))) {
     layingDown = true; // The robot is in a unsolvable position, so turn off both motors and wait until it's vertical again
     stopAndReset();
   } else {
     layingDown = false; // It's no longer laying down
-    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(timer-pidTimer)/1000000.0);
+    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(timer - pidTimer) / 1000000.0);
   }
   pidTimer = timer;
 
@@ -268,7 +268,7 @@ void loop() {
     batteryCounter++;
     if (batteryCounter > 10) { // Measure battery every 1s
       batteryCounter = 0;
-      batteryVoltage = (double)analogRead(VBAT)/63.050847458; // VBAT is connected to analog input 5 which is not broken out. This is then connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
+      batteryVoltage = (double)analogRead(VBAT) / 63.050847458; // VBAT is connected to analog input 5 which is not broken out. This is then connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
       if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
         digitalWrite(buzzer, HIGH);
       else
