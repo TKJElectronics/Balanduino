@@ -16,8 +16,7 @@ BOARD = balanduino
 
 LIB_DIRS += ../libraries/USB_Host_Shield_2.0
 LIB_DIRS += ../libraries/KalmanFilter
-LIB_DIRS += $(ARD_HOME)/libraries/Wire/src
-LIB_DIRS += $(ARD_HOME)/libraries/Wire/arch/avr
-LIB_DIRS += $(ARD_HOME)/libraries/Wire/arch/avr/utility
+LIB_DIRS += $(ARD_HOME)/hardware/arduino/avr/libraries/Wire
+LIB_DIRS += $(ARD_HOME)/hardware/arduino/avr/libraries/Wire/utility
 
 include Arduino_Makefile_master/_Makefile.master
