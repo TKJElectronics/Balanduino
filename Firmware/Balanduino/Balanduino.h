@@ -65,14 +65,14 @@ const uint8_t rightEncoder1 = 16; // PD3
 const uint8_t rightEncoder2 = 31; // PA7
 
 #define leftEncoder1Port PIND
-#define leftEncoder1Mask _BV(PIND2)
+#define leftEncoder1Mask (1 << PIND2)
 #define leftEncoder2Port PINA
-#define leftEncoder2Mask _BV(PINA6)
+#define leftEncoder2Mask (1 << PINA6)
 
 #define rightEncoder1Port PIND
-#define rightEncoder1Mask _BV(PIND3)
+#define rightEncoder1Mask (1 << PIND3)
 #define rightEncoder2Port PINA
-#define rightEncoder2Mask _BV(PINA7)
+#define rightEncoder2Mask (1 << PINA7)
 
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
