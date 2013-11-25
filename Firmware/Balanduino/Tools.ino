@@ -192,11 +192,11 @@ void printValues() {
 
 #ifdef ENABLE_SPP
   if (SerialBT.connected && bluetoothData)
-    out = &SerialBT; // Print using the Bluetooth SPP interface
+    out = dynamic_cast<Print *> (&SerialBT); // Print using the Bluetooth SPP interface
   else
-    out = &Serial; // Print using the standard UART port
+    out = dynamic_cast<Print *> (&Serial); // Print using the standard UART port
 #else
-  out = &Serial; // Print using the standard UART port
+  out = dynamic_cast<Print *> (&Serial); // Print using the standard UART port
 #endif
 
   if (sendPairConfirmation) {
