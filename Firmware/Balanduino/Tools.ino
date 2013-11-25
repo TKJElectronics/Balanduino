@@ -188,15 +188,14 @@ void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, do
 
 #if defined(ENABLE_TOOLS) || defined(ENABLE_SPP)
 void printValues() {
-  Print *out; // This allows the robot to use either the hardware UART or the Bluetooth SPP connection dynamically
-
 #ifdef ENABLE_SPP
+  Print *out; // This allows the robot to use either the hardware UART or the Bluetooth SPP connection dynamically
   if (SerialBT.connected && bluetoothData)
     out = dynamic_cast<Print *> (&SerialBT); // Print using the Bluetooth SPP interface
   else
     out = dynamic_cast<Print *> (&Serial); // Print using the standard UART port
 #else
-  out = dynamic_cast<Print *> (&Serial); // Print using the standard UART port
+  HardwareSerial *out = &Serial; // Print using the standard UART port
 #endif
 
   if (sendPairConfirmation) {
