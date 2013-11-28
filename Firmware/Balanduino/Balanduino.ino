@@ -98,8 +98,8 @@ void setup() {
   pinMode(leftEncoder2, INPUT);
   pinMode(rightEncoder1, INPUT);
   pinMode(rightEncoder2, INPUT);
-  attachInterrupt(0, leftEncoder, CHANGE);
-  attachInterrupt(1, rightEncoder, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(leftEncoder1), leftEncoder, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(rightEncoder1), rightEncoder, CHANGE);
 
   /* Enable the motor drivers */
   pinMode(leftEnable, OUTPUT);
