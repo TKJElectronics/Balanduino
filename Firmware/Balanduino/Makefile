@@ -14,9 +14,4 @@ PORT = /dev/tty.usbserial-DNWYFIDM
 THIRD_PARTY_HARDWARE = ../hardware/Balanduino/avr
 BOARD = balanduino
 
-LIB_DIRS += ../libraries/USB_Host_Shield_2.0
-LIB_DIRS += ../libraries/KalmanFilter
-LIB_DIRS += $(ARD_HOME)/hardware/arduino/avr/libraries/Wire
-LIB_DIRS += $(ARD_HOME)/hardware/arduino/avr/libraries/Wire/utility
-
 include Arduino_Makefile_master/_Makefile.master
