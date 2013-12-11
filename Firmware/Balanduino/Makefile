@@ -1,7 +1,7 @@
 # You should only have to change this value:
 PORT = /dev/tty.usbserial-DNWYFIDM
 
-# You should only set the path to your Arduino application if it is not the default one:
+# You should only set the path to your Arduino application if it is not in your path or not the default one:
 # The default for Linux and Solaris is:
 #ARD_HOME = /opt/Arduino
 # The default for Mac is:
