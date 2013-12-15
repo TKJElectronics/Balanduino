@@ -152,6 +152,7 @@ void setup() {
 
   /* Setup IMU */
   Wire.begin();
+  TWBR = ((F_CPU / 400000L) - 16) / 2; // Set I2C frequency to 400kHz
 
   while (i2cRead(0x75, i2cBuffer, 1));
   if (i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
