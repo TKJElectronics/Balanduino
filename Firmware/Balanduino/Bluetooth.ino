@@ -50,20 +50,14 @@ void readUsb() {
         while (!PS3.getButtonPress(START))
           Usb.Task();
       }
-      else if ((PS3.getAnalogHat(LeftHatY) < 117) || (PS3.getAnalogHat(RightHatY) < 117) || (PS3.getAnalogHat(LeftHatY) > 137) || (PS3.getAnalogHat(RightHatY) > 137))
+      else if (PS3.getButtonPress(CROSS) || (PS3.getAnalogHat(LeftHatY) < 117 || PS3.getAnalogHat(RightHatY) < 117 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(RightHatY) > 137))
         steer(updatePS3);
-      else if (PS3.getButtonPress(CROSS))
-        steer(updatePS3);
-    } else if (PS3.PS3NavigationConnected) {
-      if (PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117)
-        steer(updatePS3);
-    }
+    } else if (PS3.PS3NavigationConnected && (PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117))
+      steer(updatePS3);
 #endif // ENABLE_PS3
 #ifdef ENABLE_WII
     if (Wii.wiimoteConnected && !Wii.wiiUProControllerConnected && !commandSent) {
-      if (Wii.getButtonPress(B))
-        steer(updateWii);
-      else if (Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117))
+      if (Wii.getButtonPress(B) || (Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117)))
         steer(updateWii);
     } else if (Wii.wiiUProControllerConnected && !commandSent) { // The Wii U Pro Controller Joysticks has an range from approximately 800-3200
       if (Wii.getButtonPress(MINUS)) {
@@ -82,7 +76,7 @@ void readUsb() {
         while (!Xbox.getButtonPress(START))
           Usb.Task();
       }
-      else if ((Xbox.getAnalogHat(LeftHatY) < -7500) || (Xbox.getAnalogHat(RightHatY) < -7500) || (Xbox.getAnalogHat(LeftHatY) > 7500) || (Xbox.getAnalogHat(RightHatY) > 7500))
+      else if (Xbox.getAnalogHat(LeftHatY) < -7500 || Xbox.getAnalogHat(RightHatY) < -7500 || Xbox.getAnalogHat(LeftHatY) > 7500 || Xbox.getAnalogHat(RightHatY) > 7500)
         steer(updateXbox);
     }
 #endif // ENABLE_XBOX
