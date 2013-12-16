@@ -96,8 +96,7 @@ void readUsb() {
       PS3.disconnect();
       ps3OldLed = 0; // Reset value
     }
-  } else
-    ps3Initialized = false;
+  }
 #endif // ENABLE_PS3
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
@@ -105,8 +104,7 @@ void readUsb() {
       Wii.disconnect();
       wiiOldLed = 0; // Reset value
     }
-  } else
-    wiiInitialized = false;
+  }
 #endif // ENABLE_WII
 #ifdef ENABLE_XBOX
   if (Xbox.Xbox360Connected[0]) {
@@ -114,8 +112,7 @@ void readUsb() {
       Xbox.disconnect();
       xboxOldLed = (LED)0xFF; // Reset value
     }
-  } else
-    xboxInitialized = false;
+  }
 #endif
 
 #if defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
@@ -233,33 +230,37 @@ void updateLEDs() {
 #endif // ENABLE_XBOX
 }
 
-void onInit() { // This function is called when a controller is first initialized
 #ifdef ENABLE_PS3
-  if (PS3.PS3Connected && !ps3Initialized) { // We only check the normal PS3 controller as the Navigation controller doesn't have rumble support
-    ps3Initialized = true;
+void onInitPS3() { // This function is called when the controller is first initialized
+  if (PS3.PS3Connected) { // We only check the normal PS3 controller as the Navigation controller doesn't have rumble support
     updateLEDs(); // Turn the LEDs on according to the voltage level
     ledTimer = millis() - 500; // Wait 500ms before turning rumble on
     ps3RumbleEnable = true; // We can't sent commands to the PS3 controller that often, so we don't send the command here
   }
+}
 #endif // ENABLE_PS3
+
 #ifdef ENABLE_WII
-  if (Wii.wiimoteConnected && !wiiInitialized) { // Both the Wiimote and the Wii U Pro Controller
-    wiiInitialized = true;
+void onInitWii() { // This function is called when the controller is first initialized
+  if (Wii.wiimoteConnected) { // Both the Wiimote and the Wii U Pro Controller
     updateLEDs(); // Turn the LEDs on according to the voltage level
     ledTimer = millis() - 500; // This will turn the rumble off again after 500ms
     Wii.setRumbleOn();
     wiiRumbleEnabled = true;
   }
+}
 #endif // ENABLE_WII
+
 #ifdef ENABLE_XBOX
-  if (Xbox.Xbox360Connected[0] && !xboxInitialized) { // Xbox wireless controller
-    xboxInitialized = true;
+void onInitXbox() { // This function is called when the controller is first initialized
+  if (Xbox.Xbox360Connected[0]) { // Xbox wireless controller
     ledTimer = millis() - 500; // This will turn the rumble off again after 500ms
     Xbox.setRumbleOn(0x00, 0xFF);
     xboxRumbleDisable = true;
   }
-#endif // ENABLE_XBOX
 }
+#endif // ENABLE_XBOX
+
 #endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 
 #endif // ENABLE_USB

@@ -141,13 +141,13 @@ void setup() {
   /* Attach onInit function */
   // This is used to set the LEDs according to the voltage level and vibrate the controller to indicate the new connection
 #ifdef ENABLE_PS3
-  PS3.attachOnInit(onInit);
+  PS3.attachOnInit(onInitPS3);
 #endif
 #ifdef ENABLE_WII
-  Wii.attachOnInit(onInit);
+  Wii.attachOnInit(onInitWii);
 #endif
 #ifdef ENABLE_XBOX
-  Xbox.attachOnInit(onInit);
+  Xbox.attachOnInit(onInitXbox);
 #endif
 
   /* Setup IMU */

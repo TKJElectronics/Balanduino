@@ -130,7 +130,6 @@ uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the P
 uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
 
 /* Used to rumble controllers upon connection */
-bool ps3Initialized, wiiInitialized, xboxInitialized; // These are used to check if a controller has been initialized
 bool ps3RumbleEnable, wiiRumbleEnabled; // These are used to turn rumble off again on the Wiimote and to turn on rumble on the PS3 controller
 bool ps3RumbleDisable, xboxRumbleDisable; // Used to turn rumble off again on the PS3 and Xbox controller
 
