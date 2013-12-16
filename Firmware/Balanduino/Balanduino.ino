@@ -161,7 +161,7 @@ void setup() {
     while (1); // Halt
   }
 
-  i2cBuffer[0] = 19; // Set the sample rate to 400Hz - 8kHz/(19+1) = 400Hz
+  i2cBuffer[0] = 15; // Set the sample rate to 500Hz - 8kHz/(15+1) = 500Hz
   i2cBuffer[1] = 0x00; // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
   i2cBuffer[2] = 0x00; // Set Gyro Full Scale Range to ±250deg/s
   i2cBuffer[3] = 0x00; // Set Accelerometer Full Scale Range to ±2g
