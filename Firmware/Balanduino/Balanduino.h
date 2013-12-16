@@ -17,7 +17,6 @@ const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a PWM frequ
 const uint16_t PWMVALUE = F_CPU / PWM_FREQUENCY / 2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
 
 /* Used to make commands more readable */
-uint8_t lastCommand; // This is used set a new targetPosition
 enum Command {
   updatePS3,
   updateWii,
@@ -30,6 +29,7 @@ enum Command {
   imu,
   joystick,
 };
+Command lastCommand; // This is used set a new targetPosition
 
 // These are used to read and write to the port registers - see http://www.arduino.cc/en/Reference/PortManipulation
 // I do this to save processing power - see this page for more information: http://www.billporter.info/ready-set-oscillate-the-fastest-way-to-change-arduino-pins/
