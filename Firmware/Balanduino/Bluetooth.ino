@@ -31,6 +31,9 @@ void readUsb() {
 
   if (Usb.getUsbTaskState() == USB_STATE_ERROR && layingDown) { // Check if the USB state machine is in an error state, but also make sure the robot is laying down
     Serial.println(F("USB fail"));
+    Usb.vbusPower(vbus_off);
+    delay(1000);
+    Usb.vbusPower(vbus_on);
     Usb.setUsbTaskState(USB_DETACHED_SUBSTATE_WAIT_FOR_DEVICE); // Reset state machine
   }
 
