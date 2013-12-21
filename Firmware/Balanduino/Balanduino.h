@@ -133,10 +133,7 @@ uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster u
 bool ps3RumbleEnable, wiiRumbleEnabled; // These are used to turn rumble off again on the Wiimote and to turn on rumble on the PS3 controller
 bool ps3RumbleDisable, xboxRumbleDisable; // Used to turn rumble off again on the PS3 and Xbox controller
 
-/* Direction set by the controllers or the SPP library */
-bool steerForward, steerBackward, steerLeft, steerRight;
 bool steerStop = true; // Stop by default
-
 bool stopped; // This is used to set a new target position after braking
 
 bool layingDown = true; // Use to indicate if the robot is laying down
