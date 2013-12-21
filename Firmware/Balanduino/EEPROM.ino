@@ -36,7 +36,7 @@ void restoreEEPROMValues() {
 
   cfg.targetAngle = 180.0;
   cfg.backToSpot = 1;
-  cfg.controlAngleLimit = 8;
+  cfg.controlAngleLimit = 7;
   cfg.turningLimit = 25;
 
   cfg.Qangle = 0.001;
