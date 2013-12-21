@@ -123,8 +123,8 @@ double PIDValue, PIDLeft, PIDRight;
 /* Used for timing */
 uint32_t kalmanTimer; // Timer used for the Kalman filter
 uint32_t pidTimer; // Timer used for the PID loop
-uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
 uint32_t imuTimer; // This is used to set a delay between sending IMU values
+uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
 uint32_t reportTimer; // This is used to set a delay between sending report values
 uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, Wii and Xbox controllers
 uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
