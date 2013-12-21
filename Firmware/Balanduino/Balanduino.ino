@@ -47,6 +47,9 @@ Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
 #define ENABLE_USB
 USB Usb; // This will take care of all USB communication
+#else
+#define _usb_h_ // Workaround include trap in the USB Host library
+#include <avrpins.h> // Include this from the USB Host library
 #endif
 
 #ifdef ENABLE_ADK
@@ -79,41 +82,43 @@ PS3BT PS3(&Btd); // The PS3 library supports all three official controllers: the
 
 #ifdef ENABLE_WII
 WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
-//WII Wii(&Btd,PAIR); // You will have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote
-// or press sync if you are using a Wii U Pro Controller
+//WII Wii(&Btd,PAIR); // You will have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote or press sync if you are using a Wii U Pro Controller
 // Or you can simply send "CW;" to the robot to start the pairing sequence
-// This can also be done using the Android or Processing application
+// This can also be done using the Android or via the serial port
 #endif
 
 void setup() {
   /* Initialize UART */
   Serial.begin(115200);
 
+  /* Setup buzzer pin */
+  buzzer::SetDirWrite();
+
   /* Read the PID values, target angle and other saved values in the EEPROM */
   if (!checkInitializationFlags())
     readEEPROMValues(); // Only read the EEPROM values if they have not been restored
 
   /* Setup encoders */
-  pinMode(leftEncoder1, INPUT);
-  pinMode(leftEncoder2, INPUT);
-  pinMode(rightEncoder1, INPUT);
-  pinMode(rightEncoder2, INPUT);
-  attachInterrupt(digitalPinToInterrupt(leftEncoder1), leftEncoder, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(rightEncoder1), rightEncoder, CHANGE);
+  leftEncoder1::SetDirRead();
+  leftEncoder2::SetDirRead();
+  rightEncoder1::SetDirRead();
+  rightEncoder2::SetDirRead();
+  attachInterrupt(digitalPinToInterrupt(leftEncoder1Pin), leftEncoder, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(rightEncoder1Pin), rightEncoder, CHANGE);
 
   /* Enable the motor drivers */
-  pinMode(leftEnable, OUTPUT);
-  pinMode(rightEnable, OUTPUT);
-  digitalWrite(leftEnable, HIGH);
-  digitalWrite(rightEnable, HIGH);
+  leftEnable::SetDirWrite();
+  rightEnable::SetDirWrite();
+  leftEnable::Set();
+  rightEnable::Set();
 
   /* Setup motor pins to output */
-  sbi(pwmPortDirection, leftPWM);
-  sbi(leftPortDirection, leftA);
-  sbi(leftPortDirection, leftB);
-  sbi(pwmPortDirection, rightPWM);
-  sbi(rightPortDirection, rightA);
-  sbi(rightPortDirection, rightB);
+  leftPWM::SetDirWrite();
+  leftA::SetDirWrite();
+  leftB::SetDirWrite();
+  rightPWM::SetDirWrite();
+  rightA::SetDirWrite();
+  rightB::SetDirWrite();
 
   /* Set PWM frequency to 20kHz - see the datasheet http://www.atmel.com/Images/doc8272.pdf page 128-135 */
   // Set up PWM, Phase and Frequency Correct on pin 18 (OC1A) & pin 17 (OC1B) with ICR1 as TOP using Timer1
@@ -124,16 +129,14 @@ void setup() {
   // Clear OC1A/OC1B on compare match when up-counting
   // Set OC1A/OC1B on compare match when downcounting
   TCCR1A = (1 << COM1A1) | (1 << COM1B1);
-  setPWM(leftPWM, 0); // Turn off PWM on both pins
-  setPWM(rightPWM, 0);
 
-  /* Setup buzzer pin */
-  pinMode(buzzer, OUTPUT);
+  setPWM(leftPWM::Number, 0); // Turn off PWM on both pins
+  setPWM(rightPWM::Number, 0);
 
 #ifdef ENABLE_USB
   if (Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
-    digitalWrite(buzzer, HIGH);
+    buzzer::Set();
     while (1); // Halt
   }
 #endif
@@ -157,7 +160,7 @@ void setup() {
   while (i2cRead(0x75, i2cBuffer, 1));
   if (i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
     Serial.print(F("Error reading sensor"));
-    digitalWrite(buzzer, HIGH);
+    buzzer::Set();
     while (1); // Halt
   }
 
@@ -188,9 +191,9 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
 
   /* Beep to indicate that it is now ready */
-  digitalWrite(buzzer, HIGH);
+  buzzer::Set();
   delay(100);
-  digitalWrite(buzzer, LOW);
+  buzzer::Clear();
 
   /* Setup timing */
   kalmanTimer = micros();
@@ -271,9 +274,9 @@ void loop() {
       batteryCounter = 0;
       batteryVoltage = (double)analogRead(VBAT) / 63.050847458; // VBAT is connected to analog input 5 which is not broken out. This is then connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
       if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
-        digitalWrite(buzzer, HIGH);
+        buzzer::Set();
       else
-        digitalWrite(buzzer, LOW);
+        buzzer::Clear();
     }
   }
 

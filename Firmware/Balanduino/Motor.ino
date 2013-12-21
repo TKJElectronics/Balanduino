@@ -92,44 +92,44 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
     speedRaw = 100.0;
   uint16_t speed = speedRaw * ((double)PWMVALUE) / 100.0; // Scale from 0-100 to 0-PWMVALUE
   if (motor == left) {
-    setPWM(leftPWM, speed); // Left motor PWM
+    setPWM(leftPWM::Number, speed); // Left motor PWM
     if (direction == forward) {
-      cbi(leftPort, leftA);
-      sbi(leftPort, leftB);
+      leftA::Clear();
+      leftB::Set();
     }
     else if (direction == backward) {
-      sbi(leftPort, leftA);
-      cbi(leftPort, leftB);
+      leftA::Set();
+      leftB::Clear();
     }
   }
   else if (motor == right) {
-    setPWM(rightPWM, speed); // Right motor PWM
+    setPWM(rightPWM::Number, speed); // Right motor PWM
     if (direction == forward) {
-      sbi(rightPort, rightA);
-      cbi(rightPort, rightB);
+      rightA::Set();
+      rightB::Clear();
     }
     else if (direction == backward) {
-      cbi(rightPort, rightA);
-      sbi(rightPort, rightB);
+      rightA::Clear();
+      rightB::Set();
     }
   }
 }
 void stopMotor(Command motor) {
   if (motor == left) {
-    setPWM(leftPWM, PWMVALUE); // Set high
-    sbi(leftPort, leftA);
-    sbi(leftPort, leftB);
+    setPWM(leftPWM::Number, PWMVALUE); // Set high
+    leftA::Set();
+    leftB::Set();
   }
   else if (motor == right) {
-    setPWM(rightPWM, PWMVALUE); // Set high
-    sbi(rightPort, rightA);
-    sbi(rightPort, rightB);
+    setPWM(rightPWM::Number, PWMVALUE); // Set high
+    rightA::Set();
+    rightB::Set();
   }
 }
 void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR1
-  if (pin == leftPWM)
+  if (pin == leftPWM::Number)
     OCR1A = dutyCycle;
-  else if (pin == rightPWM)
+  else if (pin == rightPWM::Number)
     OCR1B = dutyCycle;
 }
 void stopAndReset() {
@@ -143,13 +143,13 @@ void stopAndReset() {
 
 /* Interrupt routine and encoder read functions - we read using the port registers for faster processing */
 void leftEncoder() {
-  if ((bool)(leftEncoder1Port & leftEncoder1Mask) == (bool)(leftEncoder2Port & leftEncoder2Mask)) // Compare pin 15 and pin 30
+  if ((bool)leftEncoder1::IsSet() == (bool)leftEncoder2::IsSet()) // Compare pin 15 and pin 30
     leftCounter--;
   else
     leftCounter++;
 }
 void rightEncoder() {
-  if ((bool)(rightEncoder1Port & rightEncoder1Mask) == (bool)(rightEncoder2Port & rightEncoder2Mask)) // Compare pin 16 and pin 31
+  if ((bool)rightEncoder1::IsSet() == (bool)rightEncoder2::IsSet()) // Compare pin 16 and pin 31
     rightCounter++;
   else
     rightCounter--;

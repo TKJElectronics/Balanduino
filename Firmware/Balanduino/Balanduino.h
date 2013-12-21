@@ -31,53 +31,40 @@ enum Command {
 };
 Command lastCommand; // This is used set a new targetPosition
 
-// These are used to read and write to the port registers - see http://www.arduino.cc/en/Reference/PortManipulation
+// These pins macros are defined in avrpins.h in the USB Host library. This allows to read and write directly to the port registers instead of using Arduino's slow digitalRead()/digitalWrite() functions
+// The source is available here: https://github.com/felis/USB_Host_Shield_2.0/blob/master/avrpins.h
 // I do this to save processing power - see this page for more information: http://www.billporter.info/ready-set-oscillate-the-fastest-way-to-change-arduino-pins/
-#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
-#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-
-#define pwmPortDirection DDRD
+// Also see the Arduino port manipulation guide: http://www.arduino.cc/en/Reference/PortManipulation
 
 /* Left motor */
-#define leftPort PORTC
-#define leftPortDirection DDRC
-
-#define leftA PINC6 // PC6 - M1A - pin 23
-#define leftB PINC7 // PC7 - M1B - pin 24
-#define leftPWM PIND5 // PD5 - PWM1A (OC1A) - pin 18
+#define leftA P23
+#define leftB P24
+#define leftPWM P18
 
 /* Right motor */
-#define rightPort PORTB
-#define rightPortDirection DDRB
-
-#define rightA PINB0 // PB0 - M2A - pin 25
-#define rightB PINB1 // PB1 - M2B - pin 26
-#define rightPWM PIND4 // PD4 - PWM1B (OC1B) - pin 17
+#define rightA P25
+#define rightB P26
+#define rightPWM P17
 
 /* Pins connected to the motor drivers enable pins */
-const uint8_t leftEnable = 21;
-const uint8_t rightEnable = 22;
+#define leftEnable P21
+#define rightEnable P22
 
 /* Encoders */
-const uint8_t leftEncoder1 = 15; // PD2
-const uint8_t leftEncoder2 = 30; // PA6
-const uint8_t rightEncoder1 = 16; // PD3
-const uint8_t rightEncoder2 = 31; // PA7
+#define leftEncoder1 P15
+#define leftEncoder2 P30
 
-#define leftEncoder1Port PIND
-#define leftEncoder1Mask (1 << PIND2)
-#define leftEncoder2Port PINA
-#define leftEncoder2Mask (1 << PINA6)
+#define rightEncoder1 P16
+#define rightEncoder2 P31
 
-#define rightEncoder1Port PIND
-#define rightEncoder1Mask (1 << PIND3)
-#define rightEncoder2Port PINA
-#define rightEncoder2Mask (1 << PINA7)
+#define leftEncoder1Pin 15 // Used for attachInterrupt
+#define rightEncoder1Pin 16
 
+/* Counters used to count the pulses from the encoders */
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
-const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconnected using the jumper
+#define buzzer P5 // Buzzer used for feedback, it can be disconnected using the jumper
 
 double batteryVoltage; // Measured battery level
 uint8_t batteryCounter; // Counter used to check if it should check the battery level
