@@ -271,20 +271,20 @@ void steer(Command command) {
     if (sppData2 > 0) // Forward
       targetOffset = scale(sppData2, 0, 1, 0, cfg.controlAngleLimit);
     else if (sppData2 < 0) // Backward
-      targetOffset = scale(sppData2, 0, -1, 0, -cfg.controlAngleLimit);
+      targetOffset = -scale(sppData2, 0, -1, 0, cfg.controlAngleLimit);
     if (sppData1 > 0) // Right
       turningOffset = scale(sppData1, 0, 1, 0, cfg.turningLimit);
     else if (sppData1 < 0) // Left
-      turningOffset = scale(sppData1, 0, -1, 0, -cfg.turningLimit);
+      turningOffset = -scale(sppData1, 0, -1, 0, cfg.turningLimit);
   } else if (command == imu) {
     if (sppData1 > 0) // Forward
       targetOffset = scale(sppData1, 0, 36, 0, cfg.controlAngleLimit);
     else if (sppData1 < 0) // Backward
-      targetOffset = scale(sppData1, 0, -36, 0, -cfg.controlAngleLimit);
+      targetOffset = -scale(sppData1, 0, -36, 0, cfg.controlAngleLimit);
     if (sppData2 > 0) // Right
       turningOffset = scale(sppData2, 0, 45, 0, cfg.turningLimit);
     else if (sppData2 < 0) // Left
-      turningOffset = scale(sppData2, 0, -45, 0, -cfg.turningLimit);
+      turningOffset = -scale(sppData2, 0, -45, 0, cfg.turningLimit);
   }
 #endif // ENABLE_SPP or ENABLE_TOOLS
 #ifdef ENABLE_PS3
@@ -293,28 +293,28 @@ void steer(Command command) {
       if (PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) // Forward
         targetOffset = scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
       else if (PS3.getAnalogHat(LeftHatY) > 137 && PS3.getAnalogHat(RightHatY) > 137) // Backward
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 276, 510, 0, -cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
+        targetOffset = -scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
       if (((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) // Left
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, -cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+        turningOffset = -scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
       else if (((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) // Right
         turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
       else if (PS3.getButtonPress(CROSS)) {
         if (PS3.getAngle(Pitch) > 180) // Forward
           targetOffset = scale(PS3.getAngle(Pitch), 180, 216, 0, cfg.controlAngleLimit);
         else if (PS3.getAngle(Pitch) < 180) // Backward
-          targetOffset = scale(PS3.getAngle(Pitch), 180, 144, 0, -cfg.controlAngleLimit);
+          targetOffset = -scale(PS3.getAngle(Pitch), 180, 144, 0, cfg.controlAngleLimit);
         if (PS3.getAngle(Roll) > 180) // Right
           turningOffset = scale(PS3.getAngle(Roll), 180, 225, 0, cfg.turningLimit);
         else if (PS3.getAngle(Roll) < 180) // Left
-          turningOffset = scale(PS3.getAngle(Roll), 180, 135, 0, -cfg.turningLimit);
+          turningOffset = -scale(PS3.getAngle(Roll), 180, 135, 0, cfg.turningLimit);
       }
     } else { // It must be a Navigation controller then
       if (PS3.getAnalogHat(LeftHatY) < 117) // Forward
         targetOffset = scale(PS3.getAnalogHat(LeftHatY), 116, 0, 0, cfg.controlAngleLimit); // Scale from 116-0 to 0-controlAngleLimit
       else if (PS3.getAnalogHat(LeftHatY) > 137) // Backward
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY), 138, 255, 0, -cfg.controlAngleLimit); // Scale from 138-255 to 0-controlAngleLimit
+        targetOffset = -scale(PS3.getAnalogHat(LeftHatY), 138, 255, 0, cfg.controlAngleLimit); // Scale from 138-255 to 0-controlAngleLimit
       if (PS3.getAnalogHat(LeftHatX) < 55) // Left
-        turningOffset = scale(PS3.getAnalogHat(LeftHatX), 54, 0, 0, -cfg.turningLimit); // Scale from 54-0 to 0-turningLimit
+        turningOffset = -scale(PS3.getAnalogHat(LeftHatX), 54, 0, 0, cfg.turningLimit); // Scale from 54-0 to 0-turningLimit
       else if (PS3.getAnalogHat(LeftHatX) > 200) // Right
         turningOffset = scale(PS3.getAnalogHat(LeftHatX), 201, 255, 0, cfg.turningLimit); // Scale from 201-255 to 0-turningLimit
     }
@@ -327,29 +327,29 @@ void steer(Command command) {
         if (Wii.getPitch() > 180) // Forward
           targetOffset = scale(Wii.getPitch(), 180, 216, 0, cfg.controlAngleLimit);
         else if (Wii.getPitch() < 180) // Backward
-          targetOffset = scale(Wii.getPitch(), 180, 144, 0, -cfg.controlAngleLimit);
+          targetOffset = -scale(Wii.getPitch(), 180, 144, 0, cfg.controlAngleLimit);
         if (Wii.getRoll() > 180) // Right
           turningOffset = scale(Wii.getRoll(), 180, 225, 0, cfg.turningLimit);
         else if (Wii.getRoll() < 180) // Left
-          turningOffset = scale(Wii.getRoll(), 180, 135, 0, -cfg.turningLimit);
+          turningOffset = -scale(Wii.getRoll(), 180, 135, 0, cfg.turningLimit);
       }
       else { // Read the Nunchuck controller
         if (Wii.getAnalogHat(HatY) > 137) // Forward
           targetOffset = scale(Wii.getAnalogHat(HatY), 138, 230, 0, cfg.controlAngleLimit);
         else if (Wii.getAnalogHat(HatY) < 117) // Backward
-          targetOffset = scale(Wii.getAnalogHat(HatY), 116, 25, 0, -cfg.controlAngleLimit);
+          targetOffset = -scale(Wii.getAnalogHat(HatY), 116, 25, 0, cfg.controlAngleLimit);
         if (Wii.getAnalogHat(HatX) > 137) // Right
           turningOffset = scale(Wii.getAnalogHat(HatX), 138, 230, 0, cfg.turningLimit);
         else if (Wii.getAnalogHat(HatX) < 117) // Left
-          turningOffset = scale(Wii.getAnalogHat(HatX), 116, 25, 0, -cfg.turningLimit);
+          turningOffset = -scale(Wii.getAnalogHat(HatX), 116, 25, 0, cfg.turningLimit);
       }
     } else { // It must be a Wii U Pro Controller then
       if (Wii.getAnalogHat(LeftHatY) > 2200 && Wii.getAnalogHat(RightHatY) > 2200) // Forward
         targetOffset = scale(Wii.getAnalogHat(LeftHatY) + Wii.getAnalogHat(RightHatY), 4402, 6400, 0, cfg.controlAngleLimit); // Scale from 4402-6400 to 0-controlAngleLimit
       else if (Wii.getAnalogHat(LeftHatY) < 1800 && Wii.getAnalogHat(RightHatY) < 1800) // Backward
-        targetOffset = scale(Wii.getAnalogHat(LeftHatY) + Wii.getAnalogHat(RightHatY), 3598, 1600, 0, -cfg.controlAngleLimit); // Scale from 3598-1600 to 0-controlAngleLimit
+        targetOffset = -scale(Wii.getAnalogHat(LeftHatY) + Wii.getAnalogHat(RightHatY), 3598, 1600, 0, cfg.controlAngleLimit); // Scale from 3598-1600 to 0-controlAngleLimit
       if (((int16_t)Wii.getAnalogHat(RightHatY) - (int16_t)Wii.getAnalogHat(LeftHatY)) > 200) // Left
-        turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)), 0, 2400, 0, -cfg.turningLimit); // Scale from 0-2400 to 0-turningLimit
+        turningOffset = -scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)), 0, 2400, 0, cfg.turningLimit); // Scale from 0-2400 to 0-turningLimit
       else if (((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)) > 200) // Right
         turningOffset = scale(abs((int16_t)Wii.getAnalogHat(LeftHatY) - (int16_t)Wii.getAnalogHat(RightHatY)), 0, 2400, 0, cfg.turningLimit); // Scale from 0-2400 to 0-turningLimit
     }
@@ -360,9 +360,9 @@ void steer(Command command) {
     if (Xbox.getAnalogHat(LeftHatY) > 7500 && Xbox.getAnalogHat(RightHatY) > 7500) // Forward
       targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY) + (int32_t)Xbox.getAnalogHat(RightHatY), 15002, 65534, 0, cfg.controlAngleLimit); // Scale from 15002-65534 to 0-controlAngleLimit
     else if (Xbox.getAnalogHat(LeftHatY) < -7500 && Xbox.getAnalogHat(RightHatY) < -7500) // Backward
-      targetOffset = scale((int32_t)Xbox.getAnalogHat(LeftHatY) + (int32_t)Xbox.getAnalogHat(RightHatY), -15002, -65536, 0, -cfg.controlAngleLimit); // Scale from -15002-(-65536) to 0-controlAngleLimit
+      targetOffset = -scale((int32_t)Xbox.getAnalogHat(LeftHatY) + (int32_t)Xbox.getAnalogHat(RightHatY), -15002, -65536, 0, cfg.controlAngleLimit); // Scale from -15002-(-65536) to 0-controlAngleLimit
     if (((int32_t)Xbox.getAnalogHat(RightHatY) - (int32_t)Xbox.getAnalogHat(LeftHatY)) > 7500) // Left
-      turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)), 0, 65535, 0, -cfg.turningLimit); // Scale from 0-65535 to 0-turningLimit
+      turningOffset = -scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)), 0, 65535, 0, cfg.turningLimit); // Scale from 0-65535 to 0-turningLimit
     else if (((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)) > 7500) // Right
       turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)), 0, 65535, 0, cfg.turningLimit); // Scale from 0-65535 to 0-turningLimit
   }
