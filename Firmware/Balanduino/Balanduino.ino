@@ -97,6 +97,14 @@ void setup() {
   /* Read the PID values, target angle and other saved values in the EEPROM */
   if (!checkInitializationFlags())
     readEEPROMValues(); // Only read the EEPROM values if they have not been restored
+  else { // Indicate that the EEPROM values have been reset
+    for (uint8_t i = 0; i < 2; i++) {
+      buzzer::Set();
+      delay(50);
+      buzzer::Clear();
+      delay(50);
+    }
+  }
 
   /* Setup encoders */
   leftEncoder1::SetDirRead();
