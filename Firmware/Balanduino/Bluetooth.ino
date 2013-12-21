@@ -333,7 +333,7 @@ void steer(Command command) {
         else if (Wii.getRoll() < 180) // Left
           turningOffset = scale(Wii.getRoll(), 180, 135, 0, -cfg.turningLimit);
       }
-      else { // Read the Navigation controller
+      else { // Read the Nunchuck controller
         if (Wii.getAnalogHat(HatY) > 137) // Forward
           targetOffset = scale(Wii.getAnalogHat(HatY), 138, 230, 0, cfg.controlAngleLimit);
         else if (Wii.getAnalogHat(HatY) < 117) // Backward
