@@ -145,10 +145,10 @@ void stopAndReset() {
 }
 
 /* Interrupt routine and encoder read functions */
-// It uses gray code to detect if any pulses are missed. See: https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino and http://en.wikipedia.org/wiki/Gray_code.
+// It uses gray code to detect if any pulses are missed. See: https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino and http://en.wikipedia.org/wiki/Rotary_encoder#Incremental_rotary_encoder.
 
 #if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
-const int8_t enc_states[16] PROGMEM = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0 }; // Encoder lookup table if it interrupts on every edge
+const int8_t enc_states[16] = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0 }; // Encoder lookup table if it interrupts on every edge
 
 ISR(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) {
   leftEncoder();
@@ -159,21 +159,21 @@ ISR(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT) {
   rightEncoder();
 }
 #else
-const int8_t enc_states[16] PROGMEM = { 0, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0 }; // Encoder lookup table if it only interrupts on every second edge
+const int8_t enc_states[16] = { 0, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0 }; // Encoder lookup table if it only interrupts on every second edge
 #endif
 
 void leftEncoder() {
   static uint8_t old_AB = 0;
   old_AB <<= 2; // Remember previous state
   old_AB |= (leftEncoder1::IsSet() >> (leftEncoder1::Number - 1)) | (leftEncoder2::IsSet() >> leftEncoder2::Number);
-  leftCounter += (int8_t)pgm_read_byte(&enc_states[ old_AB & 0x0F ]);
+  leftCounter += enc_states[ old_AB & 0x0F ];
 }
 
 void rightEncoder() {
   static uint8_t old_AB = 0;
   old_AB <<= 2; // Remember previous state
   old_AB |= (rightEncoder1::IsSet() >> (rightEncoder1::Number - 1)) | (rightEncoder2::IsSet() >> rightEncoder2::Number);
-  rightCounter -= (int8_t)pgm_read_byte(&enc_states[ old_AB & 0x0F ]);
+  rightCounter -= enc_states[ old_AB & 0x0F ];
 }
 
 int32_t readLeftEncoder() { // The encoders decrease when motors are traveling forward and increase when traveling backward
