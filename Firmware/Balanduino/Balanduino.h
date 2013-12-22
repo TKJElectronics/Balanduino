@@ -91,7 +91,7 @@ typedef struct {
 extern cfg_t cfg;
 
 /* EEPROM Address Definitions */
-const uint8_t initFlagsAddr = 0; // Set the first three bytes to the EEPROM version
+const uint8_t initFlagsAddr = 0; // Set the first byte to the EEPROM version
 const uint8_t configAddr = 1; // Save the configuration starting from this location
 
 double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
