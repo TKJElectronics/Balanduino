@@ -128,11 +128,9 @@ void setup() {
   *digitalPinToPCICR(rightEncoder2Pin) |= (1 << digitalPinToPCICRbit(rightEncoder2Pin));
 #endif
 
-  /* Enable the motor drivers */
-  leftEnable::SetDirWrite();
-  rightEnable::SetDirWrite();
-  leftEnable::Set();
-  rightEnable::Set();
+  /* Set the motor diagnostic pins to inputs */
+  leftDiag::SetDirRead();
+  rightDiag::SetDirRead();
 
   /* Setup motor pins to output */
   leftPWM::SetDirWrite();
@@ -228,6 +226,13 @@ void setup() {
 }
 
 void loop() {
+  if (!leftDiag::IsSet() || !rightDiag::IsSet()) { // Motor driver will pull these low if on error
+    buzzer::Set();
+    stopMotor(left);
+    stopMotor(right);
+    while (1);
+  }
+
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
     Usb.Task();

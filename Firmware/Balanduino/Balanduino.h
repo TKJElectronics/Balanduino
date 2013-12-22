@@ -46,9 +46,9 @@ Command lastCommand; // This is used set a new targetPosition
 #define rightB P26
 #define rightPWM P17
 
-/* Pins connected to the motor drivers enable pins */
-#define leftEnable P21
-#define rightEnable P22
+/* Pins connected to the motor drivers diagnostic pins */
+#define leftDiag P21
+#define rightDiag P22
 
 /* Encoders */
 #define leftEncoder1 P15
