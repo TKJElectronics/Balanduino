@@ -173,7 +173,9 @@ const double velocityScaleTurning = 70;
 void readSPPData();
 void readUsb();
 void updateLEDs();
-void onInit();
+void onInitPS3();
+void onInitWii();
+void onInitXbox();
 void steer(Command command);
 double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax);
 
