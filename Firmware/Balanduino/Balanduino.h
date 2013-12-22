@@ -62,7 +62,8 @@ Command lastCommand; // This is used set a new targetPosition
 #define leftEncoder2Pin 30 // Used for pin change interrupt
 #define rightEncoder2Pin 31
 
-#define PIN_CHANGE_INTERRUPT_VECTOR PCINT0_vect // You should change to match your pins, if you are in doubt, just comment this out to disable it
+#define PIN_CHANGE_INTERRUPT_VECTOR_LEFT PCINT0_vect // You should change these to match your pins, if you are in doubt, just comment them out to disable them
+#define PIN_CHANGE_INTERRUPT_VECTOR_RIGHT PCINT0_vect
 
 /* Counters used to count the pulses from the encoders */
 volatile int32_t leftCounter = 0;
@@ -145,7 +146,7 @@ int32_t lastWheelPosition; // Used to calculate the wheel velocity
 int32_t wheelVelocity; // Wheel velocity based on encoder readings
 int32_t targetPosition; // The encoder position the robot should be at
 
-#ifdef PIN_CHANGE_INTERRUPT_VECTOR
+#if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
 const uint16_t zoneA = 8000*2;
 const uint16_t zoneB = 4000*2;
 const uint16_t zoneC = 1000*2;

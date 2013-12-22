@@ -147,10 +147,15 @@ void stopAndReset() {
 /* Interrupt routine and encoder read functions */
 // It uses gray code to detect if any pulses are missed. See: https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino and http://en.wikipedia.org/wiki/Gray_code.
 
-#ifdef PIN_CHANGE_INTERRUPT_VECTOR
+#if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
 const int8_t enc_states[16] PROGMEM = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0 }; // Encoder lookup table if it interrupts on every edge
-ISR(PIN_CHANGE_INTERRUPT_VECTOR) {
+
+ISR(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) {
   leftEncoder();
+#if PIN_CHANGE_INTERRUPT_VECTOR_LEFT != PIN_CHANGE_INTERRUPT_VECTOR_RIGHT
+}
+ISR(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT) {
+#endif
   rightEncoder();
 }
 #else

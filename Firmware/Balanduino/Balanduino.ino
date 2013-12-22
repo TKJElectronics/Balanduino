@@ -111,14 +111,14 @@ void setup() {
   leftEncoder2::SetDirRead();
   rightEncoder1::SetDirRead();
   rightEncoder2::SetDirRead();
-  leftEncoder1::Set();
+  leftEncoder1::Set(); // Enable pull-ups
   leftEncoder2::Set();
   rightEncoder1::Set();
   rightEncoder2::Set();
   attachInterrupt(digitalPinToInterrupt(leftEncoder1Pin), leftEncoder, CHANGE);
   attachInterrupt(digitalPinToInterrupt(rightEncoder1Pin), rightEncoder, CHANGE);
 
-#ifdef PIN_CHANGE_INTERRUPT_VECTOR
+#if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
   /* Enable encoder pins interrupt sources */
   *digitalPinToPCMSK(leftEncoder2Pin) |= (1 << digitalPinToPCMSKbit(leftEncoder2Pin));
   *digitalPinToPCMSK(rightEncoder2Pin) |= (1 << digitalPinToPCMSKbit(rightEncoder2Pin));
