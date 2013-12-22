@@ -114,6 +114,7 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
     }
   }
 }
+
 void stopMotor(Command motor) {
   if (motor == left) {
     setPWM(leftPWM::Number, PWMVALUE); // Set high
@@ -126,12 +127,14 @@ void stopMotor(Command motor) {
     rightB::Set();
   }
 }
+
 void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR1
   if (pin == leftPWM::Number)
     OCR1A = dutyCycle;
   else if (pin == rightPWM::Number)
     OCR1B = dutyCycle;
 }
+
 void stopAndReset() {
   stopMotor(left);
   stopMotor(right);
@@ -141,25 +144,41 @@ void stopAndReset() {
   lastRestAngle = cfg.targetAngle;
 }
 
-/* Interrupt routine and encoder read functions - we read using the port registers for faster processing */
+/* Interrupt routine and encoder read functions */
+// It uses gray code to detect if any pulses are missed. See: https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino and http://en.wikipedia.org/wiki/Gray_code.
+
+#ifdef PIN_CHANGE_INTERRUPT_VECTOR
+const int8_t enc_states[16] PROGMEM = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0 }; // Encoder lookup table if it interrupts on every edge
+ISR(PIN_CHANGE_INTERRUPT_VECTOR) {
+  leftEncoder();
+  rightEncoder();
+}
+#else
+const int8_t enc_states[16] PROGMEM = { 0, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0 }; // Encoder lookup table if it only interrupts on every second edge
+#endif
+
 void leftEncoder() {
-  if ((bool)leftEncoder1::IsSet() == (bool)leftEncoder2::IsSet()) // Compare pin 15 and pin 30
-    leftCounter--;
-  else
-    leftCounter++;
+  static uint8_t old_AB = 0;
+  old_AB <<= 2; // Remember previous state
+  old_AB |= (leftEncoder1::IsSet() >> (leftEncoder1::Number - 1)) | (leftEncoder2::IsSet() >> leftEncoder2::Number);
+  leftCounter += (int8_t)pgm_read_byte(&enc_states[ old_AB & 0x0F ]);
 }
+
 void rightEncoder() {
-  if ((bool)rightEncoder1::IsSet() == (bool)rightEncoder2::IsSet()) // Compare pin 16 and pin 31
-    rightCounter++;
-  else
-    rightCounter--;
+  static uint8_t old_AB = 0;
+  old_AB <<= 2; // Remember previous state
+  old_AB |= (rightEncoder1::IsSet() >> (rightEncoder1::Number - 1)) | (rightEncoder2::IsSet() >> rightEncoder2::Number);
+  rightCounter -= (int8_t)pgm_read_byte(&enc_states[ old_AB & 0x0F ]);
 }
+
 int32_t readLeftEncoder() { // The encoders decrease when motors are traveling forward and increase when traveling backward
   return leftCounter;
 }
+
 int32_t readRightEncoder() {
   return rightCounter;
 }
+
 int32_t getWheelsPosition() {
   return leftCounter + rightCounter;
 }
