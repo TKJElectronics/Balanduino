@@ -128,7 +128,7 @@ void setup() {
   *digitalPinToPCICR(rightEncoder2Pin) |= (1 << digitalPinToPCICRbit(rightEncoder2Pin));
 #endif
 
-  /* Set the motor diagnostic pins to inputs */
+  /* Set the motordriver diagnostic pins to inputs */
   leftDiag::SetDirRead();
   rightDiag::SetDirRead();
 
@@ -226,7 +226,7 @@ void setup() {
 }
 
 void loop() {
-  if (!leftDiag::IsSet() || !rightDiag::IsSet()) { // Motor driver will pull these low if on error
+  if (!leftDiag::IsSet() || !rightDiag::IsSet()) { // Motor driver will pull these low on error
     buzzer::Set();
     stopMotor(left);
     stopMotor(right);
