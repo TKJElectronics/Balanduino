@@ -192,7 +192,7 @@ uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes);
 void updatePID(double restAngle, double offset, double turning, double dt);
 void moveMotor(Command motor, Command direction, double speedRaw);
 void stopMotor(Command motor);
-void setPWM(uint8_t pin, uint16_t dutyCycle);
+void setPWM(Command motor, uint16_t dutyCycle);
 void stopAndReset();
 void leftEncoder();
 void rightEncoder();

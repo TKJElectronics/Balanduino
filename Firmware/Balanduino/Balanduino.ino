@@ -150,8 +150,8 @@ void setup() {
   // Set OC1A/OC1B on compare match when downcounting
   TCCR1A = (1 << COM1A1) | (1 << COM1B1);
 
-  setPWM(leftPWM::Number, 0); // Turn off PWM on both pins
-  setPWM(rightPWM::Number, 0);
+  setPWM(left, 0); // Turn off PWM on both pins
+  setPWM(right, 0);
 
 #ifdef ENABLE_USB
   if (Usb.Init() == -1) { // Check if USB Host is working

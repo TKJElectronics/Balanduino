@@ -91,8 +91,8 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
   if (speedRaw > 100)
     speedRaw = 100.0;
   uint16_t speed = speedRaw * ((double)PWMVALUE) / 100.0; // Scale from 0-100 to 0-PWMVALUE
+  setPWM(motor, speed); // Set PWM value
   if (motor == left) {
-    setPWM(leftPWM::Number, speed); // Left motor PWM
     if (direction == forward) {
       leftA::Clear();
       leftB::Set();
@@ -103,7 +103,6 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
     }
   }
   else if (motor == right) {
-    setPWM(rightPWM::Number, speed); // Right motor PWM
     if (direction == forward) {
       rightA::Set();
       rightB::Clear();
@@ -116,22 +115,21 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
 }
 
 void stopMotor(Command motor) {
+  setPWM(motor, PWMVALUE); // Set high
   if (motor == left) {
-    setPWM(leftPWM::Number, PWMVALUE); // Set high
     leftA::Set();
     leftB::Set();
   }
   else if (motor == right) {
-    setPWM(rightPWM::Number, PWMVALUE); // Set high
     rightA::Set();
     rightB::Set();
   }
 }
 
-void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR1
-  if (pin == leftPWM::Number)
+void setPWM(Command motor, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR1
+  if (motor == left)
     OCR1A = dutyCycle;
-  else if (pin == rightPWM::Number)
+  else if (motor == right)
     OCR1B = dutyCycle;
 }
 
