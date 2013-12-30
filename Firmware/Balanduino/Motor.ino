@@ -1,15 +1,14 @@
-void updatePID(double angle, double offset, double turning, double dt) {
-  //restAngle = angle;
+void updatePID(double restAngle, double offset, double turning, double dt) {
   /* Steer robot */
-  if (steerForward) {
+  if (offset > 0) { // Forward
     if (wheelVelocity < 0)
       offset += (double)wheelVelocity / velocityScaleMove; // Scale down offset at high speed - wheel velocity is negative when driving forward
-    restAngle = angle - offset;
+    restAngle -= offset;
   }
-  else if (steerBackward) {
+  else if (offset < 0) { // Backward
     if (wheelVelocity > 0)
-      offset -= (double)wheelVelocity / velocityScaleMove; // Scale down offset at high speed - wheel velocity is positive when driving backward
-    restAngle = angle + offset;
+      offset += (double)wheelVelocity / velocityScaleMove; // Scale down offset at high speed - wheel velocity is positive when driving backward
+    restAngle -= offset;
   }
   /* Brake */
   else if (steerStop) {
@@ -60,14 +59,14 @@ void updatePID(double angle, double offset, double turning, double dt) {
   main_pid.Compute();
 
   /* Steer robot sideways */
-  if (steerLeft) {
-    turning -= abs((double)wheelVelocity / velocityScaleTurning); // Scale down at high speed
-    if (turning < 0)
+  if (turning < 0) { // Left
+    turning += abs((double)wheelVelocity / velocityScaleTurning); // Scale down at high speed
+    if (turning > 0)
       turning = 0;
-    PIDLeft = PIDValue - turning;
-    PIDRight = PIDValue + turning;
+    PIDLeft = PIDValue + turning;
+    PIDRight = PIDValue - turning;
   }
-  else if (steerRight) {
+  else if (turning > 0) { // Right
     turning -= abs((double)wheelVelocity / velocityScaleTurning); // Scale down at high speed
     if (turning < 0)
       turning = 0;
@@ -97,47 +96,48 @@ void moveMotor(Command motor, Command direction, double speedRaw) { // Speed is 
   if (speedRaw > 100)
     speedRaw = 100.0;
   uint16_t speed = speedRaw * ((double)PWMVALUE) / 100.0; // Scale from 0-100 to 0-PWMVALUE
+  setPWM(motor, speed); // Set PWM value
   if (motor == left) {
-    setPWM(leftPWM, speed); // Left motor PWM
     if (direction == forward) {
-      cbi(leftPort, leftA);
-      sbi(leftPort, leftB);
+      leftA::Clear();
+      leftB::Set();
     }
     else if (direction == backward) {
-      sbi(leftPort, leftA);
-      cbi(leftPort, leftB);
+      leftA::Set();
+      leftB::Clear();
     }
   }
   else if (motor == right) {
-    setPWM(rightPWM, speed); // Right motor PWM
     if (direction == forward) {
-      sbi(rightPort, rightA);
-      cbi(rightPort, rightB);
+      rightA::Set();
+      rightB::Clear();
     }
     else if (direction == backward) {
-      cbi(rightPort, rightA);
-      sbi(rightPort, rightB);
+      rightA::Clear();
+      rightB::Set();
     }
   }
 }
+
 void stopMotor(Command motor) {
+  setPWM(motor, PWMVALUE); // Set high
   if (motor == left) {
-    setPWM(leftPWM, PWMVALUE); // Set high
-    sbi(leftPort, leftA);
-    sbi(leftPort, leftB);
+    leftA::Set();
+    leftB::Set();
   }
   else if (motor == right) {
-    setPWM(rightPWM, PWMVALUE); // Set high
-    sbi(rightPort, rightA);
-    sbi(rightPort, rightB);
+    rightA::Set();
+    rightB::Set();
   }
 }
-void setPWM(uint8_t pin, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR1
-  if (pin == leftPWM)
+
+void setPWM(Command motor, uint16_t dutyCycle) { // dutyCycle is a value between 0-ICR1
+  if (motor == left)
     OCR1A = dutyCycle;
-  else if (pin == rightPWM)
+  else if (motor == right)
     OCR1B = dutyCycle;
 }
+
 void stopAndReset() {
   stopMotor(left);
   stopMotor(right);
@@ -145,25 +145,46 @@ void stopAndReset() {
   lastRestAngle = cfg.targetAngle;
 }
 
-/* Interrupt routine and encoder read functions - we read using the port registers for faster processing */
+/* Interrupt routine and encoder read functions */
+// It uses gray code to detect if any pulses are missed. See: https://www.circuitsathome.com/mcu/reading-rotary-encoder-on-arduino and http://en.wikipedia.org/wiki/Rotary_encoder#Incremental_rotary_encoder.
+
+#if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
+const int8_t enc_states[16] = { 0, -1, 1, 0, 1, 0, 0, -1, -1, 0, 0, 1, 0, 1, -1, 0 }; // Encoder lookup table if it interrupts on every edge
+
+ISR(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) {
+  leftEncoder();
+#if PIN_CHANGE_INTERRUPT_VECTOR_LEFT != PIN_CHANGE_INTERRUPT_VECTOR_RIGHT
+}
+ISR(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT) {
+#endif
+  rightEncoder();
+}
+#else
+const int8_t enc_states[16] = { 0, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0 }; // Encoder lookup table if it only interrupts on every second edge
+#endif
+
 void leftEncoder() {
-  if ((bool)(leftEncoder1Port & leftEncoder1Mask) == (bool)(leftEncoder2Port & leftEncoder2Mask)) // Compare pin 15 and pin 30
-    leftCounter--;
-  else
-    leftCounter++;
+  static uint8_t old_AB = 0;
+  old_AB <<= 2; // Remember previous state
+  old_AB |= (leftEncoder1::IsSet() >> (leftEncoder1::Number - 1)) | (leftEncoder2::IsSet() >> leftEncoder2::Number);
+  leftCounter += enc_states[ old_AB & 0x0F ];
 }
+
 void rightEncoder() {
-  if ((bool)(rightEncoder1Port & rightEncoder1Mask) == (bool)(rightEncoder2Port & rightEncoder2Mask)) // Compare pin 16 and pin 31
-    rightCounter++;
-  else
-    rightCounter--;
+  static uint8_t old_AB = 0;
+  old_AB <<= 2; // Remember previous state
+  old_AB |= (rightEncoder1::IsSet() >> (rightEncoder1::Number - 1)) | (rightEncoder2::IsSet() >> rightEncoder2::Number);
+  rightCounter -= enc_states[ old_AB & 0x0F ];
 }
+
 int32_t readLeftEncoder() { // The encoders decrease when motors are traveling forward and increase when traveling backward
   return leftCounter;
 }
+
 int32_t readRightEncoder() {
   return rightCounter;
 }
+
 int32_t getWheelsPosition() {
   return leftCounter + rightCounter;
 }

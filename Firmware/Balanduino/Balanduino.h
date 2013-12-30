@@ -1,7 +1,7 @@
 #ifndef _balanduino_h_
 #define _balanduino_h_
 
-#if ARDUINO < 154 // Make sure the newest version of the Arduino IDE is used
+#if ARDUINO < 155 // Make sure the newest version of the Arduino IDE is used
 #error "Please update the Arduino IDE to the newest version: http://arduino.cc/en/Main/Software"
 #endif
 
@@ -17,7 +17,6 @@ const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a PWM frequ
 const uint16_t PWMVALUE = F_CPU / PWM_FREQUENCY / 2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
 
 /* Used to make commands more readable */
-uint8_t lastCommand; // This is used set a new targetPosition
 enum Command {
   updatePS3,
   updateWii,
@@ -30,54 +29,47 @@ enum Command {
   imu,
   joystick,
 };
+Command lastCommand; // This is used set a new targetPosition
 
-// These are used to read and write to the port registers - see http://www.arduino.cc/en/Reference/PortManipulation
+// These pins macros are defined in avrpins.h in the USB Host library. This allows to read and write directly to the port registers instead of using Arduino's slow digitalRead()/digitalWrite() functions
+// The source is available here: https://github.com/felis/USB_Host_Shield_2.0/blob/master/avrpins.h
 // I do this to save processing power - see this page for more information: http://www.billporter.info/ready-set-oscillate-the-fastest-way-to-change-arduino-pins/
-#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
-#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
-
-#define pwmPortDirection DDRD
+// Also see the Arduino port manipulation guide: http://www.arduino.cc/en/Reference/PortManipulation
 
 /* Left motor */
-#define leftPort PORTC
-#define leftPortDirection DDRC
-
-#define leftA PINC6 // PC6 - M1A - pin 23
-#define leftB PINC7 // PC7 - M1B - pin 24
-#define leftPWM PIND5 // PD5 - PWM1A (OC1A) - pin 18
+#define leftA P23
+#define leftB P24
+#define leftPWM P18
 
 /* Right motor */
-#define rightPort PORTB
-#define rightPortDirection DDRB
+#define rightA P25
+#define rightB P26
+#define rightPWM P17
 
-#define rightA PINB0 // PB0 - M2A - pin 25
-#define rightB PINB1 // PB1 - M2B - pin 26
-#define rightPWM PIND4 // PD4 - PWM1B (OC1B) - pin 17
-
-/* Pins connected to the motor drivers enable pins */
-const uint8_t leftEnable = 21;
-const uint8_t rightEnable = 22;
+/* Pins connected to the motor drivers diagnostic pins */
+#define leftDiag P21
+#define rightDiag P22
 
 /* Encoders */
-const uint8_t leftEncoder1 = 15; // PD2
-const uint8_t leftEncoder2 = 30; // PA6
-const uint8_t rightEncoder1 = 16; // PD3
-const uint8_t rightEncoder2 = 31; // PA7
+#define leftEncoder1 P15
+#define leftEncoder2 P30
 
-#define leftEncoder1Port PIND
-#define leftEncoder1Mask (1 << PIND2)
-#define leftEncoder2Port PINA
-#define leftEncoder2Mask (1 << PINA6)
+#define rightEncoder1 P16
+#define rightEncoder2 P31
 
-#define rightEncoder1Port PIND
-#define rightEncoder1Mask (1 << PIND3)
-#define rightEncoder2Port PINA
-#define rightEncoder2Mask (1 << PINA7)
+#define leftEncoder1Pin 15 // Used for attachInterrupt
+#define rightEncoder1Pin 16
+#define leftEncoder2Pin 30 // Used for pin change interrupt
+#define rightEncoder2Pin 31
 
+#define PIN_CHANGE_INTERRUPT_VECTOR_LEFT PCINT0_vect // You should change these to match your pins, if you are in doubt, just comment them out to disable them
+#define PIN_CHANGE_INTERRUPT_VECTOR_RIGHT PCINT0_vect
+
+/* Counters used to count the pulses from the encoders */
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
-const uint8_t buzzer = 5; // Buzzer used for feedback, it can be disconnected using the jumper
+#define buzzer P5 // Buzzer used for feedback, it can be disconnected using the jumper
 
 double batteryVoltage; // Measured battery level
 uint8_t batteryCounter; // Counter used to check if it should check the battery level
@@ -108,7 +100,7 @@ typedef struct {
 extern cfg_t cfg;
 
 /* EEPROM Address Definitions */
-const uint8_t initFlagsAddr = 0; // Set the first three bytes to the EEPROM version
+const uint8_t initFlagsAddr = 0; // Set the first byte to the EEPROM version
 const uint8_t configAddr = 1; // Save the configuration starting from this location
 
 double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
@@ -128,21 +120,17 @@ double restAngle;
 /* Used for timing */
 uint32_t kalmanTimer; // Timer used for the Kalman filter
 uint32_t pidTimer; // Timer used for the PID loop
-uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
 uint32_t imuTimer; // This is used to set a delay between sending IMU values
+uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
 uint32_t reportTimer; // This is used to set a delay between sending report values
 uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, Wii and Xbox controllers
 uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
 
 /* Used to rumble controllers upon connection */
-bool ps3Initialized, wiiInitialized, xboxInitialized; // These are used to check if a controller has been initialized
 bool ps3RumbleEnable, wiiRumbleEnabled; // These are used to turn rumble off again on the Wiimote and to turn on rumble on the PS3 controller
 bool ps3RumbleDisable, xboxRumbleDisable; // Used to turn rumble off again on the PS3 and Xbox controller
 
-/* Direction set by the controllers or the SPP library */
-bool steerForward, steerBackward, steerLeft, steerRight;
 bool steerStop = true; // Stop by default
-
 bool stopped; // This is used to set a new target position after braking
 
 bool layingDown = true; // Use to indicate if the robot is laying down
@@ -164,6 +152,18 @@ int32_t wheelVelocity; // Wheel velocity based on encoder readings
 double targetPosition; // The encoder position the robot should be at
 double wheelPosition;
 
+#if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
+const uint16_t zoneA = 8000*2;
+const uint16_t zoneB = 4000*2;
+const uint16_t zoneC = 1000*2;
+const double positionScaleA = 600*2; // One resolution is 1856 pulses per encoder
+const double positionScaleB = 800*2;
+const double positionScaleC = 1000*2;
+const double positionScaleD = 500*2;
+const double velocityScaleMove = 70*2;
+const double velocityScaleStop = 60*2;
+const double velocityScaleTurning = 70*2;
+#else
 const uint16_t zoneA = 8000;
 const uint16_t zoneB = 4000;
 const uint16_t zoneC = 1000;
@@ -174,12 +174,15 @@ const double positionScaleD = 500;
 const double velocityScaleMove = 70;
 const double velocityScaleStop = 60;
 const double velocityScaleTurning = 70;
+#endif
 
 // Function prototypes
 void readSPPData();
 void readUsb();
 void updateLEDs();
-void onInit();
+void onInitPS3();
+void onInitWii();
+void onInitXbox();
 void steer(Command command);
 double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax);
 
@@ -195,7 +198,7 @@ uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes);
 void updatePID(double restAngle, double offset, double turning, double dt);
 void moveMotor(Command motor, Command direction, double speedRaw);
 void stopMotor(Command motor);
-void setPWM(uint8_t pin, uint16_t dutyCycle);
+void setPWM(Command motor, uint16_t dutyCycle);
 void stopAndReset();
 void leftEncoder();
 void rightEncoder();

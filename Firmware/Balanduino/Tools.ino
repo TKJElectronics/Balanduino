@@ -73,7 +73,7 @@ void calibrateAcc() {
   }
   if (!checkMinMax(accYbuffer, 25, 1000) || !checkMinMax(accZbuffer, 25, 1000)) {
     Serial.print(F("Accelerometer calibration error"));
-    digitalWrite(buzzer, HIGH);
+    buzzer::Set();
     while (1); // Halt
   }
   for (uint8_t i = 0; i < 25; i++) {
@@ -405,7 +405,7 @@ void calibrateGyro() {
   }
   if (!checkMinMax(gyroXbuffer, 25, 2000)) {
     Serial.print(F("Gyro calibration error"));
-    digitalWrite(buzzer, HIGH);
+    buzzer::Set();
     while (1); // Halt
   }
   for (uint8_t i = 0; i < 25; i++)

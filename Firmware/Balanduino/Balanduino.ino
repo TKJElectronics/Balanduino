@@ -20,7 +20,6 @@
 #include "Balanduino.h"
 #include <Wire.h> // Official Arduino Wire library
 #include <PID_v1.h> // The Arduino PID library by Brett Beauregard
-#include <usbhub.h> // Some dongles can have a hub inside
 
 #ifdef ENABLE_ADK
 #include <adk.h>
@@ -53,6 +52,9 @@ PID encoders_pid(&wheelPosition, &restAngle, &targetPosition, 0, 0, 0, DIRECT);
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
 #define ENABLE_USB
 USB Usb; // This will take care of all USB communication
+#else
+#define _usb_h_ // Workaround include trap in the USB Host library
+#include <avrpins.h> // Include this from the USB Host library
 #endif
 
 #ifdef ENABLE_ADK
@@ -70,6 +72,7 @@ XBOXRECV Xbox(&Usb); // You have to connect a Xbox wireless receiver to the Ardu
 #endif
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
+#include <usbhub.h> // Some dongles can have a hub inside
 USBHub Hub(&Usb); // Some dongles have a hub inside
 BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all the USB and HCI communication with the Bluetooth dongle
 #endif
@@ -84,15 +87,17 @@ PS3BT PS3(&Btd); // The PS3 library supports all three official controllers: the
 
 #ifdef ENABLE_WII
 WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
-//WII Wii(&Btd,PAIR); // You will have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote
-// or press sync if you are using a Wii U Pro Controller
+//WII Wii(&Btd,PAIR); // You will have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote or press sync if you are using a Wii U Pro Controller
 // Or you can simply send "CW;" to the robot to start the pairing sequence
-// This can also be done using the Android or Processing application
+// This can also be done using the Android or via the serial port
 #endif
 
 void setup() {
   /* Initialize UART */
   Serial.begin(115200);
+
+  /* Setup buzzer pin */
+  buzzer::SetDirWrite();
 
   /* Initialize PID controllers */
   main_pid.SetOutputLimits(-100,100); // Set output limits
@@ -108,30 +113,50 @@ void setup() {
   /* Read the PID values, target angle and other saved values in the EEPROM */
   if (!checkInitializationFlags())
     readEEPROMValues(); // Only read the EEPROM values if they have not been restored
+  else { // Indicate that the EEPROM values have been reset
+    for (uint8_t i = 0; i < 2; i++) {
+      buzzer::Set();
+      delay(50);
+      buzzer::Clear();
+      delay(50);
+    }
+  }
 
   /* Setup encoders */
-  pinMode(leftEncoder1, INPUT);
-  pinMode(leftEncoder2, INPUT);
-  pinMode(rightEncoder1, INPUT);
-  pinMode(rightEncoder2, INPUT);
-  attachInterrupt(0, leftEncoder, CHANGE);
-  attachInterrupt(1, rightEncoder, CHANGE);
+  leftEncoder1::SetDirRead();
+  leftEncoder2::SetDirRead();
+  rightEncoder1::SetDirRead();
+  rightEncoder2::SetDirRead();
+  leftEncoder1::Set(); // Enable pull-ups
+  leftEncoder2::Set();
+  rightEncoder1::Set();
+  rightEncoder2::Set();
+  attachInterrupt(digitalPinToInterrupt(leftEncoder1Pin), leftEncoder, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(rightEncoder1Pin), rightEncoder, CHANGE);
 
-  /* Enable the motor drivers */
-  pinMode(leftEnable, OUTPUT);
-  pinMode(rightEnable, OUTPUT);
-  digitalWrite(leftEnable, HIGH);
-  digitalWrite(rightEnable, HIGH);
+#if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
+  /* Enable encoder pins interrupt sources */
+  *digitalPinToPCMSK(leftEncoder2Pin) |= (1 << digitalPinToPCMSKbit(leftEncoder2Pin));
+  *digitalPinToPCMSK(rightEncoder2Pin) |= (1 << digitalPinToPCMSKbit(rightEncoder2Pin));
+
+  /* Enable pin change interrupts */
+  *digitalPinToPCICR(leftEncoder2Pin) |= (1 << digitalPinToPCICRbit(leftEncoder2Pin));
+  *digitalPinToPCICR(rightEncoder2Pin) |= (1 << digitalPinToPCICRbit(rightEncoder2Pin));
+#endif
+
+  /* Set the motordriver diagnostic pins to inputs */
+  leftDiag::SetDirRead();
+  rightDiag::SetDirRead();
 
   /* Setup motor pins to output */
-  sbi(pwmPortDirection, leftPWM);
-  sbi(leftPortDirection, leftA);
-  sbi(leftPortDirection, leftB);
-  sbi(pwmPortDirection, rightPWM);
-  sbi(rightPortDirection, rightA);
-  sbi(rightPortDirection, rightB);
+  leftPWM::SetDirWrite();
+  leftA::SetDirWrite();
+  leftB::SetDirWrite();
+  rightPWM::SetDirWrite();
+  rightA::SetDirWrite();
+  rightB::SetDirWrite();
 
-  /* Set PWM frequency to 20kHz - see the datasheet http://www.atmel.com/Images/doc8272.pdf page 128-135 */
+  /* Set PWM frequency to 20kHz - see the datasheet http://www.atmel.com/Images/Atmel-8272-8-bit-AVR-microcontroller-ATmega164A_PA-324A_PA-644A_PA-1284_P_datasheet.pdf page 129-139 */
   // Set up PWM, Phase and Frequency Correct on pin 18 (OC1A) & pin 17 (OC1B) with ICR1 as TOP using Timer1
   TCCR1B = (1 << WGM13) | (1 << CS10); // Set PWM Phase and Frequency Correct with ICR1 as TOP and no prescaling
   ICR1 = PWMVALUE; // ICR1 is the TOP value - this is set so the frequency is equal to 20kHz
@@ -140,16 +165,14 @@ void setup() {
   // Clear OC1A/OC1B on compare match when up-counting
   // Set OC1A/OC1B on compare match when downcounting
   TCCR1A = (1 << COM1A1) | (1 << COM1B1);
-  setPWM(leftPWM, 0); // Turn off PWM on both pins
-  setPWM(rightPWM, 0);
 
-  /* Setup buzzer pin */
-  pinMode(buzzer, OUTPUT);
+  setPWM(left, 0); // Turn off PWM on both pins
+  setPWM(right, 0);
 
 #ifdef ENABLE_USB
   if (Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
-    digitalWrite(buzzer, HIGH);
+    buzzer::Set();
     while (1); // Halt
   }
 #endif
@@ -157,26 +180,27 @@ void setup() {
   /* Attach onInit function */
   // This is used to set the LEDs according to the voltage level and vibrate the controller to indicate the new connection
 #ifdef ENABLE_PS3
-  PS3.attachOnInit(onInit);
+  PS3.attachOnInit(onInitPS3);
 #endif
 #ifdef ENABLE_WII
-  Wii.attachOnInit(onInit);
+  Wii.attachOnInit(onInitWii);
 #endif
 #ifdef ENABLE_XBOX
-  Xbox.attachOnInit(onInit);
+  Xbox.attachOnInit(onInitXbox);
 #endif
 
   /* Setup IMU */
   Wire.begin();
+  TWBR = ((F_CPU / 400000L) - 16) / 2; // Set I2C frequency to 400kHz
 
   while (i2cRead(0x75, i2cBuffer, 1));
   if (i2cBuffer[0] != 0x68) { // Read "WHO_AM_I" register
     Serial.print(F("Error reading sensor"));
-    digitalWrite(buzzer, HIGH);
+    buzzer::Set();
     while (1); // Halt
   }
 
-  i2cBuffer[0] = 19; // Set the sample rate to 400Hz - 8kHz/(19+1) = 400Hz
+  i2cBuffer[0] = 15; // Set the sample rate to 500Hz - 8kHz/(15+1) = 500Hz
   i2cBuffer[1] = 0x00; // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
   i2cBuffer[2] = 0x00; // Set Gyro Full Scale Range to ±250deg/s
   i2cBuffer[3] = 0x00; // Set Accelerometer Full Scale Range to ±2g
@@ -203,21 +227,28 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
 
   /* Beep to indicate that it is now ready */
-  digitalWrite(buzzer, HIGH);
+  buzzer::Set();
   delay(100);
-  digitalWrite(buzzer, LOW);
+  buzzer::Clear();
 
   /* Setup timing */
   kalmanTimer = micros();
   pidTimer = kalmanTimer;
-  encoderTimer = kalmanTimer;
   imuTimer = millis();
+  encoderTimer = imuTimer;
   reportTimer = imuTimer;
   ledTimer = imuTimer;
   blinkTimer = imuTimer;
 }
 
 void loop() {
+  if (!leftDiag::IsSet() || !rightDiag::IsSet()) { // Motor driver will pull these low on error
+    buzzer::Set();
+    stopMotor(left);
+    stopMotor(right);
+    while (1);
+  }
+
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
     Usb.Task();
@@ -273,8 +304,8 @@ void loop() {
   pidTimer = timer;
 
   /* Update encoders */
-  timer = micros();
-  if (timer - encoderTimer >= 100000) { // Update encoder values every 100ms
+  timer = millis();
+  if (timer - encoderTimer >= 100) { // Update encoder values every 100ms
     encoderTimer = timer;
     int32_t wheelPosition = getWheelsPosition();
     wheelVelocity = wheelPosition - lastWheelPosition;
@@ -286,13 +317,13 @@ void loop() {
     }
 
     batteryCounter++;
-    if (batteryCounter > 10) { // Measure battery every 1s
+    if (batteryCounter >= 10) { // Measure battery every 1s
       batteryCounter = 0;
       batteryVoltage = (double)analogRead(VBAT) / 63.050847458; // VBAT is connected to analog input 5 which is not broken out. This is then connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
       if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
-        digitalWrite(buzzer, HIGH);
+        buzzer::Set();
       else
-        digitalWrite(buzzer, LOW);
+        buzzer::Clear();
     }
   }
 

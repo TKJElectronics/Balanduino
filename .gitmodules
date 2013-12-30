@@ -4,6 +4,9 @@
 [submodule "BalanduinoProcessingApp"]
 	path = BalanduinoProcessingApp
 	url = https://github.com/TKJElectronics/BalanduinoProcessingApp.git
+[submodule "BalanduinoWindowsApp"]
+	path = BalanduinoWindowsApp
+	url = https://github.com/TKJElectronics/BalanduinoWindowsApp.git
 [submodule "Firmware/libraries/KalmanFilter"]
 	path = Firmware/libraries/KalmanFilter
 	url = https://github.com/TKJElectronics/KalmanFilter.git

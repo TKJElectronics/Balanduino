@@ -23,7 +23,7 @@ USB Host support is implemented using the MAX3421E and the USB Host library: <ht
 
 Two VNH5180 motor controller ICs is used to drive the two motors.
 
-More information can be found at the Kickstarter description: <http://www.kickstarter.com/projects/tkjelectronics/balanduino-balancing-robot-kit>.
+More information can be found at the Wiki article: <http://wiki.balanduino.net/Overview>.
 
 # Remote control
 
@@ -43,6 +43,8 @@ It it also possible to control the robot and adjust the PID values and others va
 Source: <https://github.com/TKJElectronics/BalanduinoAndroidApp>
 
 You can also use your Windows, Mac or Linux based computer by using the following Processing application: <https://github.com/TKJElectronics/BalanduinoProcessingApp>.
+
+A dedicated Windows application is also available: <https://github.com/TKJElectronics/BalanduinoWindowsApp>.
 
 # Video presentation
 
