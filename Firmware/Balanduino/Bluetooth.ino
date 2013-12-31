@@ -2,7 +2,7 @@
 
 uint8_t ps3OldLed, wiiOldLed;
 #ifdef ENABLE_XBOX
-LED xboxOldLed;
+LEDEnum xboxOldLed;
 #endif
 
 #ifdef ENABLE_SPP
@@ -104,7 +104,7 @@ void readUsb() {
   if (Xbox.Xbox360Connected[0]) {
     if (Xbox.getButtonClick(XBOX)) {
       Xbox.disconnect();
-      xboxOldLed = (LED)0xFF; // Reset value
+      xboxOldLed = OFF; // Reset value
     }
   }
 #endif
@@ -202,10 +202,10 @@ void updateLEDs() {
     if (xboxRumbleDisable) {
       xboxRumbleDisable = false;
       Xbox.setRumbleOff();
-      xboxOldLed = (LED)0xFF; // Reset value
+      xboxOldLed = OFF; // Reset value
     } else {
       uint8_t batteryLevel = Xbox.getBatteryLevel();
-      LED xboxLed;
+      LEDEnum xboxLed;
       if (batteryLevel == 0)
         xboxLed = LED1;
       else if (batteryLevel == 1)
