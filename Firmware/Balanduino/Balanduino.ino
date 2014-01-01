@@ -208,7 +208,7 @@ void setup() {
   /* Find gyro zero value */
   calibrateGyro();
 
-  pinMode(LED_BUILTIN, OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
+  LED::SetDirWrite();
 
   /* Beep to indicate that it is now ready */
   buzzer::Set();
@@ -323,12 +323,9 @@ void loop() {
     timer = millis();
     if ((Btd.watingForConnection && timer - blinkTimer > 1000) || (!Btd.watingForConnection && timer - blinkTimer > 100)) {
       blinkTimer = timer;
-      ledState = !ledState;
-      digitalWrite(LED_BUILTIN, ledState); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
+      LED::Toggle(); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
     }
-  } else if (ledState) { // The LED is on
-    ledState = !ledState;
-    digitalWrite(LED_BUILTIN, ledState); // This will turn it off
-  }
+  } else
+    LED::Clear(); // This will turn it off
 #endif
 }

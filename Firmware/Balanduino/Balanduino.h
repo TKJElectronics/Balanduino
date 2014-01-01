@@ -65,6 +65,11 @@ Command lastCommand; // This is used set a new targetPosition
 #define PIN_CHANGE_INTERRUPT_VECTOR_LEFT PCINT0_vect // You should change these to match your pins, if you are in doubt, just comment them out to disable them
 #define PIN_CHANGE_INTERRUPT_VECTOR_RIGHT PCINT0_vect
 
+#define MAKE_PIN(pin) MAKE_PIN2(pin) // Puts a P in front of the pin number, e.g. 1 becomes P1
+#define MAKE_PIN2(pin) P ## pin
+
+#define LED MAKE_PIN(LED_BUILTIN) // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
+
 /* Counters used to count the pulses from the encoders */
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
@@ -73,8 +78,6 @@ volatile int32_t rightCounter = 0;
 
 double batteryVoltage; // Measured battery level
 uint8_t batteryCounter; // Counter used to check if it should check the battery level
-
-bool ledState; // Last state of the built in LED
 
 // This struct will store all the configuration values
 typedef struct {
