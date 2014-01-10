@@ -52,6 +52,10 @@ typedef enum { _timer3, _timer1, _Nbr_16timers } timer16_Sequence_t;
 #define _useTimer1
 typedef enum { _timer3, _timer1, _Nbr_16timers } timer16_Sequence_t;
 
+#elif defined(ARDUINO_AVR_BALANDUINO)
+#define _useTimer3
+typedef enum { _timer3, _Nbr_16timers } timer16_Sequence_t ;
+
 #else  // everything else
 #define _useTimer1
 typedef enum { _timer1, _Nbr_16timers } timer16_Sequence_t;
