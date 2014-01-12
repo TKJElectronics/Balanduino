@@ -32,6 +32,7 @@ To control the robot you can use the following game controllers:
 * Normal PS3 Dualshock controller
 * PS3 Navigation controller
 * PS3 Move controller
+* PS4 controller
 * Xbox 360 wireless controller
 * Wiimote including support for the Motion Plus and Nunchuck extension
 * Wii U Pro controller

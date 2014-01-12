@@ -55,6 +55,17 @@ void readUsb() {
     } else if (PS3.PS3NavigationConnected && (PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117))
       steer(updatePS3);
 #endif // ENABLE_PS3
+#ifdef ENABLE_PS4
+    if (PS4.connected() && !commandSent) {
+      if (PS4.getButtonPress(SHARE)) {
+        stopAndReset();
+        while (!PS4.getButtonPress(OPTIONS))
+          Usb.Task();
+      }
+      else if (PS4.getAnalogHat(LeftHatY) < 117 || PS4.getAnalogHat(RightHatY) < 117 || PS4.getAnalogHat(LeftHatY) > 137 || PS4.getAnalogHat(RightHatY) > 137)
+        steer(updatePS4);
+    }
+#endif // ENABLE_PS4
 #ifdef ENABLE_WII
     if (Wii.wiimoteConnected && !Wii.wiiUProControllerConnected && !commandSent) {
       if (Wii.getButtonPress(B) || (Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117)))
@@ -92,6 +103,12 @@ void readUsb() {
     }
   }
 #endif // ENABLE_PS3
+#ifdef ENABLE_PS4
+  if (PS4.connected()) {
+    if (PS4.getButtonClick(PS))
+      PS4.disconnect();
+  }
+#endif // ENABLE_PS4
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
     if (Wii.getButtonClick(HOME)) {
@@ -259,7 +276,7 @@ void onInitXbox() { // This function is called when the controller is first init
 
 #endif // ENABLE_USB
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
 
@@ -320,6 +337,18 @@ void steer(Command command) {
     }
   }
 #endif // ENABLE_PS3
+#ifdef ENABLE_PS4
+  if (command == updatePS4) {
+    if (PS4.getAnalogHat(LeftHatY) < 117 && PS4.getAnalogHat(RightHatY) < 117) // Forward
+      targetOffset = scale(PS4.getAnalogHat(LeftHatY) + PS4.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
+    else if (PS4.getAnalogHat(LeftHatY) > 137 && PS4.getAnalogHat(RightHatY) > 137) // Backward
+      targetOffset = -scale(PS4.getAnalogHat(LeftHatY) + PS4.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
+    if (((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)) > 15) // Left
+      turningOffset = -scale(abs((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+    else if (((int16_t)PS4.getAnalogHat(RightHatY) - (int16_t)PS4.getAnalogHat(LeftHatY)) > 15) // Right
+      turningOffset = scale(abs((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+  }
+#endif // ENABLE_PS4
 #ifdef ENABLE_WII
   if (command == updateWii) {
     if (!Wii.wiiUProControllerConnected) {
@@ -389,4 +418,4 @@ double scale(double input, double inputMin, double inputMax, double outputMin, d
     output = outputMin;
   return output;
 }
-#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)
+#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)

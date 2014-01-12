@@ -13,6 +13,7 @@
 #define ENABLE_TOOLS
 #define ENABLE_SPP
 #define ENABLE_PS3
+#define ENABLE_PS4
 #define ENABLE_WII
 #define ENABLE_XBOX
 #define ENABLE_ADK
@@ -37,6 +38,9 @@
 #ifdef ENABLE_PS3
 #include <PS3BT.h>
 #endif
+#ifdef ENABLE_PS4
+#include <PS4BT.h>
+#endif
 #ifdef ENABLE_WII
 #include <Wii.h>
 #endif
@@ -44,7 +48,7 @@
 // Create the Kalman library instance
 Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source code
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
 #define ENABLE_USB
 USB Usb; // This will take care of all USB communication
 #else
@@ -66,7 +70,8 @@ ADK adk(&Usb, "TKJ Electronics", // Manufacturer Name
 XBOXRECV Xbox(&Usb); // You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
 #endif
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII)
+#define ENABLE_BTD
 #include <usbhub.h> // Some dongles can have a hub inside
 USBHub Hub(&Usb); // Some dongles have a hub inside
 BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all the USB and HCI communication with the Bluetooth dongle
@@ -78,6 +83,12 @@ SPP SerialBT(&Btd, "Balanduino", "0000"); // The SPP (Serial Port Protocol) emul
 
 #ifdef ENABLE_PS3
 PS3BT PS3(&Btd); // The PS3 library supports all three official controllers: the Dualshock 3, Navigation and Move controller
+#endif
+
+#ifdef ENABLE_PS4
+BTHID bthid(&Btd);
+//BTHID bthid(&Btd, PAIR); // You should create the instance like this if you want to pair with a PS4 controller, then hold PS and Share on the PS4 controller
+PS4BT PS4(&bthid); // The PS4 library supports the PS4 controller via Bluetooth
 #endif
 
 #ifdef ENABLE_WII
@@ -166,6 +177,9 @@ void setup() {
 #ifdef ENABLE_PS3
   PS3.attachOnInit(onInitPS3);
 #endif
+#ifdef ENABLE_PS4
+  //PS4.attachOnInit(onInitPS4); // I still have not figured out to control the light and rumble on the PS4 controller
+#endif
 #ifdef ENABLE_WII
   Wii.attachOnInit(onInitWii);
 #endif
@@ -233,8 +247,17 @@ void loop() {
     while (1);
   }
 
+#if defined(ENABLE_WII) || defined(ENABLE_PS4) // We have to read much more often from the Wiimote and PS4 controller to decrease latency
+  bool readUSB = false;
 #ifdef ENABLE_WII
-  if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
+  if (Wii.wiimoteConnected)
+    readUSB = true;
+#endif
+#ifdef ENABLE_PS4
+  if (PS4.connected())
+    readUSB = true;
+#endif
+  if (readUSB)
     Usb.Task();
 #endif
 
@@ -265,8 +288,8 @@ void loop() {
   kalmanTimer = timer;
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
-#ifdef ENABLE_WII
-  if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
+#if defined(ENABLE_WII) || defined(ENABLE_PS4) // We have to read much more often from the Wiimote and PS4 controller to decrease latency
+  if (readUSB)
     Usb.Task();
 #endif
 
@@ -318,7 +341,7 @@ void loop() {
   printValues();
 #endif
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
+#ifdef ENABLE_BTD
   if (Btd.isReady()) {
     timer = millis();
     if ((Btd.watingForConnection && timer - blinkTimer > 1000) || (!Btd.watingForConnection && timer - blinkTimer > 100)) {

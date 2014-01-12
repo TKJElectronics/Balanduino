@@ -19,6 +19,7 @@ const uint16_t PWMVALUE = F_CPU / PWM_FREQUENCY / 2; // The frequency is given b
 /* Used to make commands more readable */
 enum Command {
   updatePS3,
+  updatePS4,
   updateWii,
   updateXbox,
   stop,
