@@ -201,7 +201,7 @@ void printValues() {
   if (sendPairConfirmation) {
     sendPairConfirmation = false;
 
-    out->println(F("WC"));
+    out->println(F("PC"));
   } else if (sendPIDValues) {
     sendPIDValues = false;
 
@@ -358,12 +358,22 @@ void setValues(char *input) {
       sppData2 = atof(strtok(NULL, ";")); // Roll
       steer(imu);
     }
+#if defined(ENABLE_WII) || defined(ENABLE_PS4)
+    else if (input[1] == 'P') { // Pair
 #ifdef ENABLE_WII
-    else if (input[1] == 'W') { // Pair with a new Wiimote or Wii U Pro Controller
-      Wii.pair();
-      sendPairConfirmation = true;
+      if (input[2] == 'W') { // Pair with a new Wiimote or Wii U Pro Controller
+        Wii.pair();
+        sendPairConfirmation = true;
+      }
+#endif
+#ifdef ENABLE_PS4
+      if (input[2] == 'P') { // Pair with PS4 controller
+        PS4.pair();
+        sendPairConfirmation = true;
+      }
+#endif
     }
-#endif // ENABLE_WII
+#endif // defined(ENABLE_WII) || defined(ENABLE_PS4)
     else if (input[1] == 'R') {
       restoreEEPROMValues(); // Restore the default EEPROM values
       sendPIDValues = true;

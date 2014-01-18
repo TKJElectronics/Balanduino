@@ -87,13 +87,15 @@ PS3BT PS3(&Btd); // The PS3 library supports all three official controllers: the
 
 #ifdef ENABLE_PS4
 //PS4BT PS4(&Btd, PAIR); // You should create the instance like this if you want to pair with a PS4 controller, then hold PS and Share on the PS4 controller
+// Or you can simply send "CPP;" to the robot to start the pairing sequence
+// This can also be done using the Android or via the serial port
 PS4BT PS4(&Btd); // The PS4BT library supports the PS4 controller via Bluetooth
 #endif
 
 #ifdef ENABLE_WII
 WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
 //WII Wii(&Btd,PAIR); // You will have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote or press sync if you are using a Wii U Pro Controller
-// Or you can simply send "CW;" to the robot to start the pairing sequence
+// Or you can simply send "CPW;" to the robot to start the pairing sequence
 // This can also be done using the Android or via the serial port
 #endif
 
