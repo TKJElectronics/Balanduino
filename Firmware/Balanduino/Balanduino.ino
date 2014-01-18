@@ -86,9 +86,8 @@ PS3BT PS3(&Btd); // The PS3 library supports all three official controllers: the
 #endif
 
 #ifdef ENABLE_PS4
-BTHID bthid(&Btd);
-//BTHID bthid(&Btd, PAIR); // You should create the instance like this if you want to pair with a PS4 controller, then hold PS and Share on the PS4 controller
-PS4BT PS4(&bthid); // The PS4 library supports the PS4 controller via Bluetooth
+//PS4BT PS4(&Btd, PAIR); // You should create the instance like this if you want to pair with a PS4 controller, then hold PS and Share on the PS4 controller
+PS4BT PS4(&Btd); // The PS4BT library supports the PS4 controller via Bluetooth
 #endif
 
 #ifdef ENABLE_WII
