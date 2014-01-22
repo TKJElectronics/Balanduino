@@ -62,7 +62,7 @@ void readUsb() {
         while (!PS4.getButtonPress(OPTIONS))
           Usb.Task();
       }
-      else if (PS4.getAnalogHat(LeftHatY) < 117 || PS4.getAnalogHat(RightHatY) < 117 || PS4.getAnalogHat(LeftHatY) > 137 || PS4.getAnalogHat(RightHatY) > 137)
+      else if (PS4.getButtonPress(CROSS) || PS4.getAnalogHat(LeftHatY) < 117 || PS4.getAnalogHat(RightHatY) < 117 || PS4.getAnalogHat(LeftHatY) > 137 || PS4.getAnalogHat(RightHatY) > 137)
         steer(updatePS4);
     }
 #endif // ENABLE_PS4
@@ -307,15 +307,7 @@ void steer(Command command) {
 #ifdef ENABLE_PS3
   if (command == updatePS3) {
     if (PS3.PS3Connected) {
-      if (PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) // Forward
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
-      else if (PS3.getAnalogHat(LeftHatY) > 137 && PS3.getAnalogHat(RightHatY) > 137) // Backward
-        targetOffset = -scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
-      if (((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) // Left
-        turningOffset = -scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
-      else if (((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) // Right
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
-      else if (PS3.getButtonPress(CROSS)) {
+      if (PS3.getButtonPress(CROSS)) {
         if (PS3.getAngle(Pitch) > 180) // Forward
           targetOffset = scale(PS3.getAngle(Pitch), 180, 216, 0, cfg.controlAngleLimit);
         else if (PS3.getAngle(Pitch) < 180) // Backward
@@ -324,6 +316,15 @@ void steer(Command command) {
           turningOffset = scale(PS3.getAngle(Roll), 180, 225, 0, cfg.turningLimit);
         else if (PS3.getAngle(Roll) < 180) // Left
           turningOffset = -scale(PS3.getAngle(Roll), 180, 135, 0, cfg.turningLimit);
+      } else {
+        if (PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) // Forward
+          targetOffset = scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
+        else if (PS3.getAnalogHat(LeftHatY) > 137 && PS3.getAnalogHat(RightHatY) > 137) // Backward
+          targetOffset = -scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
+        if (((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) // Left
+          turningOffset = -scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+        else if (((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) // Right
+          turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
       }
     } else { // It must be a Navigation controller then
       if (PS3.getAnalogHat(LeftHatY) < 117) // Forward
@@ -339,14 +340,25 @@ void steer(Command command) {
 #endif // ENABLE_PS3
 #ifdef ENABLE_PS4
   if (command == updatePS4) {
-    if (PS4.getAnalogHat(LeftHatY) < 117 && PS4.getAnalogHat(RightHatY) < 117) // Forward
-      targetOffset = scale(PS4.getAnalogHat(LeftHatY) + PS4.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
-    else if (PS4.getAnalogHat(LeftHatY) > 137 && PS4.getAnalogHat(RightHatY) > 137) // Backward
-      targetOffset = -scale(PS4.getAnalogHat(LeftHatY) + PS4.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
-    if (((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)) > 15) // Left
-      turningOffset = -scale(abs((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
-    else if (((int16_t)PS4.getAnalogHat(RightHatY) - (int16_t)PS4.getAnalogHat(LeftHatY)) > 15) // Right
-      turningOffset = scale(abs((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+    if (PS4.getButtonPress(CROSS)) {
+      if (PS4.getAngle(Pitch) > 180) // Forward
+        targetOffset = scale(PS4.getAngle(Pitch), 180, 216, 0, cfg.controlAngleLimit);
+      else if (PS4.getAngle(Pitch) < 180) // Backward
+        targetOffset = -scale(PS4.getAngle(Pitch), 180, 144, 0, cfg.controlAngleLimit);
+      if (PS4.getAngle(Roll) < 180) // Right
+        turningOffset = scale(PS4.getAngle(Roll), 180, 135, 0, cfg.turningLimit);
+      else if (PS4.getAngle(Roll) > 180) // Left
+        turningOffset = -scale(PS4.getAngle(Roll), 180, 225, 0, cfg.turningLimit);
+    } else {
+      if (PS4.getAnalogHat(LeftHatY) < 117 && PS4.getAnalogHat(RightHatY) < 117) // Forward
+        targetOffset = scale(PS4.getAnalogHat(LeftHatY) + PS4.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
+      else if (PS4.getAnalogHat(LeftHatY) > 137 && PS4.getAnalogHat(RightHatY) > 137) // Backward
+        targetOffset = -scale(PS4.getAnalogHat(LeftHatY) + PS4.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
+      if (((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)) > 15) // Left
+        turningOffset = -scale(abs((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+      else if (((int16_t)PS4.getAnalogHat(RightHatY) - (int16_t)PS4.getAnalogHat(LeftHatY)) > 15) // Right
+        turningOffset = scale(abs((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+    }
   }
 #endif // ENABLE_PS4
 #ifdef ENABLE_WII
