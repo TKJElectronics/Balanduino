@@ -27,6 +27,8 @@ void checkSerialData() {
 void printMenu() {
   Serial.println(F("\r\n========================================== Menu ==========================================\r\n"));
 
+  Serial.println(F("m\t\t\t\tSend to show this menu\r\n"));
+
   Serial.println(F("A;\t\t\t\tSend to abort. Send 'C' again to continue\r\n"));
 
   Serial.println(F("AC;\t\t\t\tSend to calibrate the accelerometer"));
@@ -54,7 +56,8 @@ void printMenu() {
   Serial.println(F("CS;\t\t\t\tSend stop command"));
   Serial.println(F("CJ,x,y;\t\t\t\tSteer robot using x,y-coordinates"));
   Serial.println(F("CM,pitch,roll;\t\t\tSteer robot using pitch and roll"));
-  Serial.println(F("CW;\t\t\t\tStart paring sequence with Wiimote"));
+  Serial.println(F("CPW;\t\t\t\tStart paring sequence with Wiimote"));
+  Serial.println(F("CPP;\t\t\t\tStart paring sequence with PS4 controller"));
   Serial.println(F("CR;\t\t\t\tRestore default EEPROM values"));
   Serial.println(F("\r\n==========================================================================================\r\n"));
 }

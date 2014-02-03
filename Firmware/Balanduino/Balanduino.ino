@@ -102,6 +102,7 @@ WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck
 void setup() {
   /* Initialize UART */
   Serial.begin(115200);
+  printMenu();
 
   /* Setup buzzer pin */
   buzzer::SetDirWrite();
