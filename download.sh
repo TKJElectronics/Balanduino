@@ -10,7 +10,7 @@ echo "Working path:" $dir
 
 name=$(echo $(echo $url | rev | cut -d'/' -f 1 | rev) | cut -d'.' -f 1)
 echo "\nClone Project:" $name "\n"
-git clone --recursive $url
+git clone --recursive $url || exit 1
 
 echo "\nRemove git files"
 find . -name .git | xargs rm -rf
@@ -31,7 +31,7 @@ fi
 
 echo "ZIP directory"
 cd "$dir"
-zip -r -q $name $name
+zip -rq $name $name
 
 echo "Remove temporary directory"
 rm -rf $name
