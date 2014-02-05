@@ -49,9 +49,13 @@ A dedicated Windows application is also available: <https://github.com/TKJElectr
 
 # Video presentation
 
-A video for the Kickstarter presentation of the robot can be found here: <http://www.youtube.com/watch?v=_kQniPbg9zc>.
+A video for the Kickstarter presentation can be seen below:
 
-A video filmed with a GoPro mounted on the robot can be seen here: <http://www.youtube.com/watch?v=CvFcnb_9anM>.
+<a href="http://www.youtube.com/watch?v=_kQniPbg9zc" target="_blank"><img src="http://img.youtube.com/vi/_kQniPbg9zc/0.jpg" alt="Kickstarter video presentation" width="240" height="180" border="10" /></a>
+
+A video filmed with a GoPro mounted on the robot can be seen below:
+
+<a href="http://www.youtube.com/watch?v=CvFcnb_9anM" target="_blank"><img src="http://img.youtube.com/vi/CvFcnb_9anM/0.jpg" alt="GoPro demonstration" width="240" height="180" border="10" /></a>
 
 # Download
 
