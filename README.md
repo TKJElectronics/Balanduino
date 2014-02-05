@@ -61,16 +61,14 @@ To download the entire repository including all submodules run the following com
 curl https://raw.github.com/TKJElectronics/Balanduino/master/download.sh | sh
 ```
 
-To clone the project use the recursive command to clone all the submodules as well:
+Or simply download the daily updated ZIP-repository from our website: <http://downloads.balanduino.net/github/Balanduino_latest.zip>.
+
+If you want to clone the project then use the recursive command to clone all the submodules as well:
 
 ```bash
 git clone --recursive https://github.com/TKJElectronics/Balanduino.git
 ```
 
-To update all submodules run the following command:
-
-```bash
-git submodule foreach --recursive git pull origin master
-```
+</br>
 
 For more information send us an email at <mail@tkjelectronics.com>.
