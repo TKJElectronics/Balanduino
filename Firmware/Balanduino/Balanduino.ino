@@ -1,13 +1,27 @@
-/*
- * The code is released under the GNU General Public License.
- * Developed by Kristian Lauszus, TKJ Electronics 2013
- * This is the algorithm for the Balanduino balancing robot.
- * It can be controlled by either an Android app or a Processing application via Bluetooth.
- * The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
- * The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
- * It can also be controlled by a PS3, Wii or a Xbox controller
- * For details, see: http://balanduino.net/
- */
+/* Copyright (C) 2013 Kristian Lauszus, TKJ Electronics. All rights reserved.
+
+ This software may be distributed and modified under the terms of the GNU
+ General Public License version 2 (GPL2) as published by the Free Software
+ Foundation and appearing in the file GPL2.TXT included in the packaging of
+ this file. Please note that GPL2 Section 2[b] requires that all works based
+ on this software must also be made publicly available under the terms of
+ the GPL2 ("Copyleft").
+
+ Contact information
+ -------------------
+
+ Kristian Lauszus, TKJ Electronics
+ Web      :  http://www.tkjelectronics.com
+ e-mail   :  kristianl@tkjelectronics.com
+
+ This is the algorithm for the Balanduino balancing robot.
+ It can be controlled by either an Android app or a computer application via Bluetooth.
+ The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
+ The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
+ A dedicated Windows application can be found here: https://github.com/TKJElectronics/BalanduinoWindowsApp
+ It can also be controlled by a PS3, PS4, Wii or a Xbox controller.
+ For details, see: http://balanduino.net/
+*/
 
 /* Use this to enable and disable the different options */
 #define ENABLE_TOOLS
