@@ -341,8 +341,12 @@ void setValues(char *input) {
       strtok(input, ","); // Ignore 'U'
       cfg.turningLimit = atoi(strtok(NULL, ";"));
     }
-    else if (input[1] == 'B') // Set Back To Spot
-      cfg.backToSpot = input[2] - '0'; // Convert from ASCII to number
+    else if (input[1] == 'B') { // Set Back To Spot
+      if (input[3] == '1')
+        cfg.backToSpot = 1;
+      else
+        cfg.backToSpot = 0;
+    }
 
     updateConfig();
   }
