@@ -46,10 +46,7 @@ void updatePID(double restAngle, double offset, double turning, double dt) {
     restAngle -= offset;
   }
 
-  if (restAngle - lastRestAngle > 1) // Don't change restAngle with more than 1 degree in each loop
-    restAngle = lastRestAngle + 1;
-  else if (restAngle - lastRestAngle < -1)
-    restAngle = lastRestAngle - 1;
+  restAngle = constrain(restAngle, lastRestAngle - 1, lastRestAngle + 1); // Don't change restAngle with more than 1 degree in each loop
   lastRestAngle = restAngle;
 
   /* Update PID values */
