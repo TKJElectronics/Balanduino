@@ -228,7 +228,7 @@ void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, do
 void calibrateAcc();
 void printValues();
 void setValues(char *input);
-void calibrateGyro();
+bool calibrateGyro();
 bool checkMinMax(int16_t *array, uint8_t length, int16_t maxDifference);
 
 #endif

@@ -235,8 +235,8 @@ void setup() {
   pitch = accAngle;
   gyroAngle = accAngle;
 
-  /* Find gyro zero value */
-  calibrateGyro();
+  /* Calibrate gyro zero value */
+  while (calibrateGyro()); // Run again if the robot is moved while calibrating
 
   LED::SetDirWrite();
 

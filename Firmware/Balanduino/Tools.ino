@@ -408,7 +408,7 @@ void setValues(char *input) {
 }
 #endif // ENABLE_TOOLS or ENABLE_SPP
 
-void calibrateGyro() {
+bool calibrateGyro() {
   int16_t gyroXbuffer[25];
   for (uint8_t i = 0; i < 25; i++) {
     while (i2cRead(0x43, i2cBuffer, 2));
@@ -418,11 +418,12 @@ void calibrateGyro() {
   if (!checkMinMax(gyroXbuffer, 25, 2000)) {
     Serial.print(F("Gyro calibration error"));
     buzzer::Set();
-    while (1); // Halt
+    return 1;
   }
   for (uint8_t i = 0; i < 25; i++)
     gyroXzero += gyroXbuffer[i];
   gyroXzero /= 25;
+  return 0;
 }
 
 bool checkMinMax(int16_t *array, uint8_t length, int16_t maxDifference) { // Used to check that the robot is laying still while calibrating
