@@ -177,9 +177,6 @@ void setup() {
   // Set OC1A/OC1B on compare match when downcounting
   TCCR1A = (1 << COM1A1) | (1 << COM1B1);
 
-  setPWM(left, 0); // Turn off PWM on both pins
-  setPWM(right, 0);
-
 #ifdef ENABLE_USB
   if (Usb.Init() == -1) { // Check if USB Host is working
     Serial.print(F("OSC did not start"));
@@ -238,7 +235,8 @@ void setup() {
   /* Calibrate gyro zero value */
   while (calibrateGyro()); // Run again if the robot is moved while calibrating
 
-  LED::SetDirWrite();
+  LED::SetDirWrite(); // Set LED pin to output
+  stopAndReset(); // Turn off motors and reset different values
 
   /* Beep to indicate that it is now ready */
   buzzer::Set();
