@@ -18,7 +18,7 @@
 #ifndef _balanduino_h_
 #define _balanduino_h_
 
-#if ARDUINO < 155 // Make sure the newest version of the Arduino IDE is used
+#if ARDUINO < 156 // Make sure the newest version of the Arduino IDE is used
 #error "Please update the Arduino IDE to the newest version: http://arduino.cc/en/Main/Software"
 #endif
 
