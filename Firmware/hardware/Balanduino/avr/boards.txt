@@ -5,13 +5,13 @@ balanduino.name=Balanduino
 balanduino.vid.0=0x0403
 balanduino.pid.0=0x6015
 
-balanduino.upload.tool=avrdude
+balanduino.upload.tool=arduino:avrdude
 balanduino.upload.protocol=arduino
 balanduino.upload.speed=115200
 balanduino.upload.maximum_size=130048
 balanduino.upload.maximum_data_size=16384
 
-balanduino.bootloader.tool=avrdude
+balanduino.bootloader.tool=arduino:avrdude
 balanduino.bootloader.file=optiboot/optiboot_balanduino.hex
 
 balanduino.bootloader.low_fuses=0xFF
