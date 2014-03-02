@@ -24,6 +24,7 @@ The final structure should look like this:
 		* EEPROMAnything.h
 		* I2C.ino
 		* Motor.ino
+		* Spektrum.ino
 		* Tools.ino
 	* hardware/
 		* Balanduino/
