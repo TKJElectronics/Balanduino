@@ -83,6 +83,8 @@ Command lastCommand; // This is used set a new targetPosition
 #define PIN_CHANGE_INTERRUPT_VECTOR_LEFT PCINT0_vect // You should change these to match your pins, if you are in doubt, just comment them out to disable them
 #define PIN_CHANGE_INTERRUPT_VECTOR_RIGHT PCINT0_vect
 
+#define buzzer P5 // Buzzer used for feedback, it can be disconnected using the jumper
+
 #define MAKE_PIN(pin) MAKE_PIN2(pin) // Puts a P in front of the pin number, e.g. 1 becomes P1
 #define MAKE_PIN2(pin) P ## pin
 
@@ -91,8 +93,6 @@ Command lastCommand; // This is used set a new targetPosition
 /* Counters used to count the pulses from the encoders */
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
-
-#define buzzer P5 // Buzzer used for feedback, it can be disconnected using the jumper
 
 double batteryVoltage; // Measured battery level
 uint8_t batteryCounter; // Counter used to check if it should check the battery level

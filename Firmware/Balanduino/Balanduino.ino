@@ -117,9 +117,6 @@ WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck
 void setup() {
   /* Initialize UART */
   Serial.begin(115200);
-#ifdef ENABLE_TOOLS
-  printMenu();
-#endif
 
   /* Setup buzzer pin */
   buzzer::SetDirWrite();
@@ -240,6 +237,10 @@ void setup() {
 
   LED::SetDirWrite(); // Set LED pin to output
   stopAndReset(); // Turn off motors and reset different values
+
+#ifdef ENABLE_TOOLS
+  printMenu();
+#endif
 
   /* Beep to indicate that it is now ready */
   buzzer::Set();
