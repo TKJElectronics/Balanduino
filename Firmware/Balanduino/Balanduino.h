@@ -39,6 +39,7 @@ enum Command {
   updatePS4,
   updateWii,
   updateXbox,
+  updateSpektrum,
   stop,
   forward,
   backward,
@@ -167,6 +168,8 @@ int32_t lastWheelPosition; // Used to calculate the wheel velocity
 int32_t wheelVelocity; // Wheel velocity based on encoder readings
 int32_t targetPosition; // The encoder position the robot should be at
 
+extern uint16_t rcValue[];
+
 #if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
 const uint16_t zoneA = 8000*2;
 const uint16_t zoneB = 4000*2;
@@ -220,6 +223,8 @@ void rightEncoder();
 int32_t readLeftEncoder();
 int32_t readRightEncoder();
 int32_t getWheelsPosition();
+
+void readSpektrum();
 
 void checkSerialData();
 void printMenu();

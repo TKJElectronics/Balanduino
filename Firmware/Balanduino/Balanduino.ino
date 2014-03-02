@@ -31,6 +31,7 @@
 #define ENABLE_WII
 #define ENABLE_XBOX
 #define ENABLE_ADK
+#define ENABLE_SPEKTRUM
 
 #include "Balanduino.h"
 #include <Arduino.h> // Standard Arduino header
@@ -359,7 +360,7 @@ void loop() {
   }
 
   /* Read the Bluetooth dongle and send PID and IMU values */
-#ifdef ENABLE_USB
+#if defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
   readUsb();
 #endif
 #ifdef ENABLE_TOOLS

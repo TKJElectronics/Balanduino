@@ -37,6 +37,23 @@ To control the robot you can use the following game controllers:
 * Wiimote including support for the Motion Plus and Nunchuck extension
 * Wii U Pro controller
 
+You can also use a RC transmitter. For now only Spektrum satellite receivers are supported.
+
+You will need the following receiver and cable:
+
+* <http://hobbyking.com/hobbyking/store/__46339__OrangeRx_R100_Spektrum_JR_DSM2_Compatible_Satellite_Receiver.html>
+* <http://hobbyking.com/hobbyking/store/__24524__ZYX_S_DSM2_DSMJ_Satellite_Receiver_Cable.html>
+
+After that simply connect the red wire to 5V, black to GND and the yellow one to RX0.
+
+Note that you should first turn on the Balanduino and then the transmitter and the receiver should be paired beforehand.
+
+The video below shows a video demonstration of it being used together with some FPV equipment:
+
+<a href="http://www.youtube.com/watch?v=moNfc9lR6Ew" target="_blank"><img src="http://img.youtube.com/vi/moNfc9lR6Ew/0.jpg" alt="Balanduino FPV demonstration" width="240" height="180" border="10" /></a>
+
+# Android App
+
 It it also possible to control the robot and adjust the PID values and others variables using the following Android application:
 
 [![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](http://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino)

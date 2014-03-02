@@ -15,7 +15,7 @@
  e-mail   :  kristianl@tkjelectronics.com
 */
 
-#ifdef ENABLE_USB
+#if defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
 
 uint8_t ps3OldLed, wiiOldLed;
 #ifdef ENABLE_XBOX
@@ -44,6 +44,7 @@ void readSPPData() {
 #endif // ENABLE_SPP
 
 void readUsb() {
+#ifdef ENABLE_USB
   Usb.Task(); // The SPP data is actually not send until this is called, one could call SerialBT.send() directly as well
 
   if (Usb.getUsbTaskState() == USB_STATE_ERROR && layingDown) { // Check if the USB state machine is in an error state, but also make sure the robot is laying down
@@ -53,6 +54,7 @@ void readUsb() {
     Usb.vbusPower(vbus_on);
     Usb.setUsbTaskState(USB_DETACHED_SUBSTATE_WAIT_FOR_DEVICE); // Reset state machine
   }
+#endif // ENABLE_USB
 
 #ifdef ENABLE_SPP
   readSPPData();
@@ -108,6 +110,11 @@ void readUsb() {
         steer(updateXbox);
     }
 #endif // ENABLE_XBOX
+#ifdef ENABLE_SPEKTRUM
+    readSpektrum();
+    if (!commandSent && (rcValue[1] < 1490 || rcValue[1] > 1510 || rcValue[2] < 1490 || rcValue[2] > 1510))
+      steer(updateSpektrum);
+#endif // ENABLE_SPEKTRUM
     if (!commandSent) // If there hasn't been send a command by now, then send stop
       steer(stop);
   }
@@ -293,7 +300,7 @@ void onInitXbox() { // This function is called when the controller is first init
 
 #endif // ENABLE_USB
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS) || defined(ENABLE_SPEKTRUM)
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
 
@@ -425,6 +432,18 @@ void steer(Command command) {
       turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)), 0, 65535, 0, cfg.turningLimit); // Scale from 0-65535 to 0-turningLimit
   }
 #endif // ENABLE_XBOX
+#ifdef ENABLE_SPEKTRUM
+  if (command == updateSpektrum) {
+    if (rcValue[2] > 1500) // Forward
+      targetOffset = scale(rcValue[2], 1500, 2000, 0, cfg.controlAngleLimit);
+    else if (rcValue[2] < 1500) // Backward
+      targetOffset = -scale(rcValue[2], 1500, 1000, 0, cfg.controlAngleLimit);
+    if (rcValue[1] < 1500) // Left
+      turningOffset = -scale(rcValue[1], 1500, 1000, 0, cfg.turningLimit);
+    else if (rcValue[1] > 1500) // Right
+      turningOffset = scale(rcValue[1], 1500, 2000, 0, cfg.turningLimit);
+  }
+#endif // ENABLE_SPEKTRUM
 
   if (command == stop) {
     steerStop = true;
@@ -447,4 +466,4 @@ double scale(double input, double inputMin, double inputMax, double outputMin, d
     output = outputMin;
   return output;
 }
-#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)
+#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS) || defined(ENABLE_SPEKTRUM)
