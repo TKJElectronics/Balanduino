@@ -26,22 +26,19 @@ uint16_t rcValue[RC_CHANS] = { 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1
 #define SPEK_FRAME_SIZE 16
 
 #if (SPEKTRUM == 1024)
-  #define SPEK_CHAN_SHIFT  2       // Assumes 10 bit frames, that is 1024 mode.
-  #define SPEK_CHAN_MASK   0x03    // Assumes 10 bit frames, that is 1024 mode.
-  #define SPEK_DATA_SHIFT          // Assumes 10 bit frames, that is 1024 mode.
-  #define SPEK_BIND_PULSES 3
+  #define SPEK_CHAN_SHIFT  2    // Assumes 10 bit frames, that is 1024 mode.
+  #define SPEK_CHAN_MASK   0x03 // Assumes 10 bit frames, that is 1024 mode.
+  #define SPEK_DATA_SHIFT       // Assumes 10 bit frames, that is 1024 mode.
 #elif (SPEKTRUM == 2048)
-  #define SPEK_CHAN_SHIFT  3       // Assumes 11 bit frames, that is 2048 mode.
-  #define SPEK_CHAN_MASK   0x07    // Assumes 11 bit frames, that is 2048 mode.
-  #define SPEK_DATA_SHIFT >> 1     // Assumes 11 bit frames, that is 2048 mode.
-  #define SPEK_BIND_PULSES 5
+  #define SPEK_CHAN_SHIFT  3    // Assumes 11 bit frames, that is 2048 mode.
+  #define SPEK_CHAN_MASK   0x07 // Assumes 11 bit frames, that is 2048 mode.
+  #define SPEK_DATA_SHIFT >> 1  // Assumes 11 bit frames, that is 2048 mode.
 #endif
 
 void readSpektrum() {
   while (Serial.available() > SPEK_FRAME_SIZE) { // More than a frame? More bytes implies we weren't called for multiple frame times. We do not want to process 'old' frames in the buffer.
-    for (uint8_t i = 0; i < SPEK_FRAME_SIZE; i++) {
+    for (uint8_t i = 0; i < SPEK_FRAME_SIZE; i++)
       Serial.read();  // Toss one full frame of bytes.
-    }
   }
   if (Serial.available() == SPEK_FRAME_SIZE) { // A complete frame? If not, we'll catch it next time we are called.
     Serial.read(); Serial.read(); // Eat the header bytes
