@@ -211,12 +211,17 @@ void setup() {
     while (1); // Halt
   }
 
+  while (i2cWrite(0x6B, 0x80, true)); // Reset device, this resets all internal registers to their default values
+  do {
+    while (i2cRead(0x6B, i2cBuffer, 1));
+  } while (i2cBuffer[0] & 0x80); // Wait for the bit to clear
+  delay(5);
+  while (i2cWrite(0x6B, 0x09, true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
   i2cBuffer[0] = 15; // Set the sample rate to 500Hz - 8kHz/(15+1) = 500Hz
   i2cBuffer[1] = 0x00; // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
   i2cBuffer[2] = 0x00; // Set Gyro Full Scale Range to ±250deg/s
   i2cBuffer[3] = 0x00; // Set Accelerometer Full Scale Range to ±2g
-  while (i2cWrite(0x19, i2cBuffer, 4, false)); // Write to all four registers at once
-  while (i2cWrite(0x6B, 0x09, true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
+  while (i2cWrite(0x19, i2cBuffer, 4, true)); // Write to all four registers at once
 
   delay(100); // Wait for the sensor to get ready
 
