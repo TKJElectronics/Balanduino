@@ -76,7 +76,7 @@ USB Usb; // This will take care of all USB communication
 ADK adk(&Usb, "TKJ Electronics", // Manufacturer Name
               "Balanduino", // Model Name
               "Android App for Balanduino", // Description - user visible string
-              "0.6.0", // Version of the Android app
+              "0.6.1", // Version of the Android app
               "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
               "1234"); // Serial Number - this is not used
 #endif
