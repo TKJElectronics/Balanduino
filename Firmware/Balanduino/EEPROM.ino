@@ -47,7 +47,7 @@ void updateConfig() {
 }
 
 void restoreEEPROMValues() {
-  cfg.P = 10.0;
+  cfg.P = 9.0;
   cfg.I = 2.0;
   cfg.D = 3.0;
 
