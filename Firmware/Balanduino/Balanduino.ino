@@ -33,6 +33,7 @@
 #define ENABLE_ADK
 
 #include "Balanduino.h"
+#include <Arduino.h> // Standard Arduino header
 #include <Wire.h> // Official Arduino Wire library
 
 #ifdef ENABLE_ADK
