@@ -26,7 +26,7 @@
 
 /* Firmware Version Information */
 const char *version = "1.0.0";
-const uint8_t eepromVersion = 1; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
+const uint8_t eepromVersion = 2; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
 bool sendIMUValues, sendSettings, sendInfo, sendStatusReport, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
@@ -86,6 +86,8 @@ Command lastCommand; // This is used set a new targetPosition
 
 #define buzzer P5 // Buzzer used for feedback, it can be disconnected using the jumper
 
+#define spektrumBindPin P0 // Pin used to bind with the Spektrum Satellite receiver - you can use any bin while binding, but you should connect it to RX0 afterwards
+
 #define MAKE_PIN(pin) MAKE_PIN2(pin) // Puts a P in front of the pin number, e.g. 1 becomes P1
 #define MAKE_PIN2(pin) P ## pin
 
@@ -108,6 +110,7 @@ typedef struct {
   double Qangle, Qbias, Rmeasure; // Kalman filter values
   double accYzero, accZzero; // Accelerometer zero values
   double leftMotorScaler, rightMotorScaler;
+  bool bindSpektrum;
 } cfg_t;
 
 extern cfg_t cfg;
@@ -169,18 +172,20 @@ int32_t wheelVelocity; // Wheel velocity based on encoder readings
 int32_t targetPosition; // The encoder position the robot should be at
 
 extern uint16_t rcValue[];
+bool spekConnected; // True if spektrum receiver is connected
+uint32_t spekConnectedTimer; // Timer used to check if the connection is dropped
 
 #if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
-const uint16_t zoneA = 8000*2;
-const uint16_t zoneB = 4000*2;
-const uint16_t zoneC = 1000*2;
-const double positionScaleA = 600*2; // One resolution is 1856 pulses per encoder
-const double positionScaleB = 800*2;
-const double positionScaleC = 1000*2;
-const double positionScaleD = 500*2;
-const double velocityScaleMove = 70*2;
-const double velocityScaleStop = 60*2;
-const double velocityScaleTurning = 70*2;
+const uint16_t zoneA = 8000 * 2;
+const uint16_t zoneB = 4000 * 2;
+const uint16_t zoneC = 1000 * 2;
+const double positionScaleA = 600 * 2; // One resolution is 1856 pulses per encoder
+const double positionScaleB = 800 * 2;
+const double positionScaleC = 1000 * 2;
+const double positionScaleD = 500 * 2;
+const double velocityScaleMove = 70 * 2;
+const double velocityScaleStop = 60 * 2;
+const double velocityScaleTurning = 70 * 2;
 #else
 const uint16_t zoneA = 8000;
 const uint16_t zoneB = 4000;
@@ -224,7 +229,8 @@ int32_t readLeftEncoder();
 int32_t readRightEncoder();
 int32_t getWheelsPosition();
 
-void readSpektrum();
+void bindSpektrum();
+void readSpektrum(uint8_t input);
 
 void checkSerialData();
 void printMenu();

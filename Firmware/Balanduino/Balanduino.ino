@@ -116,16 +116,17 @@ WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck
 #endif
 
 void setup() {
-  /* Initialize UART */
-  Serial.begin(115200);
-
   /* Setup buzzer pin */
   buzzer::SetDirWrite();
 
   /* Read the PID values, target angle and other saved values in the EEPROM */
-  if (!checkInitializationFlags())
+  if (!checkInitializationFlags()) {
     readEEPROMValues(); // Only read the EEPROM values if they have not been restored
-  else { // Indicate that the EEPROM values have been reset
+#ifdef ENABLE_SPEKTRUM
+    if (cfg.bindSpektrum) // If flag is set, then bind with Spektrum receiver
+      bindSpektrum();
+#endif
+  } else { // Indicate that the EEPROM values have been reset
     for (uint8_t i = 0; i < 2; i++) {
       buzzer::Set();
       delay(50);
@@ -133,6 +134,9 @@ void setup() {
       delay(50);
     }
   }
+
+  /* Initialize UART */
+  Serial.begin(115200);
 
   /* Setup encoders */
   leftEncoder1::SetDirRead();
@@ -360,11 +364,11 @@ void loop() {
   }
 
   /* Read the Bluetooth dongle and send PID and IMU values */
+#if defined(ENABLE_TOOLS) || defined(ENABLE_SPEKTRUM)
+  checkSerialData();
+#endif
 #if defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
   readUsb();
-#endif
-#ifdef ENABLE_TOOLS
-  checkSerialData();
 #endif
 #if defined(ENABLE_TOOLS) || defined(ENABLE_SPP)
   printValues();

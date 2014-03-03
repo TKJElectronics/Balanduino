@@ -111,9 +111,14 @@ void readUsb() {
     }
 #endif // ENABLE_XBOX
 #ifdef ENABLE_SPEKTRUM
-    readSpektrum();
-    if (!commandSent && (rcValue[1] < 1490 || rcValue[1] > 1510 || rcValue[2] < 1490 || rcValue[2] > 1510))
-      steer(updateSpektrum);
+    if (spekConnected) {
+      if (millis() - spekConnectedTimer > 100) // If it has been more than 100ms since last data, then it must be disconnected
+        spekConnected = false;
+      else {
+        if (!commandSent && (rcValue[1] < 1490 || rcValue[1] > 1510 || rcValue[2] < 1490 || rcValue[2] > 1510))
+          steer(updateSpektrum);
+      }
+    }
 #endif // ENABLE_SPEKTRUM
     if (!commandSent) // If there hasn't been send a command by now, then send stop
       steer(stop);
@@ -148,7 +153,7 @@ void readUsb() {
       xboxOldLed = OFF; // Reset value
     }
   }
-#endif
+#endif // ENABLE_XBOX
 
 #if defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
   if (millis() - ledTimer > 1000) { // Update every 1s

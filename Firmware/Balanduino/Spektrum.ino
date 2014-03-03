@@ -15,45 +15,77 @@
  e-mail   :  kristianl@tkjelectronics.com
 */
 
-// Inspired by: https://github.com/multiwii/multiwii-firmware
-
 #ifdef ENABLE_SPEKTRUM
 
-#define SPEKTRUM 1024 // Set to either 1024 or 2048
+#define SPEKTRUM 1024 // Set to either 1024 or 2048 depending on your satellite receiver
 #define RC_CHANS 12
 uint16_t rcValue[RC_CHANS] = { 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502 }; // Interval [1000;2000]
 
 #define SPEK_FRAME_SIZE 16
 
+uint8_t spekBuffer[SPEK_FRAME_SIZE]; // Buffer used to store the serial data
+uint8_t spekIndex; // Index in buffer
+uint32_t spekTimer; // Used to check the time between messages, this is used to check if we started in the middle of a frame
+
 #if (SPEKTRUM == 1024)
   #define SPEK_CHAN_SHIFT  2    // Assumes 10 bit frames, that is 1024 mode.
   #define SPEK_CHAN_MASK   0x03 // Assumes 10 bit frames, that is 1024 mode.
   #define SPEK_DATA_SHIFT       // Assumes 10 bit frames, that is 1024 mode.
+  #define SPEK_BIND_PULSES 3
 #elif (SPEKTRUM == 2048)
   #define SPEK_CHAN_SHIFT  3    // Assumes 11 bit frames, that is 2048 mode.
   #define SPEK_CHAN_MASK   0x07 // Assumes 11 bit frames, that is 2048 mode.
   #define SPEK_DATA_SHIFT >> 1  // Assumes 11 bit frames, that is 2048 mode.
+  #define SPEK_BIND_PULSES 5
 #endif
 
-void readSpektrum() {
-  while (Serial.available() > SPEK_FRAME_SIZE) { // More than a frame? More bytes implies we weren't called for multiple frame times. We do not want to process 'old' frames in the buffer.
-    for (uint8_t i = 0; i < SPEK_FRAME_SIZE; i++)
-      Serial.read();  // Toss one full frame of bytes.
+// Bind code inspired by David Thompson: https://code.google.com/p/nextcopterplus/source/browse/trunk/OpenAero2/src/misc_asm.S
+void bindSpektrum() {
+  spektrumBindPin::Clear();
+  delay(63); // Tweaked until bind pulses was about 68ms after power-up
+  spektrumBindPin::SetDirWrite();
+  cli();
+  for (uint8_t i = 0; i < SPEK_BIND_PULSES; i++) {
+    spektrumBindPin::Clear();
+    delayMicroseconds(118);
+    spektrumBindPin::Set();
+    delayMicroseconds(122);
   }
-  if (Serial.available() == SPEK_FRAME_SIZE) { // A complete frame? If not, we'll catch it next time we are called.
-    Serial.read(); Serial.read(); // Eat the header bytes
+  sei();
+  spektrumBindPin::SetDirRead();
+  spektrumBindPin::Set();
+
+  cfg.bindSpektrum = false;
+  updateConfig(); // Update EEPROM
+
+  buzzer::Set(); // Turn on buzzer
+}
+
+// Inspired by: https://github.com/multiwii/multiwii-firmware
+void readSpektrum(uint8_t input) {
+  if (spekIndex > 0 && millis() - spekTimer > 10) // More than 10ms since last incomplete message
+    spekIndex = 0; // It must be a new frame
+  spekTimer = millis();
+
+  spekBuffer[spekIndex++] = input;
+
+  if (spekIndex == SPEK_FRAME_SIZE) { // A complete frame? If not, we'll catch it next time we are called.
+    // Skip first header bytes
     for (uint8_t b = 2; b < SPEK_FRAME_SIZE; b += 2) {
-      uint8_t bh = Serial.read();
-      uint8_t bl = Serial.read();
+      uint8_t bh = spekBuffer[b];
+      uint8_t bl = spekBuffer[b + 1];
       uint8_t spekChannel = 0x0F & (bh >> SPEK_CHAN_SHIFT);
       if (spekChannel < RC_CHANS) rcValue[spekChannel] = 988 + ((((uint16_t)(bh & SPEK_CHAN_MASK) << 8) + bl) SPEK_DATA_SHIFT);
     }
+    spekIndex = 0;
+    spekConnected = true;
+    spekConnectedTimer = millis();
 #if 0 // Set this to 1 to print the channel values
     for (uint8_t i = 0; i < RC_CHANS; i++) {
       Serial.print(rcValue[i]);
       Serial.write('\t');
     }
-    Serial.println();
+    Serial.println(Serial.available());
 #endif
   }
 }

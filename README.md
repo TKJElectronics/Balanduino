@@ -46,7 +46,9 @@ You will need the following receiver and cable:
 
 After that simply connect the red wire to 5V, black to GND and the yellow one to RX0.
 
-Note that you should first turn on the Balanduino and then the transmitter and the receiver should be paired beforehand.
+To bind with the satellite receiver send "BS;" via the serial monitor and then follow the instructions.
+
+Note that you might need to disconnect the satellite receiver from RX0 if it is already sending data, as it will corrupt your command
 
 The video below shows a video demonstration of it being used together with some FPV equipment:
 
