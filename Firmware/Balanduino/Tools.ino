@@ -24,26 +24,24 @@ void checkSerialData() {
     if (input == 'm')
       printMenu();
     else {
-      dataInput[0] = static_cast<char> (input); // Intentional cast
 #endif
 #ifdef ENABLE_SPEKTRUM
       readSpektrum(static_cast<uint8_t> (input)); // Intentional cast
 #endif
 #ifdef ENABLE_TOOLS
+      dataInput[0] = static_cast<char> (input); // Intentional cast
       delay(2); // Wait for rest of data
-#endif
       uint8_t i = 1;
+#endif
       while (1) {
         input = Serial.read();
         if (input == -1) // Error while reading the string
           return;
-#ifdef ENABLE_TOOLS
-        dataInput[i] = static_cast<char> (input); // Intentional cast
-#endif
 #ifdef ENABLE_SPEKTRUM
         readSpektrum(static_cast<uint8_t> (input)); // Intentional cast
 #endif
 #ifdef ENABLE_TOOLS
+        dataInput[i] = static_cast<char> (input); // Intentional cast
         if (dataInput[i] == ';') // Keep reading until it reads a semicolon
           break;
         if (++i >= sizeof(dataInput) / sizeof(dataInput[0])) // String is too long
