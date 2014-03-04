@@ -24,25 +24,31 @@ void checkSerialData() {
     if (input == 'm')
       printMenu();
     else {
+      dataInput[0] = static_cast<char> (input); // Intentional cast
 #endif
-      dataInput[0] = input;
 #ifdef ENABLE_SPEKTRUM
-      readSpektrum(input);
+      readSpektrum(static_cast<uint8_t> (input)); // Intentional cast
+#endif
+#ifdef ENABLE_TOOLS
+      delay(1); // Wait for rest of data
 #endif
       uint8_t i = 1;
-      delay(1); // Wait for rest of data
       while (1) {
         input = Serial.read();
         if (input == -1) // Error while reading the string
           return;
-#ifdef ENABLE_SPEKTRUM
-        readSpektrum(input);
-#endif
+#ifdef ENABLE_TOOLS
         dataInput[i] = static_cast<char> (input); // Intentional cast
+#endif
+#ifdef ENABLE_SPEKTRUM
+        readSpektrum(static_cast<uint8_t> (input)); // Intentional cast
+#endif
+#ifdef ENABLE_TOOLS
         if (dataInput[i] == ';') // Keep reading until it reads a semicolon
           break;
         if (++i >= sizeof(dataInput) / sizeof(dataInput[0])) // String is too long
           return;
+#endif
       }
 #ifdef ENABLE_TOOLS
       bluetoothData = false;
@@ -88,11 +94,17 @@ void printMenu() {
   Serial.println(F("CS;\t\t\t\tSend stop command"));
   Serial.println(F("CJ,x,y;\t\t\t\tSteer robot using x,y-coordinates"));
   Serial.println(F("CM,pitch,roll;\t\t\tSteer robot using pitch and roll"));
+#ifdef ENABLE_WII
   Serial.println(F("CPW;\t\t\t\tStart paring sequence with Wiimote"));
+#endif
+#ifdef ENABLE_PS4
   Serial.println(F("CPP;\t\t\t\tStart paring sequence with PS4 controller"));
+#endif
   Serial.println(F("CR;\t\t\t\tRestore default EEPROM values\r\n"));
 
+#ifdef ENABLE_SPEKTRUM
   Serial.println(F("BS;\t\t\t\tBind with Spektrum satellite receiver"));
+#endif
   Serial.println(F("\r\n==========================================================================================\r\n"));
 }
 
@@ -313,11 +325,13 @@ void setValues(char *input) {
 #endif
   }
 
-  else if (input[0] == 'B' && input[1] == 'S') { // Bind with Spektrum receiver
+#ifdef ENABLE_SPEKTRUM
+  else if (input[0] == 'B' && input[1] == 'S') { // Bind with Spektrum satellite receiver on next power up
     Serial.println(F("Now turn the Balanduino and the satellite receiver off by removing the power. The next time it turns on it will start the binding process with the satellite receiver"));
     cfg.bindSpektrum = true; // After this you should turn off the robot and then turn it on again
     updateConfig();
   }
+#endif
 
   else if (input[0] == 'A' && input[1] == 'C') // Accelerometer calibration
     calibrateAcc();
@@ -429,7 +443,7 @@ void setValues(char *input) {
     }
   }
 }
-#endif // ENABLE_TOOLS or ENABLE_SPP
+#endif // defined(ENABLE_TOOLS) || defined(ENABLE_SPP)
 
 bool calibrateGyro() {
   int16_t gyroXbuffer[25];

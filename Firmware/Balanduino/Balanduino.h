@@ -86,7 +86,7 @@ Command lastCommand; // This is used set a new targetPosition
 
 #define buzzer P5 // Buzzer used for feedback, it can be disconnected using the jumper
 
-#define spektrumBindPin P0 // Pin used to bind with the Spektrum Satellite receiver - you can use any bin while binding, but you should connect it to RX0 afterwards
+#define spektrumBindPin P0 // Pin used to bind with the Spektrum satellite receiver - you can use any pin while binding, but you should connect it to RX0 afterwards
 
 #define MAKE_PIN(pin) MAKE_PIN2(pin) // Puts a P in front of the pin number, e.g. 1 becomes P1
 #define MAKE_PIN2(pin) P ## pin

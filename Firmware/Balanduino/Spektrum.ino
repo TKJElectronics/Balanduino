@@ -23,8 +23,8 @@ uint16_t rcValue[RC_CHANS] = { 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1502, 1
 
 #define SPEK_FRAME_SIZE 16
 
-uint8_t spekBuffer[SPEK_FRAME_SIZE]; // Buffer used to store the serial data
-uint8_t spekIndex; // Index in buffer
+uint8_t spekBuffer[SPEK_FRAME_SIZE]; // Buffer used to store the serial data from the satellite receiver
+uint8_t spekIndex; // Buffer index
 uint32_t spekTimer; // Used to check the time between messages, this is used to check if we started in the middle of a frame
 
 #if (SPEKTRUM == 1024)

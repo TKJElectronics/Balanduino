@@ -123,7 +123,7 @@ void setup() {
   if (!checkInitializationFlags()) {
     readEEPROMValues(); // Only read the EEPROM values if they have not been restored
 #ifdef ENABLE_SPEKTRUM
-    if (cfg.bindSpektrum) // If flag is set, then bind with Spektrum receiver
+    if (cfg.bindSpektrum) // If flag is set, then bind with Spektrum satellite receiver
       bindSpektrum();
 #endif
   } else { // Indicate that the EEPROM values have been reset
