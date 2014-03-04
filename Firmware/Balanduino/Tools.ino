@@ -30,7 +30,7 @@ void checkSerialData() {
       readSpektrum(static_cast<uint8_t> (input)); // Intentional cast
 #endif
 #ifdef ENABLE_TOOLS
-      delay(1); // Wait for rest of data
+      delay(2); // Wait for rest of data
 #endif
       uint8_t i = 1;
       while (1) {
