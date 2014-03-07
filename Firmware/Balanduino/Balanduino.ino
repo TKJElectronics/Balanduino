@@ -126,13 +126,11 @@ void setup() {
     if (cfg.bindSpektrum) // If flag is set, then bind with Spektrum satellite receiver
       bindSpektrum();
 #endif
-  } else { // Indicate that the EEPROM values have been reset by beeping two short times
-    for (uint8_t i = 0; i < 2; i++) {
-      buzzer::Set();
-      delay(50);
-      buzzer::Clear();
-      delay(50);
-    }
+  } else { // Indicate that the EEPROM values have been reset by turning on the buzzer
+    buzzer::Set();
+    delay(1000);
+    buzzer::Clear();
+    delay(100); // Wait a little after the pin is cleared
   }
 
   /* Initialize UART */
