@@ -171,10 +171,23 @@ int32_t lastWheelPosition; // Used to calculate the wheel velocity
 int32_t wheelVelocity; // Wheel velocity based on encoder readings
 int32_t targetPosition; // The encoder position the robot should be at
 
-extern uint16_t rcValue[];
+// Variables used for Spektrum receiver
+extern uint16_t rcValue[]; // Channel values
 bool spekConnected; // True if spektrum receiver is connected
 uint32_t spekConnectedTimer; // Timer used to check if the connection is dropped
 
+#define RC_CHAN_THROTTLE 0
+#define RC_CHAN_ROLL     1
+#define RC_CHAN_PITCH    2
+#define RC_CHAN_YAW      3
+#define RC_CHAN_AUX1     4
+#define RC_CHAN_AUX2     5
+#define RC_CHAN_AUX3     6
+#if (SPEKTRUM == 2048) // 8 channels
+#define RC_CHAN_AUX4     7
+#endif
+
+// Encoder values
 #if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
 const uint16_t zoneA = 8000 * 2;
 const uint16_t zoneB = 4000 * 2;

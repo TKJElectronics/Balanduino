@@ -451,7 +451,7 @@ bool calibrateGyro() {
     delay(10);
   }
   if (!checkMinMax(gyroXbuffer, 25, 2000)) {
-    Serial.print(F("Gyro calibration error"));
+    Serial.println(F("Gyro calibration error"));
     buzzer::Set();
     return 1;
   }

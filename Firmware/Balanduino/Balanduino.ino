@@ -126,7 +126,7 @@ void setup() {
     if (cfg.bindSpektrum) // If flag is set, then bind with Spektrum satellite receiver
       bindSpektrum();
 #endif
-  } else { // Indicate that the EEPROM values have been reset
+  } else { // Indicate that the EEPROM values have been reset by beeping two short times
     for (uint8_t i = 0; i < 2; i++) {
       buzzer::Set();
       delay(50);
@@ -179,7 +179,7 @@ void setup() {
 
   /* Enable PWM on pin 18 (OC1A) & pin 17 (OC1B) */
   // Clear OC1A/OC1B on compare match when up-counting
-  // Set OC1A/OC1B on compare match when downcounting
+  // Set OC1A/OC1B on compare match when down-counting
   TCCR1A = (1 << COM1A1) | (1 << COM1B1);
 
 #ifdef ENABLE_USB

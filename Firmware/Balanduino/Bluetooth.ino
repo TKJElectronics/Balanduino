@@ -115,7 +115,7 @@ void readUsb() {
       if (millis() - spekConnectedTimer > 100) // If it has been more than 100ms since last data, then it must be disconnected
         spekConnected = false;
       else {
-        if (!commandSent && (rcValue[1] < 1490 || rcValue[1] > 1510 || rcValue[2] < 1490 || rcValue[2] > 1510))
+        if (!commandSent && (rcValue[RC_CHAN_ROLL] < 1490 || rcValue[RC_CHAN_ROLL] > 1510 || rcValue[RC_CHAN_PITCH] < 1490 || rcValue[RC_CHAN_PITCH] > 1510))
           steer(updateSpektrum);
       }
     }
@@ -439,14 +439,14 @@ void steer(Command command) {
 #endif // ENABLE_XBOX
 #ifdef ENABLE_SPEKTRUM
   if (command == updateSpektrum) {
-    if (rcValue[2] > 1500) // Forward
-      targetOffset = scale(rcValue[2], 1500, 2000, 0, cfg.controlAngleLimit);
-    else if (rcValue[2] < 1500) // Backward
-      targetOffset = -scale(rcValue[2], 1500, 1000, 0, cfg.controlAngleLimit);
-    if (rcValue[1] < 1500) // Left
-      turningOffset = -scale(rcValue[1], 1500, 1000, 0, cfg.turningLimit);
-    else if (rcValue[1] > 1500) // Right
-      turningOffset = scale(rcValue[1], 1500, 2000, 0, cfg.turningLimit);
+    if (rcValue[RC_CHAN_PITCH] > 1500) // Forward
+      targetOffset = scale(rcValue[RC_CHAN_PITCH], 1500, 2000, 0, cfg.controlAngleLimit);
+    else if (rcValue[RC_CHAN_PITCH] < 1500) // Backward
+      targetOffset = -scale(rcValue[RC_CHAN_PITCH], 1500, 1000, 0, cfg.controlAngleLimit);
+    if (rcValue[RC_CHAN_ROLL] < 1500) // Left
+      turningOffset = -scale(rcValue[RC_CHAN_ROLL], 1500, 1000, 0, cfg.turningLimit);
+    else if (rcValue[RC_CHAN_ROLL] > 1500) // Right
+      turningOffset = scale(rcValue[RC_CHAN_ROLL], 1500, 2000, 0, cfg.turningLimit);
   }
 #endif // ENABLE_SPEKTRUM
 
