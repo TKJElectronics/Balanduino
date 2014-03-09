@@ -52,7 +52,7 @@ Note that you might need to disconnect the satellite receiver from RX0 if it is 
 
 The video below shows a video demonstration of it being used together with some FPV equipment:
 
-<a href="http://www.youtube.com/watch?v=moNfc9lR6Ew" target="_blank"><img src="http://img.youtube.com/vi/moNfc9lR6Ew/0.jpg" alt="Balanduino FPV demonstration" width="240" height="180" border="10" /></a>
+<a href="http://www.youtube.com/watch?v=tcFdWlAbc3s" target="_blank"><img src="http://img.youtube.com/vi/tcFdWlAbc3s/0.jpg" alt="Balanduino FPV demonstration" width="240" height="180" border="10" /></a>
 
 # Android App
 
