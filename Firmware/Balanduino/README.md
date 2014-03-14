@@ -1,5 +1,5 @@
 # Balanduino Arduino code
-#### Developed by Kristian Lauszus, TKJ Electronics 2013
+#### Developed by TKJ Electronics 2013-2014
 
 The code is released under the GNU General Public License.
 _________
@@ -39,4 +39,4 @@ Advanced users can also use the included [Makefile](Makefile) if they prefer.
 
 [Balanduino.hex](Balanduino.hex) contains the latest compiled code.
 
-For more information send us an email at <mail@tkjelectronics.com>.
+For more information send us an email at <support@tkjelectronics.com>.

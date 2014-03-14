@@ -1,5 +1,5 @@
 # Balanduino
-#### Developed by Kristian Lauszus, TKJ Electronics 2013
+#### Developed by TKJ Electronics 2013-2014
 
 The code is released under the GNU General Public License.
 _________
@@ -94,4 +94,4 @@ git clone --recursive https://github.com/TKJElectronics/Balanduino.git
 
 </br>
 
-For more information send us an email at <mail@tkjelectronics.com>.
+For more information feel free to contact us at <support@tkjelectronics.com>.
