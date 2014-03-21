@@ -76,6 +76,12 @@ A video filmed with a GoPro mounted on the robot can be seen below:
 
 <a href="http://www.youtube.com/watch?v=CvFcnb_9anM" target="_blank"><img src="http://img.youtube.com/vi/CvFcnb_9anM/0.jpg" alt="GoPro demonstration" width="240" height="180" border="10" /></a>
 
+# Calibration of the accelerometer
+
+If the robot tilts to one of the sides when you receive the kit, you might need to calibrate the accelerometer.
+
+This is done by simply sending ```AC;``` via the serial monitor. After that simply just follow the instructions.
+
 # Download
 
 To download the entire repository including all submodules run the following command in a terminal:
