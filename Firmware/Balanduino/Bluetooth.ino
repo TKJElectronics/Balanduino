@@ -303,7 +303,7 @@ void onInitXbox() { // This function is called when the controller is first init
 
 #endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 
-#endif // ENABLE_USB
+#endif // defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS) || defined(ENABLE_SPEKTRUM)
 void steer(Command command) {
