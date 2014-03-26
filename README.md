@@ -27,6 +27,8 @@ More information can be found at the Wiki article: <http://wiki.balanduino.net/O
 
 # Remote control
 
+## Game controllers
+
 To control the robot you can use the following game controllers:
 
 * Normal PS3 Dualshock controller
@@ -36,6 +38,22 @@ To control the robot you can use the following game controllers:
 * Xbox 360 wireless controller
 * Wiimote including support for the Motion Plus and Nunchuck extension
 * Wii U Pro controller
+
+## Android App
+
+It it also possible to control the robot and adjust the PID values and others variables using the following Android application:
+
+[![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](http://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino)
+
+Source: <https://github.com/TKJElectronics/BalanduinoAndroidApp>
+
+## Computer applications
+
+You can also use your Windows, Mac or Linux based computer by using the following Processing application: <https://github.com/TKJElectronics/BalanduinoProcessingApp>.
+
+A dedicated Windows application is also available: <https://github.com/TKJElectronics/BalanduinoWindowsApp>.
+
+## RC Transmitter
 
 You can also use a RC transmitter. For now only Spektrum satellite receivers are supported.
 
@@ -53,18 +71,6 @@ Note that you might need to disconnect the satellite receiver from RX0 if it is 
 The video below shows a video demonstration of it being used together with some FPV equipment:
 
 <a href="http://www.youtube.com/watch?v=tcFdWlAbc3s" target="_blank"><img src="http://img.youtube.com/vi/tcFdWlAbc3s/3.jpg" alt="Balanduino FPV demonstration" width="240" height="180" border="10" /></a>
-
-# Android App
-
-It it also possible to control the robot and adjust the PID values and others variables using the following Android application:
-
-[![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](http://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino)
-
-Source: <https://github.com/TKJElectronics/BalanduinoAndroidApp>
-
-You can also use your Windows, Mac or Linux based computer by using the following Processing application: <https://github.com/TKJElectronics/BalanduinoProcessingApp>.
-
-A dedicated Windows application is also available: <https://github.com/TKJElectronics/BalanduinoWindowsApp>.
 
 # Video presentation
 
