@@ -1,4 +1,5 @@
-#### Developed by TKJ Electronics 2013-2014
+# Balanduino hardware add-on
+#### Developed by Kristian Lauszus, TKJ Electronics 2013-2014
 
 The code is released under the GNU General Public License.
 _________

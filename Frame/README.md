@@ -1,5 +1,5 @@
 # Balanduino Frame
-#### Developed by TKJ Electronics 2013-2014
+#### Developed by Kristian Lauszus and Thomas Jespersen, TKJ Electronics 2013-2014
 
 The frame is released under the [Attribution-NonCommercial-ShareAlike 3.0 Unported](http://creativecommons.org/licenses/by-nc-sa/3.0/).
 _________
