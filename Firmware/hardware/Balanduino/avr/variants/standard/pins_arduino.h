@@ -45,8 +45,7 @@ static const uint8_t A1 = 8;
 static const uint8_t A2 = 9;
 static const uint8_t A3 = 10;
 static const uint8_t A4 = 11;
-
-#define VBAT 12 // Not broken out - used for battery voltage measurement
+static const uint8_t A5 = 12; // Not broken out - used for battery voltage measurement
 
 static const uint8_t SDA = 13;
 static const uint8_t SCL = 14;

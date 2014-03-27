@@ -93,6 +93,8 @@ Command lastCommand; // This is used set a new targetPosition
 
 #define LED MAKE_PIN(LED_BUILTIN) // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
 
+#define VBAT A5 // Not broken out - used for battery voltage measurement
+
 /* Counters used to count the pulses from the encoders */
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
