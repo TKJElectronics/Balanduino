@@ -19,7 +19,7 @@
 #define _balanduino_h_
 
 #if ARDUINO < 156 // Make sure the newest version of the Arduino IDE is used
-#error "Please update the Arduino IDE to the newest version: http://arduino.cc/en/Main/Software"
+#error "Please update the Arduino IDE to version 1.5.6 at the following website: http://arduino.cc/en/Main/Software"
 #endif
 
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
