@@ -20,6 +20,7 @@
  The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
  A dedicated Windows application can be found here: https://github.com/TKJElectronics/BalanduinoWindowsApp
  It can also be controlled by a PS3, PS4, Wii or a Xbox controller.
+ Furthermore it supports the Spektrum serial protocol used for RC receivers.
  For details, see: http://balanduino.net/
 */
 
