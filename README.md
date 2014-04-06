@@ -1,5 +1,5 @@
 # Balanduino
-#### Developed by Kristian Lauszus, TKJ Electronics 2013
+#### Developed by TKJ Electronics 2013-2014
 
 The code is released under the GNU General Public License.
 _________
@@ -27,14 +27,19 @@ More information can be found at the Wiki article: <http://wiki.balanduino.net/O
 
 # Remote control
 
+## Game controllers
+
 To control the robot you can use the following game controllers:
 
 * Normal PS3 Dualshock controller
 * PS3 Navigation controller
 * PS3 Move controller
+* PS4 controller
 * Xbox 360 wireless controller
 * Wiimote including support for the Motion Plus and Nunchuck extension
 * Wii U Pro controller
+
+## Android App
 
 It it also possible to control the robot and adjust the PID values and others variables using the following Android application:
 
@@ -42,15 +47,46 @@ It it also possible to control the robot and adjust the PID values and others va
 
 Source: <https://github.com/TKJElectronics/BalanduinoAndroidApp>
 
+## Computer applications
+
 You can also use your Windows, Mac or Linux based computer by using the following Processing application: <https://github.com/TKJElectronics/BalanduinoProcessingApp>.
 
 A dedicated Windows application is also available: <https://github.com/TKJElectronics/BalanduinoWindowsApp>.
 
+## RC Transmitter
+
+You can also use a RC transmitter. For now only Spektrum satellite receivers are supported.
+
+You will need the following receiver and cable:
+
+* <http://hobbyking.com/hobbyking/store/__46339__OrangeRx_R100_Spektrum_JR_DSM2_Compatible_Satellite_Receiver.html>
+* <http://hobbyking.com/hobbyking/store/__24524__ZYX_S_DSM2_DSMJ_Satellite_Receiver_Cable.html>
+
+After that simply connect the red wire to 5V, black to GND and the yellow one to RX0.
+
+To bind with the satellite receiver send ```BS;``` via the serial monitor and then follow the instructions.
+
+Note that you might need to disconnect the satellite receiver from RX0 if it is already sending data, as it will corrupt your command.
+
+The video below shows a video demonstration of it being used together with some FPV equipment:
+
+<a href="http://www.youtube.com/watch?v=tcFdWlAbc3s" target="_blank"><img src="http://img.youtube.com/vi/tcFdWlAbc3s/3.jpg" alt="Balanduino FPV demonstration" width="240" height="180" border="10" /></a>
+
 # Video presentation
 
-A video for the Kickstarter presentation of the robot can be found here: <http://www.youtube.com/watch?v=_kQniPbg9zc>.
+A video for the Kickstarter presentation can be seen below:
 
-A video filmed with a GoPro mounted on the robot can be seen here: <http://www.youtube.com/watch?v=CvFcnb_9anM>.
+<a href="http://www.youtube.com/watch?v=_kQniPbg9zc" target="_blank"><img src="http://img.youtube.com/vi/_kQniPbg9zc/0.jpg" alt="Kickstarter video presentation" width="240" height="180" border="10" /></a>
+
+A video filmed with a GoPro mounted on the robot can be seen below:
+
+<a href="http://www.youtube.com/watch?v=CvFcnb_9anM" target="_blank"><img src="http://img.youtube.com/vi/CvFcnb_9anM/0.jpg" alt="GoPro demonstration" width="240" height="180" border="10" /></a>
+
+# Calibration of the accelerometer
+
+If the robot tilts to one of the sides when you receive the kit, you might need to calibrate the accelerometer.
+
+This is done by simply sending ```AC;``` via the serial monitor. After that simply just follow the instructions.
 
 # Download
 
@@ -60,16 +96,14 @@ To download the entire repository including all submodules run the following com
 curl https://raw.github.com/TKJElectronics/Balanduino/master/download.sh | sh
 ```
 
-To clone the project use the recursive command to clone all the submodules as well:
+Or simply download the daily updated ZIP-repository from our website: <http://downloads.balanduino.net/github/Balanduino_latest.zip>.
+
+If you want to clone the project then use the recursive command to clone all the submodules as well:
 
 ```bash
 git clone --recursive https://github.com/TKJElectronics/Balanduino.git
 ```
 
-To update all submodules run the following command:
+</br>
 
-```bash
-git submodule foreach --recursive git pull origin master
-```
-
-For more information send us an email at <mail@tkjelectronics.com>.
+For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.com>.

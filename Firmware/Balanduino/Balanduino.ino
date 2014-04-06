@@ -1,23 +1,41 @@
-/*
- * The code is released under the GNU General Public License.
- * Developed by Kristian Lauszus, TKJ Electronics 2013
- * This is the algorithm for the Balanduino balancing robot.
- * It can be controlled by either an Android app or a Processing application via Bluetooth.
- * The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
- * The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
- * It can also be controlled by a PS3, Wii or a Xbox controller
- * For details, see: http://balanduino.net/
- */
+/* Copyright (C) 2013-2014 Kristian Lauszus, TKJ Electronics. All rights reserved.
+
+ This software may be distributed and modified under the terms of the GNU
+ General Public License version 2 (GPL2) as published by the Free Software
+ Foundation and appearing in the file GPL2.TXT included in the packaging of
+ this file. Please note that GPL2 Section 2[b] requires that all works based
+ on this software must also be made publicly available under the terms of
+ the GPL2 ("Copyleft").
+
+ Contact information
+ -------------------
+
+ Kristian Lauszus, TKJ Electronics
+ Web      :  http://www.tkjelectronics.com
+ e-mail   :  kristianl@tkjelectronics.com
+
+ This is the algorithm for the Balanduino balancing robot.
+ It can be controlled by either an Android app or a computer application via Bluetooth.
+ The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
+ The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
+ A dedicated Windows application can be found here: https://github.com/TKJElectronics/BalanduinoWindowsApp
+ It can also be controlled by a PS3, PS4, Wii or a Xbox controller.
+ Furthermore it supports the Spektrum serial protocol used for RC receivers.
+ For details, see: http://balanduino.net/
+*/
 
 /* Use this to enable and disable the different options */
 #define ENABLE_TOOLS
 #define ENABLE_SPP
 #define ENABLE_PS3
+#define ENABLE_PS4
 #define ENABLE_WII
 #define ENABLE_XBOX
 #define ENABLE_ADK
+#define ENABLE_SPEKTRUM
 
 #include "Balanduino.h"
+#include <Arduino.h> // Standard Arduino header
 #include <Wire.h> // Official Arduino Wire library
 #include <PID_v1.h> // The Arduino PID library by Brett Beauregard
 
@@ -38,6 +56,9 @@
 #ifdef ENABLE_PS3
 #include <PS3BT.h>
 #endif
+#ifdef ENABLE_PS4
+#include <PS4BT.h>
+#endif
 #ifdef ENABLE_WII
 #include <Wii.h>
 #endif
@@ -49,7 +70,7 @@ Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source 
 PID main_pid(&pitch, &PIDValue, &restAngle, 0, 0, 0, DIRECT);
 PID encoders_pid(&wheelPosition, &restAngle, &targetPosition, 0, 0, 0, DIRECT);
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
 #define ENABLE_USB
 USB Usb; // This will take care of all USB communication
 #else
@@ -62,7 +83,7 @@ USB Usb; // This will take care of all USB communication
 ADK adk(&Usb, "TKJ Electronics", // Manufacturer Name
               "Balanduino", // Model Name
               "Android App for Balanduino", // Description - user visible string
-              "0.5.0", // Version of the Android app
+              "0.6.1", // Version of the Android app
               "https://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino", // URL - web page to visit if no installed apps support the accessory
               "1234"); // Serial Number - this is not used
 #endif
@@ -71,7 +92,8 @@ ADK adk(&Usb, "TKJ Electronics", // Manufacturer Name
 XBOXRECV Xbox(&Usb); // You have to connect a Xbox wireless receiver to the Arduino to control it with a wireless Xbox controller
 #endif
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII)
+#define ENABLE_BTD
 #include <usbhub.h> // Some dongles can have a hub inside
 USBHub Hub(&Usb); // Some dongles have a hub inside
 BTD Btd(&Usb); // This is the main Bluetooth library, it will take care of all the USB and HCI communication with the Bluetooth dongle
@@ -85,17 +107,21 @@ SPP SerialBT(&Btd, "Balanduino", "0000"); // The SPP (Serial Port Protocol) emul
 PS3BT PS3(&Btd); // The PS3 library supports all three official controllers: the Dualshock 3, Navigation and Move controller
 #endif
 
+#ifdef ENABLE_PS4
+//PS4BT PS4(&Btd, PAIR); // You should create the instance like this if you want to pair with a PS4 controller, then hold PS and Share on the PS4 controller
+// Or you can simply send "CPP;" to the robot to start the pairing sequence
+// This can also be done using the Android or via the serial port
+PS4BT PS4(&Btd); // The PS4BT library supports the PS4 controller via Bluetooth
+#endif
+
 #ifdef ENABLE_WII
 WII Wii(&Btd); // The Wii library can communicate with Wiimotes and the Nunchuck and Motion Plus extension and finally the Wii U Pro Controller
 //WII Wii(&Btd,PAIR); // You will have to pair with your Wiimote first by creating the instance like this and the press 1+2 on the Wiimote or press sync if you are using a Wii U Pro Controller
-// Or you can simply send "CW;" to the robot to start the pairing sequence
+// Or you can simply send "CPW;" to the robot to start the pairing sequence
 // This can also be done using the Android or via the serial port
 #endif
 
 void setup() {
-  /* Initialize UART */
-  Serial.begin(115200);
-
   /* Setup buzzer pin */
   buzzer::SetDirWrite();
 
@@ -111,16 +137,21 @@ void setup() {
   encoders_pid.SetMode(AUTOMATIC); // Turn PID on
 
   /* Read the PID values, target angle and other saved values in the EEPROM */
-  if (!checkInitializationFlags())
+  if (!checkInitializationFlags()) {
     readEEPROMValues(); // Only read the EEPROM values if they have not been restored
-  else { // Indicate that the EEPROM values have been reset
-    for (uint8_t i = 0; i < 2; i++) {
-      buzzer::Set();
-      delay(50);
-      buzzer::Clear();
-      delay(50);
-    }
+#ifdef ENABLE_SPEKTRUM
+    if (cfg.bindSpektrum) // If flag is set, then bind with Spektrum satellite receiver
+      bindSpektrum();
+#endif
+  } else { // Indicate that the EEPROM values have been reset by turning on the buzzer
+    buzzer::Set();
+    delay(1000);
+    buzzer::Clear();
+    delay(100); // Wait a little after the pin is cleared
   }
+
+  /* Initialize UART */
+  Serial.begin(115200);
 
   /* Setup encoders */
   leftEncoder1::SetDirRead();
@@ -163,11 +194,8 @@ void setup() {
 
   /* Enable PWM on pin 18 (OC1A) & pin 17 (OC1B) */
   // Clear OC1A/OC1B on compare match when up-counting
-  // Set OC1A/OC1B on compare match when downcounting
+  // Set OC1A/OC1B on compare match when down-counting
   TCCR1A = (1 << COM1A1) | (1 << COM1B1);
-
-  setPWM(left, 0); // Turn off PWM on both pins
-  setPWM(right, 0);
 
 #ifdef ENABLE_USB
   if (Usb.Init() == -1) { // Check if USB Host is working
@@ -181,6 +209,9 @@ void setup() {
   // This is used to set the LEDs according to the voltage level and vibrate the controller to indicate the new connection
 #ifdef ENABLE_PS3
   PS3.attachOnInit(onInitPS3);
+#endif
+#ifdef ENABLE_PS4
+  //PS4.attachOnInit(onInitPS4); // I still have not figured out to control the light and rumble on the PS4 controller
 #endif
 #ifdef ENABLE_WII
   Wii.attachOnInit(onInitWii);
@@ -200,12 +231,22 @@ void setup() {
     while (1); // Halt
   }
 
+  while (i2cWrite(0x6B, 0x80, true)); // Reset device, this resets all internal registers to their default values
+  do {
+    while (i2cRead(0x6B, i2cBuffer, 1));
+  } while (i2cBuffer[0] & 0x80); // Wait for the bit to clear
+  delay(5);
+  while (i2cWrite(0x6B, 0x09, true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
+#if 1
+  i2cBuffer[0] = 1; // Set the sample rate to 500Hz - 1kHz/(1+1) = 500Hz
+  i2cBuffer[1] = 0x03; // Disable FSYNC and set 44 Hz Acc filtering, 42 Hz Gyro filtering, 1 KHz sampling
+#else
   i2cBuffer[0] = 15; // Set the sample rate to 500Hz - 8kHz/(15+1) = 500Hz
   i2cBuffer[1] = 0x00; // Disable FSYNC and set 260 Hz Acc filtering, 256 Hz Gyro filtering, 8 KHz sampling
+#endif
   i2cBuffer[2] = 0x00; // Set Gyro Full Scale Range to ±250deg/s
   i2cBuffer[3] = 0x00; // Set Accelerometer Full Scale Range to ±2g
-  while (i2cWrite(0x19, i2cBuffer, 4, false)); // Write to all four registers at once
-  while (i2cWrite(0x6B, 0x09, true)); // PLL with X axis gyroscope reference, disable temperature sensor and disable sleep mode
+  while (i2cWrite(0x19, i2cBuffer, 4, true)); // Write to all four registers at once
 
   delay(100); // Wait for the sensor to get ready
 
@@ -221,10 +262,15 @@ void setup() {
   pitch = accAngle;
   gyroAngle = accAngle;
 
-  /* Find gyro zero value */
-  calibrateGyro();
+  /* Calibrate gyro zero value */
+  while (calibrateGyro()); // Run again if the robot is moved while calibrating
 
-  pinMode(LED_BUILTIN, OUTPUT); // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
+  LED::SetDirWrite(); // Set LED pin to output
+  stopAndReset(); // Turn off motors and reset different values
+
+#ifdef ENABLE_TOOLS
+  printMenu();
+#endif
 
   /* Beep to indicate that it is now ready */
   buzzer::Set();
@@ -249,8 +295,17 @@ void loop() {
     while (1);
   }
 
+#if defined(ENABLE_WII) || defined(ENABLE_PS4) // We have to read much more often from the Wiimote and PS4 controller to decrease latency
+  bool readUSB = false;
 #ifdef ENABLE_WII
-  if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
+  if (Wii.wiimoteConnected)
+    readUSB = true;
+#endif
+#ifdef ENABLE_PS4
+  if (PS4.connected())
+    readUSB = true;
+#endif
+  if (readUSB)
     Usb.Task();
 #endif
 
@@ -281,8 +336,8 @@ void loop() {
   kalmanTimer = timer;
   //Serial.print(accAngle);Serial.print('\t');Serial.print(gyroAngle);Serial.print('\t');Serial.println(pitch);
 
-#ifdef ENABLE_WII
-  if (Wii.wiimoteConnected) // We have to read much more often from the Wiimote to decrease latency
+#if defined(ENABLE_WII) || defined(ENABLE_PS4) // We have to read much more often from the Wiimote and PS4 controller to decrease latency
+  if (readUSB)
     Usb.Task();
 #endif
 
@@ -328,27 +383,24 @@ void loop() {
   }
 
   /* Read the Bluetooth dongle and send PID and IMU values */
-#ifdef ENABLE_USB
-  readUsb();
-#endif
-#ifdef ENABLE_TOOLS
+#if defined(ENABLE_TOOLS) || defined(ENABLE_SPEKTRUM)
   checkSerialData();
+#endif
+#if defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
+  readUsb();
 #endif
 #if defined(ENABLE_TOOLS) || defined(ENABLE_SPP)
   printValues();
 #endif
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII)
+#ifdef ENABLE_BTD
   if (Btd.isReady()) {
     timer = millis();
     if ((Btd.watingForConnection && timer - blinkTimer > 1000) || (!Btd.watingForConnection && timer - blinkTimer > 100)) {
       blinkTimer = timer;
-      ledState = !ledState;
-      digitalWrite(LED_BUILTIN, ledState); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
+      LED::Toggle(); // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
     }
-  } else if (ledState) { // The LED is on
-    ledState = !ledState;
-    digitalWrite(LED_BUILTIN, ledState); // This will turn it off
-  }
+  } else
+    LED::Clear(); // This will turn it off
 #endif
 }

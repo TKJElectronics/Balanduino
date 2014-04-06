@@ -1,5 +1,5 @@
 # Balanduino hardware add-on
-#### Developed by Kristian Lauszus, TKJ Electronics 2013
+#### Developed by Kristian Lauszus, TKJ Electronics 2013-2014
 
 The code is released under the GNU General Public License.
 _________
@@ -21,6 +21,7 @@ The final structure should look like this:
 		* EEPROMAnything.h
 		* I2C.ino
 		* Motor.ino
+		* Spektrum.ino
 		* Tools.ino
 	* hardware/
 		* Balanduino/
@@ -34,4 +35,4 @@ The final structure should look like this:
 		* USB\_Host\_Shield\_20/
 		* KalmanFilter/
 
-For more information see the following site: <http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware> or send us an email at <mail@tkjelectronics.com>.
+For more information see the following site: <http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware> or send us an email at <support@tkjelectronics.com>.

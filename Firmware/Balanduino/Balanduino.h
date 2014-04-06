@@ -1,15 +1,32 @@
+/* Copyright (C) 2013-2014 Kristian Lauszus, TKJ Electronics. All rights reserved.
+
+ This software may be distributed and modified under the terms of the GNU
+ General Public License version 2 (GPL2) as published by the Free Software
+ Foundation and appearing in the file GPL2.TXT included in the packaging of
+ this file. Please note that GPL2 Section 2[b] requires that all works based
+ on this software must also be made publicly available under the terms of
+ the GPL2 ("Copyleft").
+
+ Contact information
+ -------------------
+
+ Kristian Lauszus, TKJ Electronics
+ Web      :  http://www.tkjelectronics.com
+ e-mail   :  kristianl@tkjelectronics.com
+*/
+
 #ifndef _balanduino_h_
 #define _balanduino_h_
 
-#if ARDUINO < 155 // Make sure the newest version of the Arduino IDE is used
-#error "Please update the Arduino IDE to the newest version: http://arduino.cc/en/Main/Software"
+#if ARDUINO < 156 // Make sure the newest version of the Arduino IDE is used
+#error "Please update the Arduino IDE to version 1.5.6 at the following website: http://arduino.cc/en/Main/Software"
 #endif
 
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
 /* Firmware Version Information */
-const char *version = "1.0.0";
-const uint8_t eepromVersion = 1; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
+const char *version = "1.1.0";
+const uint8_t eepromVersion = 2; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
 bool sendIMUValues, sendSettings, sendInfo, sendStatusReport, sendMainPIDValues, sendEncoderPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
@@ -19,8 +36,10 @@ const uint16_t PWMVALUE = F_CPU / PWM_FREQUENCY / 2; // The frequency is given b
 /* Used to make commands more readable */
 enum Command {
   updatePS3,
+  updatePS4,
   updateWii,
   updateXbox,
+  updateSpektrum,
   stop,
   forward,
   backward,
@@ -65,16 +84,23 @@ Command lastCommand; // This is used set a new targetPosition
 #define PIN_CHANGE_INTERRUPT_VECTOR_LEFT PCINT0_vect // You should change these to match your pins, if you are in doubt, just comment them out to disable them
 #define PIN_CHANGE_INTERRUPT_VECTOR_RIGHT PCINT0_vect
 
+#define buzzer P5 // Buzzer used for feedback, it can be disconnected using the jumper
+
+#define spektrumBindPin P0 // Pin used to bind with the Spektrum satellite receiver - you can use any pin while binding, but you should connect it to RX0 afterwards
+
+#define MAKE_PIN(pin) MAKE_PIN2(pin) // Puts a P in front of the pin number, e.g. 1 becomes P1
+#define MAKE_PIN2(pin) P ## pin
+
+#define LED MAKE_PIN(LED_BUILTIN) // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
+
+#define VBAT A5 // Not broken out - used for battery voltage measurement
+
 /* Counters used to count the pulses from the encoders */
 volatile int32_t leftCounter = 0;
 volatile int32_t rightCounter = 0;
 
-#define buzzer P5 // Buzzer used for feedback, it can be disconnected using the jumper
-
 double batteryVoltage; // Measured battery level
 uint8_t batteryCounter; // Counter used to check if it should check the battery level
-
-bool ledState; // Last state of the built in LED
 
 // PID Values struct
 typedef struct {
@@ -95,6 +121,7 @@ typedef struct {
   double Qangle, Qbias, Rmeasure; // Kalman filter values
   double accYzero, accZzero; // Accelerometer zero values
   double leftMotorScaler, rightMotorScaler;
+  bool bindSpektrum;
 } cfg_t;
 
 extern cfg_t cfg;
@@ -152,17 +179,34 @@ int32_t wheelVelocity; // Wheel velocity based on encoder readings
 double targetPosition; // The encoder position the robot should be at
 double wheelPosition;
 
+// Variables used for Spektrum receiver
+extern uint16_t rcValue[]; // Channel values
+bool spekConnected; // True if spektrum receiver is connected
+uint32_t spekConnectedTimer; // Timer used to check if the connection is dropped
+
+#define RC_CHAN_THROTTLE 0
+#define RC_CHAN_ROLL     1
+#define RC_CHAN_PITCH    2
+#define RC_CHAN_YAW      3
+#define RC_CHAN_AUX1     4
+#define RC_CHAN_AUX2     5
+#define RC_CHAN_AUX3     6
+#if (SPEKTRUM == 2048) // 8 channels
+#define RC_CHAN_AUX4     7
+#endif
+
+// Encoder values
 #if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
-const uint16_t zoneA = 8000*2;
-const uint16_t zoneB = 4000*2;
-const uint16_t zoneC = 1000*2;
-const double positionScaleA = 600*2; // One resolution is 1856 pulses per encoder
-const double positionScaleB = 800*2;
-const double positionScaleC = 1000*2;
-const double positionScaleD = 500*2;
-const double velocityScaleMove = 70*2;
-const double velocityScaleStop = 60*2;
-const double velocityScaleTurning = 70*2;
+const uint16_t zoneA = 8000 * 2;
+const uint16_t zoneB = 4000 * 2;
+const uint16_t zoneC = 1000 * 2;
+const double positionScaleA = 600 * 2; // One resolution is 1856 pulses per encoder
+const double positionScaleB = 800 * 2;
+const double positionScaleC = 1000 * 2;
+const double positionScaleD = 500 * 2;
+const double velocityScaleMove = 70 * 2;
+const double velocityScaleStop = 60 * 2;
+const double velocityScaleTurning = 70 * 2;
 #else
 const uint16_t zoneA = 8000;
 const uint16_t zoneB = 4000;
@@ -206,6 +250,9 @@ int32_t readLeftEncoder();
 int32_t readRightEncoder();
 int32_t getWheelsPosition();
 
+void bindSpektrum();
+void readSpektrum(uint8_t input);
+
 void checkSerialData();
 void printMenu();
 void calibrateMotor();
@@ -213,7 +260,7 @@ void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, do
 void calibrateAcc();
 void printValues();
 void setValues(char *input);
-void calibrateGyro();
+bool calibrateGyro();
 bool checkMinMax(int16_t *array, uint8_t length, int16_t maxDifference);
 
 #endif

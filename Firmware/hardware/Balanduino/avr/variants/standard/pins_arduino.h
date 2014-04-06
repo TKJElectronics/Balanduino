@@ -33,22 +33,22 @@
 
 #include <avr/pgmspace.h>
 
-#define SS   6
-#define MOSI 27
-#define MISO 28
-#define SCK  29
+const static uint8_t SS   = 6;
+const static uint8_t MOSI = 27;
+const static uint8_t MISO = 28;
+const static uint8_t SCK  = 29;
 
 #define LED_BUILTIN 6
 
-#define A0   7
-#define A1   8
-#define A2   9
-#define A3   10
-#define A4   11
-#define VBAT 12 // Not broken out - used for battery voltage measurement
+static const uint8_t A0 = 7;
+static const uint8_t A1 = 8;
+static const uint8_t A2 = 9;
+static const uint8_t A3 = 10;
+static const uint8_t A4 = 11;
+static const uint8_t A5 = 12; // Not broken out - used for battery voltage measurement
 
-#define SDA 13
-#define SCL 14
+static const uint8_t SDA = 13;
+static const uint8_t SCL = 14;
 
 // ATMEL ATMEGA1284P / Balanduino
 //
@@ -253,8 +253,8 @@ const uint8_t PROGMEM digital_pin_to_timer_PGM[] = {
         NOT_ON_TIMER, /* 25 - PB0 */
         NOT_ON_TIMER, /* 26 - PB1 */
         NOT_ON_TIMER, /* 27 - PB5 */
-        NOT_ON_TIMER, /* 28 - PB6 */
-        NOT_ON_TIMER, /* 29 - PB7 */
+        TIMER3A,      /* 28 - PB6 */
+        TIMER3B,      /* 29 - PB7 */
 
         NOT_ON_TIMER, /* 30 - PA6 */
         NOT_ON_TIMER  /* 31 - PA7 */

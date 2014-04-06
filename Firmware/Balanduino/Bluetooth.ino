@@ -1,8 +1,25 @@
-#ifdef ENABLE_USB
+/* Copyright (C) 2013-2014 Kristian Lauszus, TKJ Electronics. All rights reserved.
+
+ This software may be distributed and modified under the terms of the GNU
+ General Public License version 2 (GPL2) as published by the Free Software
+ Foundation and appearing in the file GPL2.TXT included in the packaging of
+ this file. Please note that GPL2 Section 2[b] requires that all works based
+ on this software must also be made publicly available under the terms of
+ the GPL2 ("Copyleft").
+
+ Contact information
+ -------------------
+
+ Kristian Lauszus, TKJ Electronics
+ Web      :  http://www.tkjelectronics.com
+ e-mail   :  kristianl@tkjelectronics.com
+*/
+
+#if defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
 
 uint8_t ps3OldLed, wiiOldLed;
 #ifdef ENABLE_XBOX
-LED xboxOldLed;
+LEDEnum xboxOldLed;
 #endif
 
 #ifdef ENABLE_SPP
@@ -27,6 +44,7 @@ void readSPPData() {
 #endif // ENABLE_SPP
 
 void readUsb() {
+#ifdef ENABLE_USB
   Usb.Task(); // The SPP data is actually not send until this is called, one could call SerialBT.send() directly as well
 
   if (Usb.getUsbTaskState() == USB_STATE_ERROR && layingDown) { // Check if the USB state machine is in an error state, but also make sure the robot is laying down
@@ -36,6 +54,7 @@ void readUsb() {
     Usb.vbusPower(vbus_on);
     Usb.setUsbTaskState(USB_DETACHED_SUBSTATE_WAIT_FOR_DEVICE); // Reset state machine
   }
+#endif // ENABLE_USB
 
 #ifdef ENABLE_SPP
   readSPPData();
@@ -55,6 +74,17 @@ void readUsb() {
     } else if (PS3.PS3NavigationConnected && (PS3.getAnalogHat(LeftHatX) > 200 || PS3.getAnalogHat(LeftHatX) < 55 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(LeftHatY) < 117))
       steer(updatePS3);
 #endif // ENABLE_PS3
+#ifdef ENABLE_PS4
+    if (PS4.connected() && !commandSent) {
+      if (PS4.getButtonPress(SHARE)) {
+        stopAndReset();
+        while (!PS4.getButtonPress(OPTIONS))
+          Usb.Task();
+      }
+      else if (PS4.getButtonPress(CROSS) || PS4.getAnalogHat(LeftHatY) < 117 || PS4.getAnalogHat(RightHatY) < 117 || PS4.getAnalogHat(LeftHatY) > 137 || PS4.getAnalogHat(RightHatY) > 137)
+        steer(updatePS4);
+    }
+#endif // ENABLE_PS4
 #ifdef ENABLE_WII
     if (Wii.wiimoteConnected && !Wii.wiiUProControllerConnected && !commandSent) {
       if (Wii.getButtonPress(B) || (Wii.nunchuckConnected && (Wii.getAnalogHat(HatX) > 137 || Wii.getAnalogHat(HatX) < 117 || Wii.getAnalogHat(HatY) > 137 || Wii.getAnalogHat(HatY) < 117)))
@@ -80,6 +110,16 @@ void readUsb() {
         steer(updateXbox);
     }
 #endif // ENABLE_XBOX
+#ifdef ENABLE_SPEKTRUM
+    if (spekConnected) {
+      if (millis() - spekConnectedTimer > 100) // If it has been more than 100ms since last data, then it must be disconnected
+        spekConnected = false;
+      else {
+        if (!commandSent && (rcValue[RC_CHAN_ROLL] < 1490 || rcValue[RC_CHAN_ROLL] > 1510 || rcValue[RC_CHAN_PITCH] < 1490 || rcValue[RC_CHAN_PITCH] > 1510))
+          steer(updateSpektrum);
+      }
+    }
+#endif // ENABLE_SPEKTRUM
     if (!commandSent) // If there hasn't been send a command by now, then send stop
       steer(stop);
   }
@@ -92,6 +132,12 @@ void readUsb() {
     }
   }
 #endif // ENABLE_PS3
+#ifdef ENABLE_PS4
+  if (PS4.connected()) {
+    if (PS4.getButtonClick(PS))
+      PS4.disconnect();
+  }
+#endif // ENABLE_PS4
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
     if (Wii.getButtonClick(HOME)) {
@@ -104,10 +150,10 @@ void readUsb() {
   if (Xbox.Xbox360Connected[0]) {
     if (Xbox.getButtonClick(XBOX)) {
       Xbox.disconnect();
-      xboxOldLed = (LED)0xFF; // Reset value
+      xboxOldLed = OFF; // Reset value
     }
   }
-#endif
+#endif // ENABLE_XBOX
 
 #if defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
   if (millis() - ledTimer > 1000) { // Update every 1s
@@ -202,10 +248,10 @@ void updateLEDs() {
     if (xboxRumbleDisable) {
       xboxRumbleDisable = false;
       Xbox.setRumbleOff();
-      xboxOldLed = (LED)0xFF; // Reset value
+      xboxOldLed = OFF; // Reset value
     } else {
       uint8_t batteryLevel = Xbox.getBatteryLevel();
-      LED xboxLed;
+      LEDEnum xboxLed;
       if (batteryLevel == 0)
         xboxLed = LED1;
       else if (batteryLevel == 1)
@@ -257,9 +303,9 @@ void onInitXbox() { // This function is called when the controller is first init
 
 #endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 
-#endif // ENABLE_USB
+#endif // defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
 
-#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)
+#if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS) || defined(ENABLE_SPEKTRUM)
 void steer(Command command) {
   commandSent = true; // Used to see if there has already been send a command or not
 
@@ -290,15 +336,7 @@ void steer(Command command) {
 #ifdef ENABLE_PS3
   if (command == updatePS3) {
     if (PS3.PS3Connected) {
-      if (PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) // Forward
-        targetOffset = scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
-      else if (PS3.getAnalogHat(LeftHatY) > 137 && PS3.getAnalogHat(RightHatY) > 137) // Backward
-        targetOffset = -scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
-      if (((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) // Left
-        turningOffset = -scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
-      else if (((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) // Right
-        turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
-      else if (PS3.getButtonPress(CROSS)) {
+      if (PS3.getButtonPress(CROSS)) {
         if (PS3.getAngle(Pitch) > 180) // Forward
           targetOffset = scale(PS3.getAngle(Pitch), 180, 216, 0, cfg.controlAngleLimit);
         else if (PS3.getAngle(Pitch) < 180) // Backward
@@ -307,6 +345,15 @@ void steer(Command command) {
           turningOffset = scale(PS3.getAngle(Roll), 180, 225, 0, cfg.turningLimit);
         else if (PS3.getAngle(Roll) < 180) // Left
           turningOffset = -scale(PS3.getAngle(Roll), 180, 135, 0, cfg.turningLimit);
+      } else {
+        if (PS3.getAnalogHat(LeftHatY) < 117 && PS3.getAnalogHat(RightHatY) < 117) // Forward
+          targetOffset = scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
+        else if (PS3.getAnalogHat(LeftHatY) > 137 && PS3.getAnalogHat(RightHatY) > 137) // Backward
+          targetOffset = -scale(PS3.getAnalogHat(LeftHatY) + PS3.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
+        if (((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)) > 15) // Left
+          turningOffset = -scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+        else if (((int16_t)PS3.getAnalogHat(RightHatY) - (int16_t)PS3.getAnalogHat(LeftHatY)) > 15) // Right
+          turningOffset = scale(abs((int16_t)PS3.getAnalogHat(LeftHatY) - (int16_t)PS3.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
       }
     } else { // It must be a Navigation controller then
       if (PS3.getAnalogHat(LeftHatY) < 117) // Forward
@@ -320,6 +367,29 @@ void steer(Command command) {
     }
   }
 #endif // ENABLE_PS3
+#ifdef ENABLE_PS4
+  if (command == updatePS4) {
+    if (PS4.getButtonPress(CROSS)) {
+      if (PS4.getAngle(Pitch) > 180) // Forward
+        targetOffset = scale(PS4.getAngle(Pitch), 180, 216, 0, cfg.controlAngleLimit);
+      else if (PS4.getAngle(Pitch) < 180) // Backward
+        targetOffset = -scale(PS4.getAngle(Pitch), 180, 144, 0, cfg.controlAngleLimit);
+      if (PS4.getAngle(Roll) < 180) // Right
+        turningOffset = scale(PS4.getAngle(Roll), 180, 135, 0, cfg.turningLimit);
+      else if (PS4.getAngle(Roll) > 180) // Left
+        turningOffset = -scale(PS4.getAngle(Roll), 180, 225, 0, cfg.turningLimit);
+    } else {
+      if (PS4.getAnalogHat(LeftHatY) < 117 && PS4.getAnalogHat(RightHatY) < 117) // Forward
+        targetOffset = scale(PS4.getAnalogHat(LeftHatY) + PS4.getAnalogHat(RightHatY), 232, 0, 0, cfg.controlAngleLimit); // Scale from 232-0 to 0-controlAngleLimit
+      else if (PS4.getAnalogHat(LeftHatY) > 137 && PS4.getAnalogHat(RightHatY) > 137) // Backward
+        targetOffset = -scale(PS4.getAnalogHat(LeftHatY) + PS4.getAnalogHat(RightHatY), 276, 510, 0, cfg.controlAngleLimit); // Scale from 276-510 to 0-controlAngleLimit
+      if (((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)) > 15) // Left
+        turningOffset = -scale(abs((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+      else if (((int16_t)PS4.getAnalogHat(RightHatY) - (int16_t)PS4.getAnalogHat(LeftHatY)) > 15) // Right
+        turningOffset = scale(abs((int16_t)PS4.getAnalogHat(LeftHatY) - (int16_t)PS4.getAnalogHat(RightHatY)), 0, 255, 0, cfg.turningLimit); // Scale from 0-255 to 0-turningLimit
+    }
+  }
+#endif // ENABLE_PS4
 #ifdef ENABLE_WII
   if (command == updateWii) {
     if (!Wii.wiiUProControllerConnected) {
@@ -367,6 +437,18 @@ void steer(Command command) {
       turningOffset = scale(abs((int32_t)Xbox.getAnalogHat(LeftHatY) - (int32_t)Xbox.getAnalogHat(RightHatY)), 0, 65535, 0, cfg.turningLimit); // Scale from 0-65535 to 0-turningLimit
   }
 #endif // ENABLE_XBOX
+#ifdef ENABLE_SPEKTRUM
+  if (command == updateSpektrum) {
+    if (rcValue[RC_CHAN_PITCH] > 1500) // Forward
+      targetOffset = scale(rcValue[RC_CHAN_PITCH], 1500, 2000, 0, cfg.controlAngleLimit);
+    else if (rcValue[RC_CHAN_PITCH] < 1500) // Backward
+      targetOffset = -scale(rcValue[RC_CHAN_PITCH], 1500, 1000, 0, cfg.controlAngleLimit);
+    if (rcValue[RC_CHAN_ROLL] < 1500) // Left
+      turningOffset = -scale(rcValue[RC_CHAN_ROLL], 1500, 1000, 0, cfg.turningLimit);
+    else if (rcValue[RC_CHAN_ROLL] > 1500) // Right
+      turningOffset = scale(rcValue[RC_CHAN_ROLL], 1500, 2000, 0, cfg.turningLimit);
+  }
+#endif // ENABLE_SPEKTRUM
 
   if (command == stop) {
     steerStop = true;
@@ -389,4 +471,4 @@ double scale(double input, double inputMin, double inputMax, double outputMin, d
     output = outputMin;
   return output;
 }
-#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS)
+#endif // defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_TOOLS) || defined(ENABLE_SPEKTRUM)
