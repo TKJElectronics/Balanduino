@@ -132,7 +132,7 @@ void setup() {
   main_pid.SetMode(AUTOMATIC); // Turn PID on
 
   encoders_pid.SetOutputLimits(-10, 10); // Set output limits
-  encoders_pid.SetSampleTime(100000); // Sample every 100ms
+  encoders_pid.SetSampleTime(0); // Sample as fast as possible
   encoders_pid.SetResolution(MICROS); // Set the resolution to microseconds
   encoders_pid.SetMode(AUTOMATIC); // Turn PID on
 
