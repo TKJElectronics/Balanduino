@@ -106,4 +106,4 @@ git clone --recursive https://github.com/TKJElectronics/Balanduino.git
 
 </br>
 
-For more information feel free to contact us at <support@tkjelectronics.com>.
+For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.com>.

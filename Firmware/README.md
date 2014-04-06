@@ -33,4 +33,4 @@ The final structure should look like this:
 		* USB\_Host\_Shield\_20/
 		* KalmanFilter/
 
-For more information send us an email at <support@tkjelectronics.com>.
+For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.com>.

@@ -8,4 +8,4 @@ This is the PCB for the Balanduino.
 
 To open the files you will need to download and install [EAGLE](http://www.cadsoftusa.com/download-eagle/).
 
-For more information send us an email at <support@tkjelectronics.com>.
+For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.com>.

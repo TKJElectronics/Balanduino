@@ -39,4 +39,4 @@ Advanced users can also use the included [Makefile](Makefile) if they prefer.
 
 [Balanduino.hex](Balanduino.hex) contains the latest compiled code.
 
-For more information send us an email at <support@tkjelectronics.com>.
+For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.com>.
