@@ -354,7 +354,7 @@ void loop() {
     layingDown = false; // It's no longer laying down
     encoders_pid.SetMode(AUTOMATIC); // Turn PID on
     main_pid.SetMode(AUTOMATIC); // Turn PID on
-    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(timer - pidTimer) / 1000000.0);
+    updatePID();
   }
   pidTimer = timer;
 

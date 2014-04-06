@@ -15,10 +15,12 @@
  e-mail   :  kristianl@tkjelectronics.com
 */
 
-void updatePID(double restAngle, double offset, double turning, double dt) {
+void updatePID() {
+  double offset = targetOffset;
+  double turning = turningOffset;
   /* Brake */
   if (steerStop) {
-    int32_t wheelPosition = getWheelsPosition();
+    wheelPosition = getWheelsPosition();
     // The input is 'wheelPosition'
     // The setpoint is 'targetPosition'
     // The output is stored in 'restAngle'
@@ -52,7 +54,7 @@ void updatePID(double restAngle, double offset, double turning, double dt) {
   else {
     if ((offset > 0 && wheelVelocity < 0) || (offset < 0 && wheelVelocity > 0) || offset == 0) // Scale down offset at high speed - wheel velocity is negative when driving forward and positive when driving backward
       offset += (double)wheelVelocity / velocityScaleMove; // We will always compensate if the offset is 0, but steerStop is not set
-    restAngle -= offset;
+    restAngle = offset + cfg.targetAngle;
   }
 
   restAngle = constrain(restAngle, lastRestAngle - 1, lastRestAngle + 1); // Don't change restAngle with more than 1 degree in each loop

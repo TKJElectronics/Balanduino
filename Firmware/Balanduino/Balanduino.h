@@ -26,7 +26,7 @@
 
 /* Firmware Version Information */
 const char *version = "1.1.0";
-const uint8_t eepromVersion = 2; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
+const uint8_t eepromVersion = 3; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
 bool sendIMUValues, sendSettings, sendInfo, sendStatusReport, sendMainPIDValues, sendEncoderPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
