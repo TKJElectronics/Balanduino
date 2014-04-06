@@ -362,12 +362,12 @@ void loop() {
   timer = millis();
   if (timer - encoderTimer >= 100) { // Update encoder values every 100ms
     encoderTimer = timer;
-    int32_t wheelPosition = getWheelsPosition();
-    wheelVelocity = wheelPosition - lastWheelPosition;
-    lastWheelPosition = wheelPosition;
-    //Serial.print(wheelPosition);Serial.print('\t');Serial.print(targetPosition);Serial.print('\t');Serial.println(wheelVelocity);
+    int32_t position = getWheelsPosition();
+    wheelVelocity = position - lastWheelPosition;
+    lastWheelPosition = position;
+    //Serial.print(position);Serial.print('\t');Serial.print(targetPosition);Serial.print('\t');Serial.println(wheelVelocity);
     if (abs(wheelVelocity) <= 40 && !stopped) { // Set new targetPosition if braking
-      targetPosition = wheelPosition;
+      targetPosition = position;
       stopped = true;
     }
 
