@@ -145,11 +145,11 @@ uint32_t pidTimer; // Timer used for the PID loop
 uint32_t imuTimer; // This is used to set a delay between sending IMU values
 uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
 uint32_t reportTimer; // This is used to set a delay between sending report values
-uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, Wii and Xbox controllers
+uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, PS4, Wii and Xbox controllers
 uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
 
 /* Used to rumble controllers upon connection */
-bool ps3RumbleEnable, wiiRumbleEnabled; // These are used to turn rumble off again on the Wiimote and to turn on rumble on the PS3 controller
+bool ps3RumbleEnable, wiiRumbleEnabled, ps4RumbleEnabled; // These are used to turn rumble off again on the Wiimote and PS4 controller and to turn on rumble on the PS3 controller
 bool ps3RumbleDisable, xboxRumbleDisable; // Used to turn rumble off again on the PS3 and Xbox controller
 
 bool steerStop = true; // Stop by default
@@ -219,6 +219,7 @@ void readSPPData();
 void readUsb();
 void updateLEDs();
 void onInitPS3();
+void onInitPS4();
 void onInitWii();
 void onInitXbox();
 void steer(Command command);
