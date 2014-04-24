@@ -33,10 +33,15 @@
 #define ENABLE_XBOX
 #define ENABLE_ADK
 #define ENABLE_SPEKTRUM
+#define ENABLE_WATCHDOG
 
 #include "Balanduino.h"
 #include <Arduino.h> // Standard Arduino header
 #include <Wire.h> // Official Arduino Wire library
+
+#ifdef ENABLE_WATCHDOG
+#include <avr/wdt.h> // Watchdog timer handling
+#endif
 
 #ifdef ENABLE_ADK
 #include <adk.h>
@@ -257,9 +262,20 @@ void setup() {
 #endif
 
   /* Beep to indicate that it is now ready */
-  buzzer::Set();
-  delay(100);
-  buzzer::Clear();
+  uint8_t beepCount = 1;
+  if (resetFlags & (1 << WDRF)) // If watchdog timer caused the reset then beep twice
+    beepCount = 2; // Since the watchdog timer is also used to reboot the bootloader it will also beep twice when pressing the reset button
+
+  for (uint8_t i = 0; i < beepCount; i++) {
+      buzzer::Set();
+      delay(50);
+      buzzer::Clear();
+      delay(50);
+  }
+
+#ifdef ENABLE_WATCHDOG
+  wdt_enable(WATCHDOG_TIME); // Enable watchdog timer
+#endif
 
   /* Setup timing */
   kalmanTimer = micros();
@@ -272,6 +288,10 @@ void setup() {
 }
 
 void loop() {
+#ifdef ENABLE_WATCHDOG
+  wdt_reset(); // Reset watchdog timer
+#endif
+
   if (!leftDiag::IsSet() || !rightDiag::IsSet()) { // Motor driver will pull these low on error
     buzzer::Set();
     stopMotor(left);

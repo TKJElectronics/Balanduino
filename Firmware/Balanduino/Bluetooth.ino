@@ -67,8 +67,12 @@ void readUsb() {
     if (PS3.PS3Connected) {
       if (PS3.getButtonPress(SELECT)) {
         stopAndReset();
-        while (!PS3.getButtonPress(START))
+        while (!PS3.getButtonPress(START)) {
           Usb.Task();
+#ifdef ENABLE_WATCHDOG
+          wdt_reset(); // Reset watchdog timer
+#endif
+        }
       }
       else if (PS3.getButtonPress(CROSS) || (PS3.getAnalogHat(LeftHatY) < 117 || PS3.getAnalogHat(RightHatY) < 117 || PS3.getAnalogHat(LeftHatY) > 137 || PS3.getAnalogHat(RightHatY) > 137))
         steer(updatePS3);
@@ -79,8 +83,12 @@ void readUsb() {
     if (PS4.connected() && !commandSent) {
       if (PS4.getButtonPress(SHARE)) {
         stopAndReset();
-        while (!PS4.getButtonPress(OPTIONS))
+        while (!PS4.getButtonPress(OPTIONS)) {
           Usb.Task();
+#ifdef ENABLE_WATCHDOG
+          wdt_reset(); // Reset watchdog timer
+#endif
+        }
       }
       else if (PS4.getButtonPress(CROSS) || PS4.getAnalogHat(LeftHatY) < 117 || PS4.getAnalogHat(RightHatY) < 117 || PS4.getAnalogHat(LeftHatY) > 137 || PS4.getAnalogHat(RightHatY) > 137)
         steer(updatePS4);
@@ -93,8 +101,12 @@ void readUsb() {
     } else if (Wii.wiiUProControllerConnected && !commandSent) { // The Wii U Pro Controller Joysticks has an range from approximately 800-3200
       if (Wii.getButtonPress(MINUS)) {
         stopAndReset();
-        while (!Wii.getButtonPress(PLUS))
+        while (!Wii.getButtonPress(PLUS)) {
           Usb.Task();
+#ifdef ENABLE_WATCHDOG
+          wdt_reset(); // Reset watchdog timer
+#endif
+        }
       }
       else if (Wii.getAnalogHat(LeftHatY) > 2200 || Wii.getAnalogHat(LeftHatY) < 1800 || Wii.getAnalogHat(RightHatY) > 2200 || Wii.getAnalogHat(RightHatY) < 1800)
         steer(updateWii);
@@ -104,8 +116,12 @@ void readUsb() {
     if (Xbox.Xbox360Connected[0] && !commandSent) { // We will only read from the first controller, up to four is supported by one receiver
       if (Xbox.getButtonPress(BACK)) {
         stopAndReset();
-        while (!Xbox.getButtonPress(START))
+        while (!Xbox.getButtonPress(START)) {
           Usb.Task();
+#ifdef ENABLE_WATCHDOG
+          wdt_reset(); // Reset watchdog timer
+#endif
+        }
       }
       else if (Xbox.getAnalogHat(LeftHatY) < -7500 || Xbox.getAnalogHat(RightHatY) < -7500 || Xbox.getAnalogHat(LeftHatY) > 7500 || Xbox.getAnalogHat(RightHatY) > 7500)
         steer(updateXbox);

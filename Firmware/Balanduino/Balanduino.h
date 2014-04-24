@@ -189,6 +189,14 @@ uint32_t spekConnectedTimer; // Timer used to check if the connection is dropped
 #define RC_CHAN_AUX4     7
 #endif
 
+#define WATCHDOG_TIME WDTO_1S // Set watchdog timer to 1 seconds
+
+uint8_t resetFlags __attribute__ ((section(".noinit"))); // Source: https://code.google.com/p/optiboot/issues/attachmentText?id=66&aid=660004000&name=resetFlags_appCode.cpp
+void resetFlagsInit(void) __attribute__ ((naked)) __attribute__ ((section (".init0")));
+void resetFlagsInit(void) {
+  __asm__ __volatile__ ("mov %0, r2\n" : "=r" (resetFlags) :); // Save the reset flags passed from the bootloader
+}
+
 // Encoder values
 #if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
 const uint16_t zoneA = 8000 * 2;

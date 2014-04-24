@@ -107,6 +107,9 @@ void printMenu() {
 }
 
 void calibrateAcc() {
+#ifdef ENABLE_WATCHDOG
+  wdt_disable(); // Disable watchdog timer
+#endif
   Serial.println(F("Please put the robot perfectly horizontal on its side and then send any character to start the calibration routine"));
   while (Serial.read() == -1);
 
@@ -141,9 +144,15 @@ void calibrateAcc() {
 
   updateConfig(); // Store the new values in the EEPROM
   Serial.println(F("Calibration of the accelerometer is done"));
+#ifdef ENABLE_WATCHDOG
+  wdt_enable(WATCHDOG_TIME); // Enable watchdog timer
+#endif
 }
 
 void calibrateMotor() {
+#ifdef ENABLE_WATCHDOG
+  wdt_disable(); // Disable watchdog timer
+#endif
   Serial.println(F("Put the robot so the wheels can move freely and then send any character to start the motor calibration routine"));
   while (Serial.read() == -1);
 
@@ -184,6 +193,9 @@ void calibrateMotor() {
 
   updateConfig(); // Store the new values in the EEPROM
   Serial.println(F("Calibration of the motors is done"));
+#ifdef ENABLE_WATCHDOG
+  wdt_enable(WATCHDOG_TIME); // Enable watchdog timer
+#endif
 }
 
 void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, double rightScaler) {
@@ -316,11 +328,18 @@ void setValues(char *input) {
   if (input[0] == 'A' && input[1] == ';') { // Abort
     stopAndReset();
 #ifdef ENABLE_SPP
-    while (Serial.read() != 'C' && SerialBT.read() != 'C') // Wait until continue is sent
+    while (Serial.read() != 'C' && SerialBT.read() != 'C') { // Wait until continue is sent
       Usb.Task();
-#else
-    while (Serial.read() != 'C');
+#ifdef ENABLE_WATCHDOG
+      wdt_reset(); // Reset watchdog timer
 #endif
+#else
+    while (Serial.read() != 'C') {
+#ifdef ENABLE_WATCHDOG
+      wdt_reset(); // Reset watchdog timer
+#endif
+#endif
+    }
   }
 
 #ifdef ENABLE_SPEKTRUM
