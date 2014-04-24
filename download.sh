@@ -11,6 +11,7 @@ echo "Working path:" $dir
 name=$(echo $(echo $url | rev | cut -d'/' -f 1 | rev) | cut -d'.' -f 1)
 echo "\nClone Project:" $name "\n"
 git clone --recursive $url || exit 1
+cd "$name"
 
 echo "\nRemove git files"
 find . -name .git | xargs rm -rf
