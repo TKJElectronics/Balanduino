@@ -141,8 +141,12 @@ uint8_t i2cBuffer[8]; // Buffer for I2C data
 double accAngle, gyroRate, gyroAngle;
 double pitch;
 
+double lastError; // Store last angle error
+double integratedError; // Store integrated error
+
+double error;
+double pTerm, iTerm, dTerm;
 double PIDValue, PIDLeft, PIDRight;
-double restAngle;
 
 /* Used for timing */
 uint32_t kalmanTimer; // Timer used for the Kalman filter
@@ -175,9 +179,8 @@ uint32_t receiveControlTimer;
 const uint16_t receiveControlTimeout = 500; // After how long time should it should prioritize the other controllers instead of the serial control
 
 int32_t lastWheelPosition; // Used to calculate the wheel velocity
-int32_t wheelVelocity; // Wheel velocity based on encoder readings
-double targetPosition; // The encoder position the robot should be at
-double wheelPosition;
+double wheelVelocity; // Wheel velocity based on encoder readings
+int32_t targetPosition; // The encoder position the robot should be at
 
 // Variables used for Spektrum receiver
 extern uint16_t rcValue[]; // Channel values

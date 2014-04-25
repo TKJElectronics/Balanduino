@@ -14,7 +14,7 @@
  Web      :  http://www.tkjelectronics.com
  e-mail   :  kristianl@tkjelectronics.com
 
- This is the algorithm for the Balanduino balancing robot.
+ This is the code for the Balanduino balancing robot.
  It can be controlled by either an Android app or a computer application via Bluetooth.
  The Android app can be found at the following link: https://github.com/TKJElectronics/BalanduinoAndroidApp
  The Processing application can be found here: https://github.com/TKJElectronics/BalanduinoProcessingApp
@@ -67,8 +67,9 @@
 Kalman kalman; // See https://github.com/TKJElectronics/KalmanFilter for source code
 
 // Create the PID instances, since the PID values are stored in the EEPROM we don't know them at compile time
-PID main_pid(&pitch, &PIDValue, &restAngle, 0, 0, 0, DIRECT);
-PID encoders_pid(&wheelPosition, &restAngle, &targetPosition, 0, 0, 0, DIRECT);
+//PID main_pid(&pitch, &PIDValue, &restAngle, 0, 0, 0, DIRECT);
+double setPoint = 0, output, outputSum;
+PID encoders_pid(&wheelVelocity, &output, &setPoint, 0, 0, 0, DIRECT);
 
 #if defined(ENABLE_SPP) || defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX) || defined(ENABLE_ADK)
 #define ENABLE_USB
@@ -126,14 +127,14 @@ void setup() {
   buzzer::SetDirWrite();
 
   /* Initialize PID controllers */
-  main_pid.SetOutputLimits(-100,100); // Set output limits
+  /*main_pid.SetOutputLimits(-100,100); // Set output limits
   main_pid.SetSampleTime(0); // Sample as fast as possible
   main_pid.SetResolution(MICROS); // Set the resolution to microseconds
-  main_pid.SetMode(AUTOMATIC); // Turn PID on
+  main_pid.SetMode(AUTOMATIC); // Turn PID on*/
 
-  encoders_pid.SetOutputLimits(-10, 10); // Set output limits
-  encoders_pid.SetSampleTime(0); // Sample as fast as possible
-  encoders_pid.SetResolution(MICROS); // Set the resolution to microseconds
+  encoders_pid.SetOutputLimits(-100, 100); // Set output limits
+  encoders_pid.SetSampleTime(100); // Sample to same rate as we update wheelVelocity
+  encoders_pid.SetResolution(MILLIS); // Set the resolution to milliseconds
   encoders_pid.SetMode(AUTOMATIC); // Turn PID on
 
   /* Read the PID values, target angle and other saved values in the EEPROM */
@@ -348,13 +349,13 @@ void loop() {
   if ((layingDown && (pitch < cfg.targetAngle - 10 || pitch > cfg.targetAngle + 10)) || (!layingDown && (pitch < cfg.targetAngle - 45 || pitch > cfg.targetAngle + 45))) {
     layingDown = true; // The robot is in a unsolvable position, so turn off both motors and wait until it's vertical again
     encoders_pid.SetMode(MANUAL); // Turn PID off
-    main_pid.SetMode(MANUAL); // Turn PID off
+    //main_pid.SetMode(MANUAL); // Turn PID off
     stopAndReset();
   } else {
     layingDown = false; // It's no longer laying down
     encoders_pid.SetMode(AUTOMATIC); // Turn PID on
-    main_pid.SetMode(AUTOMATIC); // Turn PID on
-    updatePID();
+    //main_pid.SetMode(AUTOMATIC); // Turn PID on
+    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(timer - pidTimer) / 1000000.0);
   }
   pidTimer = timer;
 

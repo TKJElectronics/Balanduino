@@ -15,21 +15,21 @@
  e-mail   :  kristianl@tkjelectronics.com
 */
 
-void updatePID() {
-  double offset = targetOffset;
-  double turning = turningOffset;
+void updatePID(double restAngle, double offset, double turning, double dt) {
   /* Brake */
   if (steerStop) {
-    wheelPosition = getWheelsPosition();
-    // The input is 'wheelPosition'
-    // The setpoint is 'targetPosition'
-    // The output is stored in 'restAngle'
-    encoders_pid.Compute();
-    restAngle += cfg.targetAngle;
-
-    /*
     int32_t wheelPosition = getWheelsPosition();
     int32_t positionError = wheelPosition - targetPosition;
+    if (abs(positionError) > zoneC/6) { // Outside zone C/6
+      // The input is 'wheelVelocity'
+      // The setpoint is 'setPoint = 0'
+      // The output is stored in 'output'
+      encoders_pid.Compute();
+      outputSum += output / 5000.0;
+      outputSum = constrain(outputSum, -45, 45); // Limit output sum
+      restAngle += outputSum;
+    }
+
     if (cfg.backToSpot) {
       if (abs(positionError) > zoneA) // Inside zone A
         restAngle -= (double)positionError / positionScaleA;
@@ -47,14 +47,14 @@ void updatePID() {
     }
     restAngle -= (double)wheelVelocity / velocityScaleStop;
 
-    restAngle = constrain(restAngle, cfg.targetAngle - 10, cfg.targetAngle + 10); // Limit rest Angle
-    */
+    restAngle = constrain(restAngle, cfg.targetAngle - 45, cfg.targetAngle + 45); // Limit rest Angle
   }
   /* Drive forward and backward */
   else {
     if ((offset > 0 && wheelVelocity < 0) || (offset < 0 && wheelVelocity > 0) || offset == 0) // Scale down offset at high speed - wheel velocity is negative when driving forward and positive when driving backward
       offset += (double)wheelVelocity / velocityScaleMove; // We will always compensate if the offset is 0, but steerStop is not set
-    restAngle = offset + cfg.targetAngle;
+    restAngle += outputSum;
+    restAngle -= offset;
   }
 
   restAngle = constrain(restAngle, lastRestAngle - 1, lastRestAngle + 1); // Don't change restAngle with more than 1 degree in each loop
@@ -64,7 +64,15 @@ void updatePID() {
   // The input is 'pitch'
   // The setpoint is 'restAngle'
   // The output is stored in 'PIDValue'
-  main_pid.Compute();
+  //main_pid.Compute();
+
+  error = restAngle - pitch;
+  pTerm = cfg.mainPID.Kp * error;
+  integratedError += error * dt;
+  iTerm = (cfg.mainPID.Ki * 100.0) * constrain(integratedError, -1.0, 1.0); // Limit the integrated error
+  dTerm = (cfg.mainPID.Kd / 100.0) * (error - lastError) / dt;
+  lastError = error;
+  PIDValue = pTerm + iTerm + dTerm;
 
   /* Steer robot sideways */
   if (turning < 0) { // Left
@@ -143,6 +151,9 @@ void setPWM(Command motor, uint16_t dutyCycle) { // dutyCycle is a value between
 void stopAndReset() {
   stopMotor(left);
   stopMotor(right);
+  lastError = 0;
+  integratedError = 0;
+  outputSum = 0;
   targetPosition = getWheelsPosition();
   lastRestAngle = cfg.targetAngle;
 }
