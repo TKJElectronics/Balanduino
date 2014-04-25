@@ -17,7 +17,8 @@
 
 #if defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
 
-uint8_t ps3OldLed, wiiOldLed;
+uint8_t ps3OldLed, wiiOldLed, ps4OldBatteryLevel;
+
 #ifdef ENABLE_XBOX
 LEDEnum xboxOldLed;
 #endif
@@ -134,8 +135,10 @@ void readUsb() {
 #endif // ENABLE_PS3
 #ifdef ENABLE_PS4
   if (PS4.connected()) {
-    if (PS4.getButtonClick(PS))
+    if (PS4.getButtonClick(PS)) {
       PS4.disconnect();
+      ps4OldBatteryLevel = 0; // Reset value
+    }
   }
 #endif // ENABLE_PS4
 #ifdef ENABLE_WII
@@ -155,15 +158,15 @@ void readUsb() {
   }
 #endif // ENABLE_XBOX
 
-#if defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
+#if defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
   if (millis() - ledTimer > 1000) { // Update every 1s
     ledTimer = millis();
     updateLEDs();
   }
-#endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
+#endif // defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 }
 
-#if defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
+#if defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 void updateLEDs() {
   uint8_t Led;
 #ifdef ENABLE_PS3
@@ -214,6 +217,25 @@ void updateLEDs() {
     }
   }
 #endif // ENABLE_PS3
+#ifdef ENABLE_PS4
+  if (PS4.connected()) {
+    if (ps4RumbleEnabled) {
+      ps4RumbleEnabled = false;
+      PS4.setRumbleOff();
+      ps4OldBatteryLevel = 0; // Reset value
+    } else {
+      uint8_t ps4BatteryLevel = PS4.getBatteryLevel();
+      if (ps4BatteryLevel != ps4OldBatteryLevel) {
+        ps4OldBatteryLevel = ps4BatteryLevel;
+        PS4.setLed(0, 0, ps4BatteryLevel * 17); // The battery status is in the range from 0-15, by multiplying we get it in the range 0-255
+        if (ps4BatteryLevel < 2)
+          PS4.setLedFlash(10, 10); // Blink rapidly
+        else
+          PS4.setLedFlash(0xFF, 0); // Turn on
+      }
+    }
+  }
+#endif // ENABLE_PS4
 #ifdef ENABLE_WII
   if (Wii.wiimoteConnected || Wii.wiiUProControllerConnected) {
     if (wiiRumbleEnabled) {
@@ -280,6 +302,17 @@ void onInitPS3() { // This function is called when the controller is first initi
 }
 #endif // ENABLE_PS3
 
+#ifdef ENABLE_PS4
+void onInitPS4() { // This function is called when the controller is first initialized
+  if (PS4.connected()) { // Check if the PS4 controller is connected
+    updateLEDs(); // Turn the LEDs on according to the voltage level
+    ledTimer = millis() - 500; // This will turn the rumble off again after 500ms
+    PS4.setRumbleOn(RumbleLow);
+    ps4RumbleEnabled = true;
+  }
+}
+#endif // ENABLE_PS4
+
 #ifdef ENABLE_WII
 void onInitWii() { // This function is called when the controller is first initialized
   if (Wii.wiimoteConnected) { // Both the Wiimote and the Wii U Pro Controller
@@ -301,7 +334,7 @@ void onInitXbox() { // This function is called when the controller is first init
 }
 #endif // ENABLE_XBOX
 
-#endif // defined(ENABLE_PS3) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
+#endif // defined(ENABLE_PS3) || defined(ENABLE_PS4) || defined(ENABLE_WII) || defined(ENABLE_XBOX)
 
 #endif // defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
 

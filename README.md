@@ -39,6 +39,16 @@ To control the robot you can use the following game controllers:
 * Wiimote including support for the Motion Plus and Nunchuck extension
 * Wii U Pro controller
 
+### Paring
+
+To pair with any of the PS3 controller please see the following section of the USB Host library readme: <https://github.com/felis/USB_Host_Shield_2.0#ps3-library>.
+
+To pair with the PS4 controller send: ```CPP;``` via the serial monitor. Then hold down the Share button and then hold down the PS button without releasing the Share button. The PS4 controller will then start to blink rapidly indicating that it is in paring mode.
+
+To use a Xbox 360 wireless controller you need a special receiver. More information can be seen at the following link: <https://github.com/felis/USB_Host_Shield_2.0#xbox-360-library>.
+
+To pair with the Wiimote send: ```CPW;``` via the serial monitor and then press 1 and 2 at the same time on the Wiimote. On the Wii U Pro controller you should press on the sync button instead.
+
 ## Android App
 
 It it also possible to control the robot and adjust the PID values and others variables using the following Android application:

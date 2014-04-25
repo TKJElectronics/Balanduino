@@ -211,7 +211,7 @@ void setup() {
   PS3.attachOnInit(onInitPS3);
 #endif
 #ifdef ENABLE_PS4
-  //PS4.attachOnInit(onInitPS4); // I still have not figured out to control the light and rumble on the PS4 controller
+  PS4.attachOnInit(onInitPS4);
 #endif
 #ifdef ENABLE_WII
   Wii.attachOnInit(onInitWii);
