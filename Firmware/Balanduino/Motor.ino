@@ -20,7 +20,8 @@ void updatePID(double restAngle, double offset, double turning, double dt) {
   if (steerStop) {
     int32_t wheelPosition = getWheelsPosition();
     int32_t positionError = wheelPosition - targetPosition;
-    if (abs(positionError) > zoneC/6) { // Outside zone C/6
+    if (abs(positionError) > zoneC) { // Outside zone C
+      // This code is used to keep it in the same position even on inclinations
       // The input is 'wheelVelocity'
       // The setpoint is 'setPoint = 0'
       // The output is stored in 'output'
@@ -30,6 +31,7 @@ void updatePID(double restAngle, double offset, double turning, double dt) {
       restAngle += outputSum;
     }
 
+    // This should make it stay in the same position
     if (cfg.backToSpot) {
       if (abs(positionError) > zoneA) // Inside zone A
         restAngle -= (double)positionError / positionScaleA;
