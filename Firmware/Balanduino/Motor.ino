@@ -71,7 +71,8 @@ void updatePID(double restAngle, double offset, double turning, double dt) {
   error = restAngle - pitch;
   pTerm = cfg.mainPID.Kp * error;
   integratedError += error * dt;
-  iTerm = (cfg.mainPID.Ki * 100.0) * constrain(integratedError, -1.0, 1.0); // Limit the integrated error
+  integratedError = constrain(integratedError, -1.0, 1.0); // Limit the integrated error
+  iTerm = (cfg.mainPID.Ki * 100.0) * integratedError;
   dTerm = (cfg.mainPID.Kd / 100.0) * (error - lastError) / dt;
   lastError = error;
   PIDValue = pTerm + iTerm + dTerm;

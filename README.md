@@ -103,7 +103,7 @@ This is done by simply sending ```AC;``` via the serial monitor. After that simp
 To download the entire repository including all submodules run the following command in a terminal:
 
 ```bash
-curl https://raw.github.com/TKJElectronics/Balanduino/master/download.sh | sh
+curl https://raw.githubusercontent.com/TKJElectronics/Balanduino/master/download.sh | sh
 ```
 
 Or simply download the daily updated ZIP-repository from our website: <http://downloads.balanduino.net/github/Balanduino_latest.zip>.
