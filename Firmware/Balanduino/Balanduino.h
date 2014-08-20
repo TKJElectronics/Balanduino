@@ -19,7 +19,7 @@
 #define _balanduino_h_
 
 #if ARDUINO < 156 // Make sure that at least Arduino IDE version 1.5.6 is used
-#error "Please update the Arduino IDE to version 1.5.6 or newer at the following website: http://arduino.cc/en/Main/Software"
+  #error "Please update the Arduino IDE to version 1.5.6 or newer at the following website: http://arduino.cc/en/Main/Software"
 #endif
 
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
@@ -214,27 +214,27 @@ uint32_t spekConnectedTimer; // Timer used to check if the connection is dropped
 
 // Encoder values
 #if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
-const uint16_t zoneA = 8000 * 2;
-const uint16_t zoneB = 4000 * 2;
-const uint16_t zoneC = 1000 * 2;
-const double positionScaleA = 600 * 2; // One resolution is 1856 pulses per encoder
-const double positionScaleB = 800 * 2;
-const double positionScaleC = 1000 * 2;
-const double positionScaleD = 500 * 2;
-const double velocityScaleMove = 70 * 2;
-const double velocityScaleStop = 60 * 2;
-const double velocityScaleTurning = 70 * 2;
+  const uint16_t zoneA = 8000 * 2;
+  const uint16_t zoneB = 4000 * 2;
+  const uint16_t zoneC = 1000 * 2;
+  const double positionScaleA = 600 * 2; // One resolution is 1856 pulses per encoder
+  const double positionScaleB = 800 * 2;
+  const double positionScaleC = 1000 * 2;
+  const double positionScaleD = 500 * 2;
+  const double velocityScaleMove = 70 * 2;
+  const double velocityScaleStop = 60 * 2;
+  const double velocityScaleTurning = 70 * 2;
 #else
-const uint16_t zoneA = 8000;
-const uint16_t zoneB = 4000;
-const uint16_t zoneC = 1000;
-const double positionScaleA = 600; // One resolution is 928 pulses per encoder
-const double positionScaleB = 800;
-const double positionScaleC = 1000;
-const double positionScaleD = 500;
-const double velocityScaleMove = 70;
-const double velocityScaleStop = 60;
-const double velocityScaleTurning = 70;
+  const uint16_t zoneA = 8000;
+  const uint16_t zoneB = 4000;
+  const uint16_t zoneC = 1000;
+  const double positionScaleA = 600; // One resolution is 928 pulses per encoder
+  const double positionScaleB = 800;
+  const double positionScaleC = 1000;
+  const double positionScaleD = 500;
+  const double velocityScaleMove = 70;
+  const double velocityScaleStop = 60;
+  const double velocityScaleTurning = 70;
 #endif
 
 // Function prototypes
