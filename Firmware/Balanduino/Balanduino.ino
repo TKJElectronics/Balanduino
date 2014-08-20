@@ -146,17 +146,30 @@ void setup() {
   leftEncoder2::Set();
   rightEncoder1::Set();
   rightEncoder2::Set();
+
+#if BALANDUINO_REVISION < 13 // On the new revisions pin change interrupt is used for all pins
   attachInterrupt(digitalPinToInterrupt(leftEncoder1Pin), leftEncoder, CHANGE);
   attachInterrupt(digitalPinToInterrupt(rightEncoder1Pin), rightEncoder, CHANGE);
+#endif
 
 #if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
   /* Enable encoder pins interrupt sources */
+  #if BALANDUINO_REVISION >= 13
+    *digitalPinToPCMSK(leftEncoder1Pin) |= (1 << digitalPinToPCMSKbit(leftEncoder1Pin));
+    *digitalPinToPCMSK(rightEncoder1Pin) |= (1 << digitalPinToPCMSKbit(rightEncoder1Pin));
+  #endif
   *digitalPinToPCMSK(leftEncoder2Pin) |= (1 << digitalPinToPCMSKbit(leftEncoder2Pin));
   *digitalPinToPCMSK(rightEncoder2Pin) |= (1 << digitalPinToPCMSKbit(rightEncoder2Pin));
 
   /* Enable pin change interrupts */
+  #if BALANDUINO_REVISION >= 13
+    *digitalPinToPCICR(leftEncoder1Pin) |= (1 << digitalPinToPCICRbit(leftEncoder1Pin));
+    *digitalPinToPCICR(rightEncoder1Pin) |= (1 << digitalPinToPCICRbit(rightEncoder1Pin));
+  #endif
   *digitalPinToPCICR(leftEncoder2Pin) |= (1 << digitalPinToPCICRbit(leftEncoder2Pin));
   *digitalPinToPCICR(rightEncoder2Pin) |= (1 << digitalPinToPCICRbit(rightEncoder2Pin));
+#elif BALANDUINO_REVISION >= 13
+  #error "Please define "PIN_CHANGE_INTERRUPT_VECTOR_LEFT" and "PIN_CHANGE_INTERRUPT_VECTOR_RIGHT" in Balanduino.h"
 #endif
 
   /* Set the motordriver diagnostic pins to inputs */

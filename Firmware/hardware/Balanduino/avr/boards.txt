@@ -1,3 +1,5 @@
+menu.rev=Revision
+
 ##############################################################
 
 balanduino.name=Balanduino
@@ -27,3 +29,11 @@ balanduino.build.core=arduino:arduino
 balanduino.build.variant=standard
 
 ##############################################################
+
+## Balanduino revision 1.2 or older
+balanduino.menu.rev.rev12=Revision 1.2 or older
+balanduino.menu.rev.rev12.build.extra_flags=-DBALANDUINO_REVISION=12
+
+## Balanduino revision 1.3
+balanduino.menu.rev.rev13=Revision 1.3
+balanduino.menu.rev.rev13.build.extra_flags=-DBALANDUINO_REVISION=13

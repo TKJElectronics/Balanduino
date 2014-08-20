@@ -61,8 +61,13 @@ Command lastCommand; // This is used set a new targetPosition
 #define leftPWM P18
 
 /* Right motor */
-#define rightA P25
-#define rightB P26
+#if BALANDUINO_REVISION < 13
+  #define rightA P25
+  #define rightB P26
+#else
+  #define rightA P15
+  #define rightB P16
+#endif
 #define rightPWM P17
 
 /* Pins connected to the motor drivers diagnostic pins */
@@ -70,26 +75,44 @@ Command lastCommand; // This is used set a new targetPosition
 #define rightDiag P22
 
 /* Encoders */
-#define leftEncoder1 P15
-#define leftEncoder2 P30
+#if BALANDUINO_REVISION < 13
+  #define leftEncoder1Pin 15 // Used for attachInterrupt
+  #define leftEncoder2Pin 30 // Used for pin change interrupt
+  #define rightEncoder1Pin 16 // Used for attachInterrupt
+  #define rightEncoder2Pin 31 // Used for pin change interrupt
+#else
+  #define leftEncoder1Pin 25 // Used for pin change interrupt
+  #define leftEncoder2Pin 26 // Used for pin change interrupt
+  #define rightEncoder1Pin 30 // Used for pin change interrupt
+  #define rightEncoder2Pin 31 // Used for pin change interrupt
+#endif
 
-#define rightEncoder1 P16
-#define rightEncoder2 P31
+#define MAKE_PIN(pin) _MAKE_PIN(pin) // Puts a P in front of the pin number, e.g. 1 becomes P1
+#define _MAKE_PIN(pin) P ## pin
 
-#define leftEncoder1Pin 15 // Used for attachInterrupt
-#define rightEncoder1Pin 16
-#define leftEncoder2Pin 30 // Used for pin change interrupt
-#define rightEncoder2Pin 31
+#define leftEncoder1 MAKE_PIN(leftEncoder1Pin)
+#define leftEncoder2 MAKE_PIN(leftEncoder2Pin)
 
-#define PIN_CHANGE_INTERRUPT_VECTOR_LEFT PCINT0_vect // You should change these to match your pins, if you are in doubt, just comment them out to disable them
-#define PIN_CHANGE_INTERRUPT_VECTOR_RIGHT PCINT0_vect
+#define rightEncoder1 MAKE_PIN(rightEncoder1Pin)
+#define rightEncoder2 MAKE_PIN(rightEncoder2Pin)
 
-#define buzzer P5 // Buzzer used for feedback, it can be disconnected using the jumper
+// You should change these to match your pins
+#if BALANDUINO_REVISION < 13
+  #define PIN_CHANGE_INTERRUPT_VECTOR_LEFT PCINT0_vect
+  #define PIN_CHANGE_INTERRUPT_VECTOR_RIGHT PCINT0_vect
+#else
+  #define PIN_CHANGE_INTERRUPT_VECTOR_LEFT PCINT1_vect
+  #define PIN_CHANGE_INTERRUPT_VECTOR_RIGHT PCINT0_vect
+#endif
+
+// Buzzer used for feedback, it can be disconnected using the jumper
+#if BALANDUINO_REVISION < 13
+  #define buzzer P5
+#else
+  #define buzzer P11 /* A4 */
+#endif
 
 #define spektrumBindPin P0 // Pin used to bind with the Spektrum satellite receiver - you can use any pin while binding, but you should connect it to RX0 afterwards
-
-#define MAKE_PIN(pin) MAKE_PIN2(pin) // Puts a P in front of the pin number, e.g. 1 becomes P1
-#define MAKE_PIN2(pin) P ## pin
 
 #define LED MAKE_PIN(LED_BUILTIN) // LED_BUILTIN is defined in pins_arduino.h in the hardware add-on
 
