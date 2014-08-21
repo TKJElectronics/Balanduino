@@ -164,14 +164,14 @@ const int8_t enc_states[16] = { 0, 0, 0, -1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, 0
 void leftEncoder() {
   static uint8_t old_AB = 0;
   old_AB <<= 2; // Remember previous state
-  old_AB |= (leftEncoder1::IsSet() >> (leftEncoder1::Number - 1)) | (leftEncoder2::IsSet() >> leftEncoder2::Number);
+  old_AB |= (leftEncoder2::IsSet() >> (leftEncoder2::Number - 1)) | (leftEncoder1::IsSet() >> leftEncoder1::Number);
   leftCounter += enc_states[ old_AB & 0x0F ];
 }
 
 void rightEncoder() {
   static uint8_t old_AB = 0;
   old_AB <<= 2; // Remember previous state
-  old_AB |= (rightEncoder1::IsSet() >> (rightEncoder1::Number - 1)) | (rightEncoder2::IsSet() >> rightEncoder2::Number);
+  old_AB |= (rightEncoder2::IsSet() >> (rightEncoder2::Number - 1)) | (rightEncoder1::IsSet() >> rightEncoder1::Number);
   rightCounter -= enc_states[ old_AB & 0x0F ];
 }
 
