@@ -25,13 +25,13 @@
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
 /* Firmware Version Information */
-const char *version = "1.1.0";
-const uint8_t eepromVersion = 2; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
+static const char *version = "1.1.0";
+static const uint8_t eepromVersion = 2; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
-bool sendIMUValues, sendSettings, sendInfo, sendStatusReport, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
+static bool sendIMUValues, sendSettings, sendInfo, sendStatusReport, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
-const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a PWM frequency up to 20kHz
-const uint16_t PWMVALUE = F_CPU / PWM_FREQUENCY / 2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
+static const uint16_t PWM_FREQUENCY = 20000; // The motor driver can handle a PWM frequency up to 20kHz
+static const uint16_t PWMVALUE = F_CPU / PWM_FREQUENCY / 2; // The frequency is given by F_CPU/(2*N*ICR) - where N is the prescaler, prescaling is used so the frequency is given by F_CPU/(2*ICR) - ICR = F_CPU/PWM_FREQUENCY/2
 
 /* Used to make commands more readable */
 enum Command {
@@ -119,11 +119,11 @@ Command lastCommand; // This is used set a new targetPosition
 #define VBAT A5 // Not broken out - used for battery voltage measurement
 
 /* Counters used to count the pulses from the encoders */
-volatile int32_t leftCounter = 0;
-volatile int32_t rightCounter = 0;
+static volatile int32_t leftCounter = 0;
+static volatile int32_t rightCounter = 0;
 
-double batteryVoltage; // Measured battery level
-uint8_t batteryCounter; // Counter used to check if it should check the battery level
+static double batteryVoltage; // Measured battery level
+static uint8_t batteryCounter; // Counter used to check if it should check the battery level
 
 // This struct will store all the configuration values
 typedef struct {
@@ -141,65 +141,65 @@ typedef struct {
 extern cfg_t cfg;
 
 /* EEPROM Address Definitions */
-const uint8_t initFlagsAddr = 0; // Set the first byte to the EEPROM version
-const uint8_t configAddr = 1; // Save the configuration starting from this location
+static const uint8_t initFlagsAddr = 0; // Set the first byte to the EEPROM version
+static const uint8_t configAddr = 1; // Save the configuration starting from this location
 
-double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
+static double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 /* IMU Data */
-int16_t accY, accZ, gyroX;
-double gyroXzero;
-uint8_t i2cBuffer[8]; // Buffer for I2C data
+static int16_t accY, accZ, gyroX;
+static double gyroXzero;
+static uint8_t i2cBuffer[8]; // Buffer for I2C data
 
 // Results
-double accAngle, gyroRate, gyroAngle;
-double pitch;
+static double accAngle, gyroRate, gyroAngle;
+static double pitch;
 
-double lastError; // Store last angle error
-double integratedError; // Store integrated error
+static double lastError; // Store last angle error
+static double integratedError; // Store integrated error
 
-double error;
-double pTerm, iTerm, dTerm;
-double PIDValue, PIDLeft, PIDRight;
+static double error;
+static double pTerm, iTerm, dTerm;
+static double PIDValue, PIDLeft, PIDRight;
 
 /* Used for timing */
-uint32_t kalmanTimer; // Timer used for the Kalman filter
-uint32_t pidTimer; // Timer used for the PID loop
-uint32_t imuTimer; // This is used to set a delay between sending IMU values
-uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
-uint32_t reportTimer; // This is used to set a delay between sending report values
-uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, PS4, Wii and Xbox controllers
-uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
+static uint32_t kalmanTimer; // Timer used for the Kalman filter
+static uint32_t pidTimer; // Timer used for the PID loop
+static uint32_t imuTimer; // This is used to set a delay between sending IMU values
+static uint32_t encoderTimer; // Timer used used to determine when to update the encoder values
+static uint32_t reportTimer; // This is used to set a delay between sending report values
+static uint32_t ledTimer; // Used to update the LEDs to indicate battery level on the PS3, PS4, Wii and Xbox controllers
+static uint32_t blinkTimer; // Used to blink the built in LED, starts blinking faster upon an incoming Bluetooth request
 
 /* Used to rumble controllers upon connection */
-bool ps3RumbleEnable, wiiRumbleEnabled, ps4RumbleEnabled; // These are used to turn rumble off again on the Wiimote and PS4 controller and to turn on rumble on the PS3 controller
-bool ps3RumbleDisable, xboxRumbleDisable; // Used to turn rumble off again on the PS3 and Xbox controller
+static bool ps3RumbleEnable, wiiRumbleEnabled, ps4RumbleEnabled; // These are used to turn rumble off again on the Wiimote and PS4 controller and to turn on rumble on the PS3 controller
+static bool ps3RumbleDisable, xboxRumbleDisable; // Used to turn rumble off again on the PS3 and Xbox controller
 
-bool steerStop = true; // Stop by default
-bool stopped; // This is used to set a new target position after braking
+static bool steerStop = true; // Stop by default
+static bool stopped; // This is used to set a new target position after braking
 
-bool layingDown = true; // Use to indicate if the robot is laying down
+static bool layingDown = true; // Use to indicate if the robot is laying down
 
-double targetOffset = 0; // Offset for going forward and backward
-double turningOffset = 0; // Offset for turning left and right
+static double targetOffset = 0; // Offset for going forward and backward
+static double turningOffset = 0; // Offset for turning left and right
 
-char dataInput[30]; // Incoming data buffer
-bool bluetoothData; // True if data received is from the Bluetooth connection
-double sppData1, sppData2; // Data send via SPP connection
+static char dataInput[30]; // Incoming data buffer
+static bool bluetoothData; // True if data received is from the Bluetooth connection
+static double sppData1, sppData2; // Data send via SPP connection
 
-bool commandSent = false; // This is used so multiple controller can be used at once
+static bool commandSent = false; // This is used so multiple controller can be used at once
 
-uint32_t receiveControlTimer;
+static uint32_t receiveControlTimer;
 const uint16_t receiveControlTimeout = 500; // After how long time should it should prioritize the other controllers instead of the serial control
 
-int32_t lastWheelPosition; // Used to calculate the wheel velocity
-int32_t wheelVelocity; // Wheel velocity based on encoder readings
-int32_t targetPosition; // The encoder position the robot should be at
+static int32_t lastWheelPosition; // Used to calculate the wheel velocity
+static int32_t wheelVelocity; // Wheel velocity based on encoder readings
+static int32_t targetPosition; // The encoder position the robot should be at
 
 // Variables used for Spektrum receiver
 extern uint16_t rcValue[]; // Channel values
-bool spekConnected; // True if spektrum receiver is connected
-uint32_t spekConnectedTimer; // Timer used to check if the connection is dropped
+static bool spekConnected; // True if spektrum receiver is connected
+static uint32_t spekConnectedTimer; // Timer used to check if the connection is dropped
 
 #define RC_CHAN_THROTTLE 0
 #define RC_CHAN_ROLL     1
@@ -214,73 +214,73 @@ uint32_t spekConnectedTimer; // Timer used to check if the connection is dropped
 
 // Encoder values
 #if defined(PIN_CHANGE_INTERRUPT_VECTOR_LEFT) && defined(PIN_CHANGE_INTERRUPT_VECTOR_RIGHT)
-  const uint16_t zoneA = 8000 * 2;
-  const uint16_t zoneB = 4000 * 2;
-  const uint16_t zoneC = 1000 * 2;
-  const double positionScaleA = 600 * 2; // One resolution is 1856 pulses per encoder
-  const double positionScaleB = 800 * 2;
-  const double positionScaleC = 1000 * 2;
-  const double positionScaleD = 500 * 2;
-  const double velocityScaleMove = 70 * 2;
-  const double velocityScaleStop = 60 * 2;
-  const double velocityScaleTurning = 70 * 2;
+  static const uint16_t zoneA = 8000 * 2;
+  static const uint16_t zoneB = 4000 * 2;
+  static const uint16_t zoneC = 1000 * 2;
+  static const double positionScaleA = 600 * 2; // One resolution is 1856 pulses per encoder
+  static const double positionScaleB = 800 * 2;
+  static const double positionScaleC = 1000 * 2;
+  static const double positionScaleD = 500 * 2;
+  static const double velocityScaleMove = 70 * 2;
+  static const double velocityScaleStop = 60 * 2;
+  static const double velocityScaleTurning = 70 * 2;
 #else
-  const uint16_t zoneA = 8000;
-  const uint16_t zoneB = 4000;
-  const uint16_t zoneC = 1000;
-  const double positionScaleA = 600; // One resolution is 928 pulses per encoder
-  const double positionScaleB = 800;
-  const double positionScaleC = 1000;
-  const double positionScaleD = 500;
-  const double velocityScaleMove = 70;
-  const double velocityScaleStop = 60;
-  const double velocityScaleTurning = 70;
+  static const uint16_t zoneA = 8000;
+  static const uint16_t zoneB = 4000;
+  static const uint16_t zoneC = 1000;
+  static const double positionScaleA = 600; // One resolution is 928 pulses per encoder
+  static const double positionScaleB = 800;
+  static const double positionScaleC = 1000;
+  static const double positionScaleD = 500;
+  static const double velocityScaleMove = 70;
+  static const double velocityScaleStop = 60;
+  static const double velocityScaleTurning = 70;
 #endif
 
 // Function prototypes
-void readSPPData();
-void readUsb();
-void updateLEDs();
-void onInitPS3();
-void onInitPS4();
-void onInitWii();
-void onInitXbox();
-void steer(Command command);
-double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax);
+// We use inline to eliminates the size and speed overhead of calling and returning from a function that is only used once.
+static inline void readSPPData();
+static inline void readUsb();
+static void updateLEDs();
+static void onInitPS3();
+static void onInitPS4();
+static void onInitWii();
+static void onInitXbox();
+static void steer(Command command);
+static double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax);
 
-bool checkInitializationFlags();
-void readEEPROMValues();
-void updateConfig();
-void restoreEEPROMValues();
+static inline bool checkInitializationFlags();
+static inline void readEEPROMValues();
+static void updateConfig();
+static void restoreEEPROMValues();
 
-uint8_t i2cWrite(uint8_t registerAddress, uint8_t data, bool sendStop);
-uint8_t i2cWrite(uint8_t registerAddress, uint8_t *data, uint8_t length, bool sendStop);
-uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes);
+static uint8_t i2cWrite(uint8_t registerAddress, uint8_t data, bool sendStop);
+static uint8_t i2cWrite(uint8_t registerAddress, uint8_t *data, uint8_t length, bool sendStop);
+static uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes);
 
-void updatePID(double restAngle, double offset, double turning, double dt);
-void moveMotor(Command motor, Command direction, double speedRaw);
-void stopMotor(Command motor);
-void setPWM(Command motor, uint16_t dutyCycle);
-void stopAndReset();
+static inline void updatePID(double restAngle, double offset, double turning, double dt);
+static void moveMotor(Command motor, Command direction, double speedRaw);
+static void stopMotor(Command motor);
+static inline void setPWM(Command motor, uint16_t dutyCycle);
+static void stopAndReset();
 // On newer versions of the PCB these two functions are only used in one place, so they will be inlined by the compiler.
-// This eliminates the size and speed overhead of calling and returning from a function that is only used once.
 static inline void leftEncoder();
 static inline void rightEncoder();
-int32_t readLeftEncoder();
-int32_t readRightEncoder();
+static int32_t readLeftEncoder();
+static int32_t readRightEncoder();
 int32_t getWheelsPosition();
 
-void bindSpektrum();
-void readSpektrum(uint8_t input);
+static inline void bindSpektrum();
+static void readSpektrum(uint8_t input);
 
-void checkSerialData();
-void printMenu();
-void calibrateMotor();
-void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, double rightScaler);
-void calibrateAcc();
-void printValues();
-void setValues(char *input);
-bool calibrateGyro();
-bool checkMinMax(int16_t *array, uint8_t length, int16_t maxDifference);
+static inline void checkSerialData();
+static void printMenu();
+static inline void calibrateMotor();
+static void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, double rightScaler);
+static inline void calibrateAcc();
+static inline void printValues();
+static void setValues(char *input);
+static inline bool calibrateGyro();
+static bool checkMinMax(int16_t *array, uint8_t length, int16_t maxDifference);
 
 #endif
