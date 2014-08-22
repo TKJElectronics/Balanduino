@@ -47,8 +47,7 @@ enum Command {
   right,
   imu,
   joystick,
-};
-Command lastCommand; // This is used set a new targetPosition
+} lastCommand; // This is used set a new targetPosition
 
 // These pins macros are defined in avrpins.h in the USB Host library. This allows to read and write directly to the port registers instead of using Arduino's slow digitalRead()/digitalWrite() functions
 // The source is available here: https://github.com/felis/USB_Host_Shield_2.0/blob/master/avrpins.h
@@ -147,20 +146,15 @@ static const uint8_t configAddr = 1; // Save the configuration starting from thi
 static double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 /* IMU Data */
-static int16_t accY, accZ, gyroX;
 static double gyroXzero;
 static uint8_t i2cBuffer[8]; // Buffer for I2C data
 
 // Results
-static double accAngle, gyroRate, gyroAngle;
-static double pitch;
+static double accAngle, gyroAngle; // Result from raw accelerometer and gyroscope readings
+static double pitch; // Result from Kalman filter
 
 static double lastError; // Store last angle error
 static double integratedError; // Store integrated error
-
-static double error;
-static double pTerm, iTerm, dTerm;
-static double PIDValue, PIDLeft, PIDRight;
 
 /* Used for timing */
 static uint32_t kalmanTimer; // Timer used for the Kalman filter
@@ -190,7 +184,7 @@ static double sppData1, sppData2; // Data send via SPP connection
 static bool commandSent = false; // This is used so multiple controller can be used at once
 
 static uint32_t receiveControlTimer;
-const uint16_t receiveControlTimeout = 500; // After how long time should it should prioritize the other controllers instead of the serial control
+static const uint16_t receiveControlTimeout = 500; // After how long time should it should prioritize the other controllers instead of the serial control
 
 static int32_t lastWheelPosition; // Used to calculate the wheel velocity
 static int32_t wheelVelocity; // Wheel velocity based on encoder readings

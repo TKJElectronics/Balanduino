@@ -249,11 +249,11 @@ void setup() {
 
   /* Set Kalman and gyro starting angle */
   while (i2cRead(0x3D, i2cBuffer, 4));
-  accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
-  accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
+  int16_t accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
+  int16_t accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  accAngle = (atan2((double)accY - cfg.accYzero, (double)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
+  double accAngle = (atan2((double)accY - cfg.accYzero, (double)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
 
   kalman.setAngle(accAngle); // Set starting angle
   pitch = accAngle;
@@ -308,13 +308,13 @@ void loop() {
 
   /* Calculate pitch */
   while (i2cRead(0x3D, i2cBuffer, 8));
-  accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
-  accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
-  gyroX = ((i2cBuffer[6] << 8) | i2cBuffer[7]);
+  int16_t accY = ((i2cBuffer[0] << 8) | i2cBuffer[1]);
+  int16_t accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
+  int16_t gyroX = ((i2cBuffer[6] << 8) | i2cBuffer[7]);
 
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  accAngle = (atan2((double)accY - cfg.accYzero, (double)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
+  double accAngle = (atan2((double)accY - cfg.accYzero, (double)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
 
   uint32_t timer = micros();
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
@@ -323,7 +323,7 @@ void loop() {
     pitch = accAngle;
     gyroAngle = accAngle;
   } else {
-    gyroRate = ((double)gyroX - gyroXzero) / 131.0; // Convert to deg/s
+    double gyroRate = ((double)gyroX - gyroXzero) / 131.0; // Convert to deg/s
     double dt = (double)(timer - kalmanTimer) / 1000000.0;
     gyroAngle += gyroRate * dt; // Gyro angle is only used for debugging
     if (gyroAngle < 0 || gyroAngle > 360)

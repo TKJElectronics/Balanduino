@@ -50,14 +50,14 @@ void updatePID(double restAngle, double offset, double turning, double dt) {
   lastRestAngle = restAngle;
 
   /* Update PID values */
-  error = (restAngle - pitch);
-  pTerm = cfg.P * error;
+  double error = (restAngle - pitch);
+  double pTerm = cfg.P * error;
   integratedError += error * dt;
   integratedError = constrain(integratedError, -1.0, 1.0); // Limit the integrated error
-  iTerm = (cfg.I * 100.0) * integratedError;
-  dTerm = (cfg.D / 100.0) * (error - lastError) / dt;
+  double iTerm = (cfg.I * 100.0) * integratedError;
+  double dTerm = (cfg.D / 100.0) * (error - lastError) / dt;
   lastError = error;
-  PIDValue = pTerm + iTerm + dTerm;
+  double PIDValue = pTerm + iTerm + dTerm;
 
   /* Steer robot sideways */
   if (turning < 0) { // Left
@@ -71,8 +71,8 @@ void updatePID(double restAngle, double offset, double turning, double dt) {
       turning = 0;
   }
 
-  PIDLeft = PIDValue + turning;
-  PIDRight = PIDValue - turning;
+  double PIDLeft = PIDValue + turning;
+  double PIDRight = PIDValue - turning;
 
   PIDLeft *= cfg.leftMotorScaler; // Compensate for difference in some of the motors
   PIDRight *= cfg.rightMotorScaler;
