@@ -262,8 +262,10 @@ void moveMotor(Command motor, Command direction, double speedRaw);
 void stopMotor(Command motor);
 void setPWM(Command motor, uint16_t dutyCycle);
 void stopAndReset();
-void leftEncoder();
-void rightEncoder();
+// On newer versions of the PCB these two functions are only used in one place, so they will be inlined by the compiler.
+// This eliminates the size and speed overhead of calling and returning from a function that is only used once.
+static inline void leftEncoder();
+static inline void rightEncoder();
 int32_t readLeftEncoder();
 int32_t readRightEncoder();
 int32_t getWheelsPosition();
