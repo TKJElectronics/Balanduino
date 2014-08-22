@@ -17,10 +17,10 @@
 
 #if defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)
 
-uint8_t ps3OldLed, wiiOldLed, ps4OldBatteryLevel;
+static uint8_t ps3OldLed, wiiOldLed, ps4OldBatteryLevel;
 
 #ifdef ENABLE_XBOX
-LEDEnum xboxOldLed;
+static LEDEnum xboxOldLed;
 #endif
 
 #ifdef ENABLE_SPP
@@ -492,6 +492,7 @@ void steer(Command command) {
   }
   lastCommand = command;
 }
+
 double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax) { // Like map() just returns a double
   double output;
   if (inputMin < inputMax)
