@@ -6,7 +6,7 @@ _________
 
 These are the needed libraries in order to compile the code.
 
-To use it, simply download the libraries and moved them into your [libraries folder](http://arduino.cc/en/Guide/Libraries).
+To use it, simply download the libraries and moved them into your [libraries folder](http://arduino.cc/en/Guide/Libraries). Also see the following [guide](https://learn.adafruit.com/adafruit-all-about-arduino-libraries-install-use).
 
 __NB:__ The libraries folders are not allowed to have any special characters, so rename the libraries to:
 
