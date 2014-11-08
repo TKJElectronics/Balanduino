@@ -28,7 +28,6 @@ The final structure should look like this:
 				* libraries/
 				* variants/
 				* boards.txt
-				* platform.txt
 	* libraries/
 		* USB\_Host\_Shield\_20/
 		* KalmanFilter/
