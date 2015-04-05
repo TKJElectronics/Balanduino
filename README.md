@@ -1,5 +1,5 @@
 # Balanduino
-#### Developed by TKJ Electronics 2013-2014
+#### Developed by TKJ Electronics 2013-2015
 
 The code is released under the GNU General Public License.
 _________
