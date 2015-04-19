@@ -47,21 +47,21 @@ void updateConfig() {
 }
 
 void restoreEEPROMValues() {
-  cfg.P = 9.0;
-  cfg.I = 2.0;
-  cfg.D = 3.0;
+  cfg.P = 9.0f;
+  cfg.I = 2.0f;
+  cfg.D = 3.0f;
 
-  cfg.targetAngle = 180.0;
+  cfg.targetAngle = 180.0f;
   cfg.backToSpot = 1;
   cfg.controlAngleLimit = 7;
   cfg.turningLimit = 25;
 
-  cfg.Qangle = 0.001;
-  cfg.Qbias = 0.003;
-  cfg.Rmeasure = 0.03;
+  cfg.Qangle = 0.001f;
+  cfg.Qbias = 0.003f;
+  cfg.Rmeasure = 0.03f;
 
-  cfg.accYzero = cfg.accZzero = 0;
-  cfg.leftMotorScaler = cfg.rightMotorScaler = 1;
+  cfg.accYzero = cfg.accZzero = 0.0f;
+  cfg.leftMotorScaler = cfg.rightMotorScaler = 1.0f;
 
   cfg.bindSpektrum = false;
 

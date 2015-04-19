@@ -126,18 +126,18 @@ void calibrateAcc() {
     cfg.accYzero += accYbuffer[i];
     cfg.accZzero += accZbuffer[i];
   }
-  cfg.accYzero /= 25;
-  cfg.accZzero /= 25;
+  cfg.accYzero /= 25.0f;
+  cfg.accZzero /= 25.0f;
 
   if (cfg.accYzero < 0) // Check which side is laying down
-    cfg.accYzero += 16384.0; // 16384.0 is equal to 1g while the full scale range is ±2g
+    cfg.accYzero += 16384.0f; // 16384.0 is equal to 1g while the full scale range is ±2g
   else
-    cfg.accYzero -= 16384.0;
+    cfg.accYzero -= 16384.0f;
 
   Serial.print(F("New zero values (g's): ")); // Print the new values in g's
-  Serial.print(cfg.accYzero / 16384.0);
+  Serial.print(cfg.accYzero / 16384.0f);
   Serial.print(F(","));
-  Serial.println(cfg.accZzero / 16384.0);
+  Serial.println(cfg.accZzero / 16384.0f);
 
   updateConfig(); // Store the new values in the EEPROM
   Serial.println(F("Calibration of the accelerometer is done"));
@@ -149,8 +149,8 @@ void calibrateMotor() {
 
   Serial.println(F("Estimating minimum starting value. When the first two values do not change anymore, then send any character to continue\r\n"));
   delay(2000);
-  double leftSpeed = 10, rightSpeed = 10;
-  testMotorSpeed(&leftSpeed, &rightSpeed, 1, 1);
+  float leftSpeed = 10.0f, rightSpeed = 10.0f;
+  testMotorSpeed(&leftSpeed, &rightSpeed, 1.0f, 1.0f);
 
   Serial.print(F("\r\nThe speed values are (L/R): "));
   Serial.print(leftSpeed);
@@ -158,11 +158,11 @@ void calibrateMotor() {
   Serial.println(rightSpeed);
 
   if (leftSpeed > rightSpeed) { // This means that the left motor needed a higher PWM signal before it rotated at the same speed
-    cfg.leftMotorScaler = 1;
+    cfg.leftMotorScaler = 1.0f;
     cfg.rightMotorScaler = rightSpeed / leftSpeed; // Therefore we will scale the right motor a bit down, so they match
   } else { // And the same goes for the right motor
     cfg.leftMotorScaler = leftSpeed / rightSpeed;
-    cfg.rightMotorScaler = 1;
+    cfg.rightMotorScaler = 1.0f;
   }
 
   Serial.print(F("The motor scalars are now (L/R): "));
@@ -172,21 +172,21 @@ void calibrateMotor() {
 
   Serial.println(F("Now the motors will spin up again. Now the speed values should be almost equal. Send any character to exit\r\n"));
   delay(2000);
-  leftSpeed = rightSpeed = 10; // Reset speed values
+  leftSpeed = rightSpeed = 10.0f; // Reset speed values
   testMotorSpeed(&leftSpeed, &rightSpeed, cfg.leftMotorScaler, cfg.rightMotorScaler);
 
-  double maxSpeed = max(leftSpeed, rightSpeed);
-  double minSpeed = min(leftSpeed, rightSpeed);
+  float maxSpeed = max(leftSpeed, rightSpeed);
+  float minSpeed = min(leftSpeed, rightSpeed);
 
   Serial.print(F("The difference is now: "));
-  Serial.print((maxSpeed - minSpeed) / maxSpeed * 100);
+  Serial.print((maxSpeed - minSpeed) / maxSpeed * 100.0f);
   Serial.println("%");
 
   updateConfig(); // Store the new values in the EEPROM
   Serial.println(F("Calibration of the motors is done"));
 }
 
-void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, double rightScaler) {
+void testMotorSpeed(float *leftSpeed, float *rightSpeed, float leftScaler, float rightScaler) {
   int32_t lastLeftPosition = readLeftEncoder(), lastRightPosition = readRightEncoder();
 
   Serial.println(F("Velocity (L), Velocity (R), Speed value (L), Speed value (R)"));
@@ -211,18 +211,18 @@ void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, do
     Serial.println(*rightSpeed);
 
     if (abs(leftVelocity) < 200)
-      (*leftSpeed) += 0.1;
+      (*leftSpeed) += 0.1f;
     else if (abs(leftVelocity) > 203)
-      (*leftSpeed) -= 0.1;
+      (*leftSpeed) -= 0.1f;
 
     if (abs(rightVelocity) < 200)
-      (*rightSpeed) += 0.1;
+      (*rightSpeed) += 0.1f;
     else if (abs(rightVelocity) > 203)
-      (*rightSpeed) -= 0.1;
+      (*rightSpeed) -= 0.1f;
 
     delay(100);
   }
-  for (double i = *leftSpeed; i > 0; i--) { // Stop motors gently
+  for (float i = *leftSpeed; i > 0; i--) { // Stop motors gently
     moveMotor(left, forward, i);
     moveMotor(right, forward, i);
     delay(50);
@@ -308,7 +308,7 @@ void printValues() {
     out->print(F("R,"));
     out->print(batteryVoltage);
     out->print(F(","));
-    out->println((double)reportTimer / 60000.0);
+    out->println((float)reportTimer / 60000.0f);
   }
 }
 
@@ -457,7 +457,7 @@ bool calibrateGyro() {
   }
   for (uint8_t i = 0; i < 25; i++)
     gyroXzero += gyroXbuffer[i];
-  gyroXzero /= 25;
+  gyroXzero /= 25.0f;
   return 0;
 }
 

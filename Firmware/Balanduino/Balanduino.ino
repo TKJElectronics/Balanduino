@@ -258,7 +258,7 @@ void setup() {
   int16_t accZ = ((i2cBuffer[2] << 8) | i2cBuffer[3]);
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  double accAngle = (atan2((double)accY - cfg.accYzero, (double)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
+  float accAngle = (atan2((float)accY - cfg.accYzero, (float)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
 
   kalman.setAngle(accAngle); // Set starting angle
   pitch = accAngle;
@@ -319,7 +319,7 @@ void loop() {
 
   // atan2 outputs the value of -π to π (radians) - see http://en.wikipedia.org/wiki/Atan2
   // We then convert it to 0 to 2π and then from radians to degrees
-  double accAngle = (atan2((double)accY - cfg.accYzero, (double)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
+  float accAngle = (atan2((float)accY - cfg.accYzero, (float)accZ - cfg.accZzero) + PI) * RAD_TO_DEG;
 
   uint32_t timer = micros();
   // This fixes the 0-360 transition problem when the accelerometer angle jumps between 0 and 360 degrees
@@ -328,8 +328,8 @@ void loop() {
     pitch = accAngle;
     gyroAngle = accAngle;
   } else {
-    double gyroRate = ((double)gyroX - gyroXzero) / 131.0; // Convert to deg/s
-    double dt = (double)(timer - kalmanTimer) / 1000000.0;
+    float gyroRate = ((float)gyroX - gyroXzero) / 131.0f; // Convert to deg/s
+    float dt = (float)(timer - kalmanTimer) / 1000000.0f;
     gyroAngle += gyroRate * dt; // Gyro angle is only used for debugging
     if (gyroAngle < 0 || gyroAngle > 360)
       gyroAngle = pitch; // Reset the gyro angle when it has drifted too much
@@ -352,7 +352,7 @@ void loop() {
     stopAndReset();
   } else {
     layingDown = false; // It's no longer laying down
-    updatePID(cfg.targetAngle, targetOffset, turningOffset, (double)(timer - pidTimer) / 1000000.0);
+    updatePID(cfg.targetAngle, targetOffset, turningOffset, (float)(timer - pidTimer) / 1000000.0f);
   }
   pidTimer = timer;
 
@@ -372,7 +372,7 @@ void loop() {
     batteryCounter++;
     if (batteryCounter >= 10) { // Measure battery every 1s
       batteryCounter = 0;
-      batteryVoltage = (double)analogRead(VBAT) / 63.050847458; // VBAT is connected to analog input 5 which is not broken out. This is then connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
+      batteryVoltage = (float)analogRead(VBAT) / 63.050847458f; // VBAT is connected to analog input 5 which is not broken out. This is then connected to a 47k-12k voltage divider - 1023.0/(3.3/(12.0/(12.0+47.0))) = 63.050847458
       if (batteryVoltage < 10.2 && batteryVoltage > 5) // Equal to 3.4V per cell - don't turn on if it's below 5V, this means that no battery is connected
         buzzer::Set();
       else

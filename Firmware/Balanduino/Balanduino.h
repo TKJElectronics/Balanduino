@@ -26,7 +26,7 @@
 
 /* Firmware Version Information */
 static const char *version = "1.1.0";
-static const uint8_t eepromVersion = 2; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
+static const uint8_t eepromVersion = 3; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
 static bool sendIMUValues, sendSettings, sendInfo, sendStatusReport, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
 
@@ -121,19 +121,19 @@ enum Command {
 static volatile int32_t leftCounter = 0;
 static volatile int32_t rightCounter = 0;
 
-static double batteryVoltage; // Measured battery level
+static float batteryVoltage; // Measured battery level
 static uint8_t batteryCounter; // Counter used to check if it should check the battery level
 
 // This struct will store all the configuration values
 typedef struct {
-  double P, I, D; // PID variables
-  double targetAngle; // Resting angle of the robot
+  float P, I, D; // PID variables
+  float targetAngle; // Resting angle of the robot
   uint8_t backToSpot; // Set whenever the robot should stay in the same spot
   uint8_t controlAngleLimit; // Set the maximum tilting angle of the robot
   uint8_t turningLimit; // Set the maximum turning value
-  double Qangle, Qbias, Rmeasure; // Kalman filter values
-  double accYzero, accZzero; // Accelerometer zero values
-  double leftMotorScaler, rightMotorScaler;
+  float Qangle, Qbias, Rmeasure; // Kalman filter values
+  float accYzero, accZzero; // Accelerometer zero values
+  float leftMotorScaler, rightMotorScaler;
   bool bindSpektrum;
 } cfg_t;
 
@@ -143,17 +143,17 @@ extern cfg_t cfg;
 static const uint8_t initFlagsAddr = 0; // Set the first byte to the EEPROM version
 static const uint8_t configAddr = 1; // Save the configuration starting from this location
 
-static double lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
+static float lastRestAngle; // Used to limit the new restAngle if it's much larger than the previous one
 
 /* IMU Data */
-static double gyroXzero;
+static float gyroXzero;
 static uint8_t i2cBuffer[8]; // Buffer for I2C data
 
 // Results
-static double accAngle, gyroAngle; // Result from raw accelerometer and gyroscope readings
-static double pitch; // Result from Kalman filter
+static float accAngle, gyroAngle; // Result from raw accelerometer and gyroscope readings
+static float pitch; // Result from Kalman filter
 
-static double lastError; // Store last angle error
+static float lastError; // Store last angle error
 static float iTerm; // Store iTerm
 
 /* Used for timing */
@@ -174,12 +174,12 @@ static bool stopped; // This is used to set a new target position after braking
 
 static bool layingDown = true; // Use to indicate if the robot is laying down
 
-static double targetOffset = 0; // Offset for going forward and backward
-static double turningOffset = 0; // Offset for turning left and right
+static float targetOffset = 0.0f; // Offset for going forward and backward
+static float turningOffset = 0.0f; // Offset for turning left and right
 
 static char dataInput[30]; // Incoming data buffer
 static bool bluetoothData; // True if data received is from the Bluetooth connection
-static double sppData1, sppData2; // Data send via SPP connection
+static float sppData1, sppData2; // Data send via SPP connection
 
 static bool commandSent = false; // This is used so multiple controller can be used at once
 
@@ -211,24 +211,24 @@ static uint32_t spekConnectedTimer; // Timer used to check if the connection is 
   static const uint16_t zoneA = 8000 * 2;
   static const uint16_t zoneB = 4000 * 2;
   static const uint16_t zoneC = 1000 * 2;
-  static const double positionScaleA = 600 * 2; // One resolution is 1856 pulses per encoder
-  static const double positionScaleB = 800 * 2;
-  static const double positionScaleC = 1000 * 2;
-  static const double positionScaleD = 500 * 2;
-  static const double velocityScaleMove = 70 * 2;
-  static const double velocityScaleStop = 60 * 2;
-  static const double velocityScaleTurning = 70 * 2;
+  static const float positionScaleA = 600.0f * 2.0f; // One resolution is 1856 pulses per encoder
+  static const float positionScaleB = 800.0f * 2.0f;
+  static const float positionScaleC = 1000.0f * 2.0f;
+  static const float positionScaleD = 500.0f * 2.0f;
+  static const float velocityScaleMove = 70.0f * 2.0f;
+  static const float velocityScaleStop = 60.0f * 2.0f;
+  static const float velocityScaleTurning = 70.0f * 2.0f;
 #else
   static const uint16_t zoneA = 8000;
   static const uint16_t zoneB = 4000;
   static const uint16_t zoneC = 1000;
-  static const double positionScaleA = 600; // One resolution is 928 pulses per encoder
-  static const double positionScaleB = 800;
-  static const double positionScaleC = 1000;
-  static const double positionScaleD = 500;
-  static const double velocityScaleMove = 70;
-  static const double velocityScaleStop = 60;
-  static const double velocityScaleTurning = 70;
+  static const float positionScaleA = 600.0f; // One resolution is 928 pulses per encoder
+  static const float positionScaleB = 800.0f;
+  static const float positionScaleC = 1000.0f;
+  static const float positionScaleD = 500.0f;
+  static const float velocityScaleMove = 70.0f;
+  static const float velocityScaleStop = 60.0f;
+  static const float velocityScaleTurning = 70.0f;
 #endif
 
 // Function prototypes
@@ -241,7 +241,7 @@ static void onInitPS4();
 static void onInitWii();
 static void onInitXbox();
 static void steer(Command command);
-static double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax);
+static float scale(float input, float inputMin, float inputMax, float outputMin, float outputMax);
 
 static inline bool checkInitializationFlags();
 static inline void readEEPROMValues();
@@ -252,8 +252,8 @@ static uint8_t i2cWrite(uint8_t registerAddress, uint8_t data, bool sendStop);
 static uint8_t i2cWrite(uint8_t registerAddress, uint8_t *data, uint8_t length, bool sendStop);
 static uint8_t i2cRead(uint8_t registerAddress, uint8_t *data, uint8_t nbytes);
 
-static inline void updatePID(double restAngle, double offset, double turning, double dt);
-static void moveMotor(Command motor, Command direction, double speedRaw);
+static inline void updatePID(float restAngle, float offset, float turning, float dt);
+static void moveMotor(Command motor, Command direction, float speedRaw);
 static void stopMotor(Command motor);
 static inline void setPWM(Command motor, uint16_t dutyCycle);
 static void stopAndReset();
@@ -270,7 +270,7 @@ static void readSpektrum(uint8_t input);
 static inline void checkSerialData();
 static void printMenu();
 static inline void calibrateMotor();
-static void testMotorSpeed(double *leftSpeed, double *rightSpeed, double leftScaler, double rightScaler);
+static void testMotorSpeed(float *leftSpeed, float *rightSpeed, float leftScaler, float rightScaler);
 static inline void calibrateAcc();
 static inline void printValues();
 static void setValues(char *input);

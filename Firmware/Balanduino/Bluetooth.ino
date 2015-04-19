@@ -493,8 +493,8 @@ void steer(Command command) {
   lastCommand = command;
 }
 
-double scale(double input, double inputMin, double inputMax, double outputMin, double outputMax) { // Like map() just returns a double
-  double output;
+float scale(float input, float inputMin, float inputMax, float outputMin, float outputMax) { // Like map() just returns a float
+  float output;
   if (inputMin < inputMax)
     output = (input - inputMin) / ((inputMax - inputMin) / (outputMax - outputMin));
   else
