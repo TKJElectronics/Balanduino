@@ -37,6 +37,7 @@
 #include "Balanduino.h"
 #include <Arduino.h> // Standard Arduino header
 #include <Wire.h> // Official Arduino Wire library
+#include <SPI.h> // Official Arduino SPI library
 
 #ifdef ENABLE_ADK
 #include <adk.h>
