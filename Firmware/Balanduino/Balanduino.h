@@ -154,7 +154,7 @@ static double accAngle, gyroAngle; // Result from raw accelerometer and gyroscop
 static double pitch; // Result from Kalman filter
 
 static double lastError; // Store last angle error
-static double integratedError; // Store integrated error
+static float iTerm; // Store iTerm
 
 /* Used for timing */
 static uint32_t kalmanTimer; // Timer used for the Kalman filter

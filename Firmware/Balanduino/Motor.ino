@@ -52,10 +52,9 @@ void updatePID(double restAngle, double offset, double turning, double dt) {
   /* Update PID values */
   double error = (restAngle - pitch);
   double pTerm = cfg.P * error;
-  integratedError += error * dt;
-  integratedError = constrain(integratedError, -1.0, 1.0); // Limit the integrated error
-  double iTerm = (cfg.I * 100.0) * integratedError;
   double dTerm = (cfg.D / 100.0) * (error - lastError) / dt;
+  iTerm += cfg.I * 100.0f * error * dt; // Multiplication with Ki is done before integration limit, to make it independent from integration limit value
+  iTerm = constrain(iTerm, -100.0f, 100.0f); // Limit the integrated error - prevents windup
   lastError = error;
   double PIDValue = pTerm + iTerm + dTerm;
 
@@ -137,7 +136,7 @@ void stopAndReset() {
   stopMotor(left);
   stopMotor(right);
   lastError = 0;
-  integratedError = 0;
+  iTerm = 0;
   targetPosition = getWheelsPosition();
   lastRestAngle = cfg.targetAngle;
 }
