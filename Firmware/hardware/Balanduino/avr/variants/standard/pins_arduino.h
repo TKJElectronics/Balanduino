@@ -33,10 +33,10 @@
 
 #include <avr/pgmspace.h>
 
-const static uint8_t SS   = 6;
-const static uint8_t MOSI = 27;
-const static uint8_t MISO = 28;
-const static uint8_t SCK  = 29;
+static const uint8_t SS   = 6;
+static const uint8_t MOSI = 27;
+static const uint8_t MISO = 28;
+static const uint8_t SCK  = 29;
 
 #define LED_BUILTIN 6
 
