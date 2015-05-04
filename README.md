@@ -10,7 +10,7 @@ This is the code for the Balanduino, the Open Source Balancing robot.
 
 To use the Balanduino as a normal Arduino board you need to add the hardware add-on to the Arduino IDE.
 
-See the [Hardware Readme](Firmware/hardware/README.md) for more information.
+See the [Getting Started page](http://balanduino.com/get-started) for more information.
 
 # Hardware
 
