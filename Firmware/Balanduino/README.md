@@ -10,29 +10,10 @@ To compile the sketch you will need the newest version of the [Arduino IDE](http
 
 Then open the sketch by clicking on [Balanduino.ino](Balanduino.ino).
 
-The final structure should look like this:
-
-* Arduino/
-	* Balanduino/
-		* Balanduino.ino
-		* Balanduino.h
-		* Bluetooth.ino
-		* EEPROM.ino
-		* EEPROMAnything.h
-		* I2C.ino
-		* Motor.ino
-		* Spektrum.ino
-		* Tools.ino
-	* hardware/
-		* Balanduino/
-			* avr/
-				* bootloaders/
-				* libraries/
-				* variants/
-				* boards.txt
+See the [Getting Started page](http://balanduino.com/get-started) for more information.
 
 Advanced users can also use the included [Makefile](Makefile) if they prefer.
 
-[Balanduino.hex](Balanduino.hex) contains the latest compiled code.
+[Balanduino_rev12.hex](Balanduino_rev12.hex) and [Balanduino_rev13.hex](Balanduino_rev13.hex) contains the latest compiled code for revision 1.2 and older and revision 1.3 respectively.
 
 For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.com>.
