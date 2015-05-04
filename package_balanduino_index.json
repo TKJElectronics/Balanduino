@@ -1,0 +1,31 @@
+{
+  "packages": [
+    {
+      "name": "Balanduino",
+      "maintainer": "Balanduino",
+      "websiteURL": "http://balanduino.com/",
+      "email": "support@tkjelectronics.com",
+      "help": {
+        "online": "http://forum.balanduino.com/"
+      },
+      "platforms": [
+        {
+          "name": "Balanduino",
+          "architecture": "avr",
+          "version": "1.1.0",
+          "category": "Balanduino",
+          "help": {
+            "online": "http://forum.balanduino.net/"
+          },
+          "url": "http://downloads.balanduino.net/Balanduino-hardware.zip",
+          "archiveFileName": "Balanduino-hardware.zip",
+          "checksum": "SHA-256:68d71007bf25fe2a4028510a68d3536e98159ec188429937b8fcc08846b19cae",
+          "size": "6944206",
+          "boards": [
+            {"name": "Balanduino"}
+          ]
+        }
+      ]
+    }
+  ]
+}
