@@ -4,7 +4,7 @@
 The code is released under the GNU General Public License.
 _________
 
-This is all the required libraries for the Balanduino:
+These are all the required libraries for the Balanduino:
 
 * [KalmanFilter](https://github.com/TKJElectronics/KalmanFilter)
 * [USB Host Shield Library 2.0](https://github.com/felis/USB_Host_Shield_2.0)
