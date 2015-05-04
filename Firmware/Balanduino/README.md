@@ -30,9 +30,6 @@ The final structure should look like this:
 				* libraries/
 				* variants/
 				* boards.txt
-	* libraries/
-		* USB\_Host\_Shield\_20/
-		* KalmanFilter/
 
 Advanced users can also use the included [Makefile](Makefile) if they prefer.
 

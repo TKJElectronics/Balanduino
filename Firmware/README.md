@@ -28,8 +28,5 @@ The final structure should look like this:
 				* libraries/
 				* variants/
 				* boards.txt
-	* libraries/
-		* USB\_Host\_Shield\_20/
-		* KalmanFilter/
 
 For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.com>.

@@ -30,8 +30,5 @@ The final structure should look like this:
 				* libraries/
 				* variants/
 				* boards.txt
-	* libraries/
-		* USB\_Host\_Shield\_20/
-		* KalmanFilter/
 
-For more information see the following site: <http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware> or send us an email at <support@tkjelectronics.com>.
+For more information see the following sites: <http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware>, <http://code.google.com/p/arduino/wiki/Platforms1>, and <https://github.com/arduino/Arduino/wiki/Arduino-IDE-1.5---3rd-party-Hardware-specification> or send us an email at <support@tkjelectronics.com>.

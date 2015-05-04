@@ -7,11 +7,11 @@
 [submodule "BalanduinoWindowsApp"]
 	path = BalanduinoWindowsApp
 	url = https://github.com/TKJElectronics/BalanduinoWindowsApp.git
-[submodule "Firmware/libraries/KalmanFilter"]
-	path = Firmware/libraries/KalmanFilter
+[submodule "Firmware/hardware/Balanduino/avr/libraries/KalmanFilter"]
+	path = Firmware/hardware/Balanduino/avr/libraries/KalmanFilter
 	url = https://github.com/TKJElectronics/KalmanFilter.git
-[submodule "Firmware/libraries/USB_Host_Shield_2.0"]
-	path = Firmware/libraries/USB_Host_Shield_2.0
+[submodule "Firmware/hardware/Balanduino/avr/libraries/USB_Host_Shield_20"]
+	path = Firmware/hardware/Balanduino/avr/libraries/USB_Host_Shield_20
 	url = https://github.com/felis/USB_Host_Shield_2.0.git
 [submodule "Firmware/Balanduino/Arduino_Makefile_master"]
 	path = Firmware/Balanduino/Arduino_Makefile_master
