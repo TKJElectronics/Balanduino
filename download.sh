@@ -20,6 +20,7 @@ echo "\nRemove git files"
 find . -name .git | xargs rm -rf
 find . -name .gitmodules | xargs rm -rf
 find . -name .gitignore | xargs rm -rf
+find . -name .gitattributes | xargs rm -rf
 
 echo "ZIP project directory"
 cd "$dir"
