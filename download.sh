@@ -35,6 +35,6 @@ echo "Remove temporary directories"
 rm -rf $name
 rm -rf "$name-hardware"
 
-# Calculate SHA-256 and file size of hardware add-on used for "package_balanduino_index.json"
+# Calculate SHA-256 and file size of hardware add-on used for "package_tkj_balanduino_index.json"
 echo \"checksum\": \"SHA-256:`shasum -a 256 $name-hardware.zip | awk '{print $1}'`\",
 echo \"size\": \"`ls -l $name-hardware.zip | awk '{print $5}'`\",
