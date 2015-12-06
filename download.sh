@@ -1,4 +1,4 @@
-#! /bin/sh -e
+#!/bin/sh -e
 # Script to automatically download the project including all submodules
 # It then updates all submodules and removes all files related to git
 # It then zips it, so it is ready to be uploaded to Balanduino.com
