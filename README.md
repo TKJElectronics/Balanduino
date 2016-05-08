@@ -53,7 +53,7 @@ To pair with the Wiimote send: ```CPW;``` via the serial monitor and then press 
 
 It it also possible to control the robot and adjust the PID values and others variables using the following Android application:
 
-[![Google Play](http://developer.android.com/images/brand/en_generic_rgb_wo_60.png)](http://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino)
+<a href="http://play.google.com/store/apps/details?id=com.tkjelectronics.balanduino"><img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" alt="Google Play" width="200px"/></a>
 
 Source: <https://github.com/TKJElectronics/BalanduinoAndroidApp>
 
