@@ -25,7 +25,7 @@
 #include <stdint.h> // Needed for uint8_t, uint16_t etc.
 
 /* Firmware Version Information */
-static const char *version = "1.1.0";
+static const char *version = "1.2.0";
 static const uint8_t eepromVersion = 3; // EEPROM version - used to restore the EEPROM values if the configuration struct have changed
 
 static bool sendIMUValues, sendSettings, sendInfo, sendStatusReport, sendPIDValues, sendPairConfirmation, sendKalmanValues; // Used to send out different values via Bluetooth
