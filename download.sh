@@ -1,9 +1,9 @@
 #!/bin/sh -e
 # Script to automatically download the project including all submodules
-# It then updates all submodules and removes all files related to git
+# It then removes all files related to git
 # It then zips it, so it is ready to be uploaded to Balanduino.com
-# Also used to download the hardware add-on and zip it and calculate SHA-256 and file size.
-# This is used with the Arduino Boards Manager.
+# Also used to download the hardware add-on and zip it and calculate SHA-256 and file size
+# This is used with the Arduino Boards Manager
 
 url=https://github.com/TKJElectronics/Balanduino.git
 hardware_add_on_path=Firmware/hardware/Balanduino/avr
@@ -13,7 +13,7 @@ echo "Working path: $dir"
 
 name=$(echo $(echo $url | rev | cut -d'/' -f 1 | rev) | cut -d'.' -f 1)
 echo "\nClone Project: $name\n"
-git clone --recursive $url || exit 1
+git clone --depth 1 --single-branch -b master --recursive $url || exit 1
 cd "$name"
 
 echo "\nRemove git files"
