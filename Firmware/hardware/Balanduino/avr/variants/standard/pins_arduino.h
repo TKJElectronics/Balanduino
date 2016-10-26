@@ -33,22 +33,37 @@
 
 #include <avr/pgmspace.h>
 
-static const uint8_t SS   = 6;
-static const uint8_t MOSI = 27;
-static const uint8_t MISO = 28;
-static const uint8_t SCK  = 29;
+#define PIN_SPI_SS   (6)
+#define PIN_SPI_MOSI (27)
+#define PIN_SPI_MISO (28)
+#define PIN_SPI_SCK  (29)
+
+static const uint8_t SS   = PIN_SPI_SS;
+static const uint8_t MOSI = PIN_SPI_MOSI;
+static const uint8_t MISO = PIN_SPI_MISO;
+static const uint8_t SCK  = PIN_SPI_SCK;
 
 #define LED_BUILTIN 6
 
-static const uint8_t A0 = 7;
-static const uint8_t A1 = 8;
-static const uint8_t A2 = 9;
-static const uint8_t A3 = 10;
-static const uint8_t A4 = 11;
-static const uint8_t A5 = 12; // Not broken out - used for battery voltage measurement
+#define PIN_A0 (7)
+#define PIN_A1 (8)
+#define PIN_A2 (9)
+#define PIN_A3 (10)
+#define PIN_A4 (11)
+#define PIN_A5 (12)
 
-static const uint8_t SDA = 13;
-static const uint8_t SCL = 14;
+static const uint8_t A0 = PIN_A0;
+static const uint8_t A1 = PIN_A1;
+static const uint8_t A2 = PIN_A2;
+static const uint8_t A3 = PIN_A3;
+static const uint8_t A4 = PIN_A4;
+static const uint8_t A5 = PIN_A5; // Not broken out - used for battery voltage measurement
+
+#define PIN_WIRE_SDA (13)
+#define PIN_WIRE_SCL (14)
+
+static const uint8_t SDA = PIN_WIRE_SDA;
+static const uint8_t SCL = PIN_WIRE_SCL;
 
 // ATMEL ATMEGA1284P / Balanduino revision 1.2 or older
 //
