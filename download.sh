@@ -1,7 +1,7 @@
 #!/bin/sh -e
 # Script to automatically download the project including all submodules
 # It then removes all files related to git
-# It then zips it, so it is ready to be uploaded to Balanduino.com
+# It then zips it, so it is ready to be uploaded to the Balanduino homepage
 # Also used to download the hardware add-on and zip it and calculate SHA-256 and file size
 # This is used with the Arduino Boards Manager
 

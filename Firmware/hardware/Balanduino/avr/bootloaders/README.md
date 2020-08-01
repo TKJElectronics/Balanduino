@@ -6,4 +6,4 @@ _________
 
 Taken from Lauszus's other Github repository: <http://lauszus.github.com/Sanguino>.
 
-For more information see the following site: <http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware> or send us an email at <support@tkjelectronics.com>.
+For more information see the following site: <http://www.arduino.cc/en/Guide/Environment#thirdpartyhardware> or send us an email at <support@tkjelectronics.dk>.

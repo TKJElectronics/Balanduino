@@ -3,10 +3,10 @@
     {
       "name": "Balanduino",
       "maintainer": "TKJ Electronics",
-      "websiteURL": "http://balanduino.com/",
-      "email": "support@tkjelectronics.com",
+      "websiteURL": "http://balanduino.tkjelectronics.dk",
+      "email": "support@tkjelectronics.dk",
       "help": {
-        "online": "http://forum.balanduino.com/"
+        "online": "http://balanduino.tkjelectronics.dk/forum"
       },
       "platforms": [
         {
@@ -15,7 +15,7 @@
           "version": "1.1.0",
           "category": "Balanduino",
           "help": {
-            "online": "http://forum.balanduino.com/"
+            "online": "http://balanduino.tkjelectronics.dk/forum"
           },
           "url": "https://github.com/TKJElectronics/Balanduino/releases/download/1.1.0/Balanduino-hardware-1.1.0.zip",
           "archiveFileName": "Balanduino-hardware-1.1.0.zip",
@@ -43,7 +43,7 @@
           "version": "1.2.0",
           "category": "Balanduino",
           "help": {
-            "online": "http://forum.balanduino.com/"
+            "online": "http://balanduino.tkjelectronics.dk/forum"
           },
           "url": "https://github.com/TKJElectronics/Balanduino/releases/download/1.2.0/Balanduino-hardware-1.2.0.zip",
           "archiveFileName": "Balanduino-hardware-1.2.0.zip",

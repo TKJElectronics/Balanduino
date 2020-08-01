@@ -11,8 +11,8 @@
  -------------------
 
  Kristian Lauszus, TKJ Electronics
- Web      :  http://www.tkjelectronics.com
- e-mail   :  kristianl@tkjelectronics.com
+ Web      :  http://www.tkjelectronics.dk
+ e-mail   :  kristianl@tkjelectronics.dk
 */
 
 #if defined(ENABLE_USB) || defined(ENABLE_SPEKTRUM)

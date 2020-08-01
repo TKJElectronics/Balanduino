@@ -8,4 +8,4 @@ This is the drawings for the three laser cut layers used for the Balanduino.
 
 To open the files you will need to download and install [SolidWorks](http://www.solidworks.com/) or you can also import the .DXF file into any preferred CAD program.
 
-For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.com>.
+For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.dk>.

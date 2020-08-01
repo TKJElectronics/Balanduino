@@ -11,8 +11,8 @@
  -------------------
 
  Kristian Lauszus, TKJ Electronics
- Web      :  http://www.tkjelectronics.com
- e-mail   :  kristianl@tkjelectronics.com
+ Web      :  http://www.tkjelectronics.dk
+ e-mail   :  kristianl@tkjelectronics.dk
 
  This is the algorithm for the Balanduino balancing robot.
  It can be controlled by either an Android app or a computer application via Bluetooth.

@@ -11,8 +11,8 @@
  -------------------
 
  Kristian Lauszus, TKJ Electronics
- Web      :  http://www.tkjelectronics.com
- e-mail   :  kristianl@tkjelectronics.com
+ Web      :  http://www.tkjelectronics.dk
+ e-mail   :  kristianl@tkjelectronics.dk
 */
 
 static const uint8_t IMUAddress = 0x68; // AD0 is logic low on the PCB
