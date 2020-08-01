@@ -1,5 +1,5 @@
 # Balanduino
-#### Developed by TKJ Electronics 2013-2015
+#### Developed by TKJ Electronics 2013-2020
 
 The code is released under the GNU General Public License.
 _________
@@ -11,7 +11,7 @@ This is the code for the Balanduino, the Open Source Balancing robot.
 
 To use the Balanduino as a normal Arduino board you need to add the hardware add-on to the Arduino IDE.
 
-See the [Getting Started page](http://balanduino.com/get-started) for more information.
+See the [Getting Started page](http://balanduino.tkjelectronics.dk/get-started) for more information.
 
 # Hardware
 
@@ -24,7 +24,7 @@ USB Host support is implemented using the MAX3421E and the USB Host library: <ht
 
 Two VNH5180 motor controller ICs is used to drive the two motors.
 
-More information can be found at the Wiki article: <http://wiki.balanduino.net/Overview>.
+More information can be found at the Wiki article: <http://balanduino.tkjelectronics.dk/wiki/Overview>.
 
 # Remote control
 
@@ -117,4 +117,4 @@ git clone --recursive https://github.com/TKJElectronics/Balanduino.git
 
 </br>
 
-For more information visit the official website: <http://balanduino.net/>, the forum: <http://forum.balanduino.net/> or feel free to contact us at <support@tkjelectronics.com>.
+For more information visit the official website: <http://balanduino.tkjelectronics.dk/>, the forum: <http://balanduino.tkjelectronics.dk/forum> or feel free to contact us at <support@tkjelectronics.dk>.
