@@ -40,7 +40,7 @@ To control the robot you can use the following game controllers:
 * Wiimote including support for the Motion Plus and Nunchuck extension
 * Wii U Pro controller
 
-### Paring
+### Pairing
 
 To pair with any of the PS3 controller please see the following section of the USB Host library readme: <https://github.com/felis/USB_Host_Shield_2.0#ps3-library>.
 
