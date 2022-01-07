@@ -3,7 +3,6 @@
 
 The code is released under the GNU General Public License.
 _________
-[![Build Status](https://travis-ci.org/TKJElectronics/Balanduino.svg?branch=master)](https://travis-ci.org/TKJElectronics/Balanduino)
 
 This is the code for the Balanduino, the Open Source Balancing robot.
 
