@@ -1,5 +1,5 @@
 # Balanduino
-#### Developed by TKJ Electronics 2013-2020
+#### Developed by TKJ Electronics 2013-2022
 
 The code is released under the GNU General Public License.
 _________
@@ -107,7 +107,7 @@ To download the entire repository including all submodules run the following com
 curl https://raw.githubusercontent.com/TKJElectronics/Balanduino/master/download.sh | sh
 ```
 
-Or simply download the daily updated ZIP-repository from our website: <http://downloads.balanduino.net/github/Balanduino_latest.zip>.
+Or simply download the latest release: <https://github.com/TKJElectronics/Balanduino/releases/download/1.2.0/Balanduino-1.2.0.zip>.
 
 If you want to clone the project then use the recursive command to clone all the submodules as well:
 
